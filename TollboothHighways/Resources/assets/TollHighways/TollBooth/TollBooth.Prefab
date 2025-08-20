@@ -1,0 +1,287 @@
+{
+    "$id": 0,
+    "$type": "0|Game.Prefabs.StaticObjectPrefab, Game",
+    "name": "TollBooth",
+    "active": true,
+    "components": {
+        "$id": 1,
+        "$type": "1|System.Collections.Generic.List`1[[Game.Prefabs.ComponentBase, Game]], mscorlib",
+        "$rlength": 4,
+        "$rcontent": [
+            {
+                "$id": 2,
+                "$type": "2|Game.Prefabs.SubObjectDefaultProbability, Game",
+                "name": "SubObjectDefaultProbability",
+                "active": true,
+                "m_DefaultProbability": 100,
+                "m_RotationSymmetry": 0
+            },
+            {
+                "$id": 3,
+                "$type": "3|Game.Prefabs.ObjectSubObjects, Game",
+                "name": "ObjectSubObjects",
+                "active": true,
+                "m_SubObjects": {
+                    "$id": 4,
+                    "$type": "4|Game.Prefabs.ObjectSubObjectInfo[], Game",
+                    "$rlength": 5,
+                    "$rcontent": [
+                        {
+                            "$id": 5,
+                            "$type": "5|Game.Prefabs.ObjectSubObjectInfo, Game",
+                            "m_Object": $fstrref:"UnityGUID:71a07d9cc3a03a044a4432ec551d6484",
+                            "m_Position": {
+                                "$type": "6|Unity.Mathematics.float3, Unity.Mathematics",
+                                "x": 0,
+                                "y": 3.3583374,
+                                "z": -2.07568145
+                            },
+                            "m_Rotation": {
+                                "$type": "7|Unity.Mathematics.quaternion, Unity.Mathematics",
+                                "value": {
+                                    "$type": "8|Unity.Mathematics.float4, Unity.Mathematics",
+                                    "x": 0,
+                                    "y": -0.9999999,
+                                    "z": 0,
+                                    "w": -1.49011612E-05
+                                }
+                            },
+                            "m_ParentMesh": 0,
+                            "m_GroupIndex": 0,
+                            "m_Probability": 100
+                        },
+                        {
+                            "$id": 6,
+                            "$type": 5,
+                            "m_Object": $fstrref:"UnityGUID:71a07d9cc3a03a044a4432ec551d6484",
+                            "m_Position": {
+                                "$type": 6,
+                                "x": 0.800002933,
+                                "y": 3.18,
+                                "z": -0.000187516212
+                            },
+                            "m_Rotation": {
+                                "$type": 7,
+                                "value": {
+                                    "$type": 8,
+                                    "x": 0,
+                                    "y": -0.7071068,
+                                    "z": 0,
+                                    "w": -0.7071065
+                                }
+                            },
+                            "m_ParentMesh": 0,
+                            "m_GroupIndex": 0,
+                            "m_Probability": 100
+                        },
+                        {
+                            "$id": 7,
+                            "$type": 5,
+                            "m_Object": $fstrref:"UnityGUID:71a07d9cc3a03a044a4432ec551d6484",
+                            "m_Position": {
+                                "$type": 6,
+                                "x": -0.8000036,
+                                "y": 3.18,
+                                "z": 0
+                            },
+                            "m_Rotation": {
+                                "$type": 7,
+                                "value": {
+                                    "$type": 8,
+                                    "x": 0,
+                                    "y": 0.7071068,
+                                    "z": 0,
+                                    "w": -0.707106531
+                                }
+                            },
+                            "m_ParentMesh": 0,
+                            "m_GroupIndex": 0,
+                            "m_Probability": 100
+                        },
+                        {
+                            "$id": 8,
+                            "$type": 5,
+                            "m_Object": $fstrref:"UnityGUID:5ce6d005ba267b0498e77f5f634bb3db",
+                            "m_Position": {
+                                "$type": 6,
+                                "x": 0,
+                                "y": 4.9,
+                                "z": 1.6
+                            },
+                            "m_Rotation": {
+                                "$type": 7,
+                                "value": {
+                                    "$type": 8,
+                                    "x": 0,
+                                    "y": 0.258819133,
+                                    "z": 0,
+                                    "w": -0.9659258
+                                }
+                            },
+                            "m_ParentMesh": 0,
+                            "m_GroupIndex": 0,
+                            "m_Probability": 100
+                        },
+                        {
+                            "$id": 9,
+                            "$type": 5,
+                            "m_Object": $fstrref:"UnityGUID:a7e534d2540373b46aaf5d9ac5613acd",
+                            "m_Position": {
+                                "$type": 6,
+                                "x": 0,
+                                "y": 4.2,
+                                "z": 2.2
+                            },
+                            "m_Rotation": {
+                                "$type": 7,
+                                "value": {
+                                    "$type": 8,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_ParentMesh": 0,
+                            "m_GroupIndex": 0,
+                            "m_Probability": 100
+                        }
+                    ]
+                }
+            },
+            {
+                "$id": 10,
+                "$type": "9|Game.Prefabs.SpawnableObject, Game",
+                "name": "SpawnableObject",
+                "active": true,
+                "m_Placeholders": {
+                    "$id": 11,
+                    "$type": "10|Game.Prefabs.ObjectPrefab[], Game",
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_Probability": 100,
+                "m_RandomizationGroup": $fstrref:"UnityGUID:0fdccbf01d49f5044b65e31086b3bea9"
+            },
+            {
+                "$id": 13,
+                "$type": "12|Game.Prefabs.UIObject, Game",
+                "name": "UIObject",
+                "active": true,
+                "m_Group": $fstrref:"UnityGUID:7284210a233d52947afe9dd82d4402bd",
+                "m_Priority": 0,
+                "m_Icon": "coui://javapower-tollbooth-highways/Tollbooth-Road.png",
+                "m_IsDebugObject": false
+            },
+            {
+                "$id": 104,
+                "$type": "13|Game.Prefabs.ServiceConsumption, Game",
+                "name": "ServiceConsumption",
+                "active": true,
+                "m_Upkeep": 275,
+                "m_ElectricityConsumption": 120,
+                "m_WaterConsumption": 0,
+                "m_GarbageAccumulation": 0,
+                "m_TelecomNeed": 0
+            },
+            {
+                "$id": 105,
+                "$type": "14|Game.Prefabs.Workplace, Game",
+                "name": "Workplace",
+                "active": true,
+                "m_Workplaces": 2,
+                "m_MinimumWorkersLimit": 1,
+                "m_Complexity": 0,
+                "m_EveningShiftProbability": 50,
+                "m_NightShiftProbability": 50
+            },
+            {
+                "$id": 106,
+                "$type": "15|Game.Prefabs.PlaceableObject, Game",
+                "name": "PlaceableObject",
+                "active": true,
+                "m_ConstructionCost": 2500,
+                "m_XPReward": 500
+            },
+            {
+                "$id": 107,
+                "$type": "16|Game.Prefabs.CompanyObject, Game",
+                "name": "CompanyObject",
+                "active": true,
+                "m_SelectCompany": true,
+                "m_Companies": {
+                    "$id": 208,
+                    "$type": "9|Game.Prefabs.CompanyPrefab[], Game",
+                    "$rlength": 1,
+                    "$rcontent": [
+                        $fstrref:"UnityGUID:f266a9fa19b59114996bee280bc5a943"
+                    ]
+                }
+            },
+            {
+                "$id": 109,
+                "$type": "17|Game.Prefabs.DefaultPolicies, Game",
+                "name": "DefaultPolicies",
+                "active": true,
+                "m_Policies": {
+                    "$id": 210,
+                    "$type": "11|Game.Prefabs.DefaultPolicyInfo[], Game",
+                    "$rlength": 1,
+                    "$rcontent": [
+                        {
+                            "$id": 211,
+                            "$type": "12|Game.Prefabs.DefaultPolicyInfo, Game",
+                            "m_Policy": $fstrref:"UnityGUID:2b1216ce5d84a6042ae388f095103d89"
+                        }
+                    ]
+                }
+            },
+            {
+                "$id": 113,
+                "$type": "18|Game.Prefabs.EditorAssetCategoryOverride, Game",
+                "name": "EditorAssetCategoryOverride",
+                "active": true,
+                "m_IncludeCategories": {
+                    "$id": 214,
+                    "$type": "15|System.String[], mscorlib",
+                    "$rlength": 1,
+                    "$rcontent": [
+                        "Javapower/Road/Tollbooth"
+                    ]
+                },
+                "m_ExcludeCategories": null
+            }
+        ]
+    },
+    "m_Meshes": {
+        "$id": 14,
+        "$type": "19|Game.Prefabs.ObjectMeshInfo[], Game",
+        "$rlength": 1,
+        "$rcontent": [
+            {
+                "$id": 15,
+                "$type": "20|Game.Prefabs.ObjectMeshInfo, Game",
+                "m_Mesh": $fstrref:"UnityGUID:8105234673f6f81428a8935aae200a5d",
+                "m_Position": {
+                    "$type": 6,
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "m_Rotation": {
+                    "$type": 7,
+                    "value": {
+                        "$type": 8,
+                        "x": 0,
+                        "y": 0,
+                        "z": 0,
+                        "w": 1
+                    }
+                },
+                "m_RequireState": 0
+            }
+        ]
+    },
+    "m_Circular": false
+}

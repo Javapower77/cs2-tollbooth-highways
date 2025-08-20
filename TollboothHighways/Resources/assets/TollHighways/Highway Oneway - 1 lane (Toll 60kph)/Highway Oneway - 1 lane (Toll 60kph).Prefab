@@ -1,0 +1,1591 @@
+{
+    "$id": 0,
+    "$type": "0|Game.Prefabs.RoadPrefab, Game",
+    "name": "Highway Oneway - 1 lane (Toll 60kph)",
+    "active": true,
+    "components": {
+        "$id": 1,
+        "$type": "1|System.Collections.Generic.List`1[[Game.Prefabs.ComponentBase, Game]], mscorlib",
+        "$rlength": 8,
+        "$rcontent": [
+            {
+                "$id": 2,
+                "$type": "2|Game.Prefabs.NetSubObjects, Game",
+                "name": "NetSubObjects",
+                "active": true,
+                "m_SubObjects": {
+                    "$id": 3,
+                    "$type": "3|Game.Prefabs.NetSubObjectInfo[], Game",
+                    "$rlength": 38,
+                    "$rcontent": [
+                        {
+                            "$id": 4,
+                            "$type": "4|Game.Prefabs.NetSubObjectInfo, Game",
+                            "m_Object": $fstrref:"UnityGUID:0ab8c75abf2b4e1408d4367f17189b57",
+                            "m_Position": {
+                                "$type": "5|Unity.Mathematics.float3, Unity.Mathematics",
+                                "x": 0,
+                                "y": -3,
+                                "z": 0
+                            },
+                            "m_Rotation": {
+                                "$type": "6|Unity.Mathematics.quaternion, Unity.Mathematics",
+                                "value": {
+                                    "$type": "7|Unity.Mathematics.float4, Unity.Mathematics",
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 0,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": false,
+                            "m_RequireElevated": true,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 5,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:d10e1f965d223454d9a724b36695dc55",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 0,
+                                "y": 5,
+                                "z": 0
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 0,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": false,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": true,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 6,
+                            "$type": 4,
+                            "m_Object": $fstrref:"CID:2cb2d6f5fd56177ebfbd33939bbdf854",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 2,
+                                "y": 2.5,
+                                "z": 0
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 7,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:c9153248d5ea5be4b875c90dc22888f8",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -1.4,
+                                "y": 2.7,
+                                "z": -7
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 8,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:170c98268e50eb94b9eca4b224632358",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 1.7,
+                                "y": 3,
+                                "z": 7
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 1,
+                                    "z": 0,
+                                    "w": -4.371139E-08
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 9,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -4.55,
+                                "y": 0.44,
+                                "z": 5
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 10,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -4.55,
+                                "y": 0.44,
+                                "z": 6
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 11,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -4.55,
+                                "y": 0.44,
+                                "z": 4
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 12,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -4.55,
+                                "y": 0.44,
+                                "z": 3
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 13,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -4.55,
+                                "y": 0.44,
+                                "z": 2
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 14,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -4.55,
+                                "y": 0.44,
+                                "z": 1
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 15,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -4.55,
+                                "y": 0.44,
+                                "z": 0
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 16,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -4.55,
+                                "y": 0.44,
+                                "z": -1
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 17,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -4.55,
+                                "y": 0.44,
+                                "z": -2
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 18,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -4.55,
+                                "y": 0.44,
+                                "z": -3
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 19,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -4.55,
+                                "y": 0.44,
+                                "z": -4
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 20,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -4.55,
+                                "y": 0.44,
+                                "z": -5
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 21,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:185753f3ea6fec143912a7ed23a26a0f",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -1.5,
+                                "y": 0.44,
+                                "z": 9
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 1,
+                                    "z": 0,
+                                    "w": -4.371139E-08
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 22,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:367fc1206e4645a4fa75bacf40f00c9f",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -1.5,
+                                "y": 0.44,
+                                "z": -8
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 1,
+                                    "z": 0,
+                                    "w": -4.371139E-08
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 23,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:367fc1206e4645a4fa75bacf40f00c9f",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -1.5,
+                                "y": 0.44,
+                                "z": -1.7
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 1,
+                                    "z": 0,
+                                    "w": -4.371139E-08
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 24,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:367fc1206e4645a4fa75bacf40f00c9f",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -1.5,
+                                "y": 0.44,
+                                "z": 4.5
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 1,
+                                    "z": 0,
+                                    "w": -4.371139E-08
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 25,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:aa2915c614a3f604fa628b059e68ae48",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 2,
+                                "y": 0.3,
+                                "z": 4
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0.707106769,
+                                    "z": 0,
+                                    "w": 0.707106769
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 26,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:aa2915c614a3f604fa628b059e68ae48",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 2,
+                                "y": 0.3,
+                                "z": 5
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0.707106769,
+                                    "z": 0,
+                                    "w": 0.707106769
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 27,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:a6d2a854d23ab324b83881f3e1df289e",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 0.759375,
+                                "y": -0.140625,
+                                "z": 2.746875
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0.707106769,
+                                    "z": 0,
+                                    "w": -0.707106769
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 28,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:a6d2a854d23ab324b83881f3e1df289e",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 0.759375,
+                                "y": -0.140625,
+                                "z": 0.0281250477
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0.707106769,
+                                    "z": 0,
+                                    "w": -0.707106769
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 29,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:a6d2a854d23ab324b83881f3e1df289e",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 0.759375,
+                                "y": -0.141,
+                                "z": -2.628125
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0.707106769,
+                                    "z": 0,
+                                    "w": -0.707106769
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 30,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:a6d2a854d23ab324b83881f3e1df289e",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 0.759375,
+                                "y": -0.141,
+                                "z": -5.003125
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0.707106769,
+                                    "z": 0,
+                                    "w": -0.707106769
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 31,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:a6d2a854d23ab324b83881f3e1df289e",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 0.759375,
+                                "y": -0.141,
+                                "z": 5.653125
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0.707106769,
+                                    "z": 0,
+                                    "w": -0.707106769
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 32,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:3c055779871a3d346bbd617f121b8dd6",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 1.49375,
+                                "y": 0.218374968,
+                                "z": 9.325
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0.707106769,
+                                    "z": 0,
+                                    "w": -0.707106769
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 33,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:3c055779871a3d346bbd617f121b8dd6",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -4.5,
+                                "y": 0.218,
+                                "z": 9.325
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0.707106769,
+                                    "z": 0,
+                                    "w": -0.707106769
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 34,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:3c055779871a3d346bbd617f121b8dd6",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 1.494,
+                                "y": 0.218,
+                                "z": 10.3718748
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0.707106769,
+                                    "z": 0,
+                                    "w": -0.707106769
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 35,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:3c055779871a3d346bbd617f121b8dd6",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -4.5,
+                                "y": 0.218,
+                                "z": 10.3718748
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0.707106769,
+                                    "z": 0,
+                                    "w": -0.707106769
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 36,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:3c055779871a3d346bbd617f121b8dd6",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 1.494,
+                                "y": 0.218,
+                                "z": 9.85
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0.707106769,
+                                    "z": 0,
+                                    "w": -0.707106769
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 37,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:3c055779871a3d346bbd617f121b8dd6",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": -4.5,
+                                "y": 0.218,
+                                "z": 9.85
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0.707106769,
+                                    "z": 0,
+                                    "w": -0.707106769
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 38,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:cdf3b645fac59aa48993330b3ec311d0",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 3.4,
+                                "y": 1,
+                                "z": 7.85
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0,
+                                    "z": 0,
+                                    "w": 1
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 39,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:a3b2f4303c1f4a540b70d80542c1994a",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 4.5,
+                                "y": 4,
+                                "z": 9.396875
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0.707106769,
+                                    "z": 0,
+                                    "w": -0.707106769
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 40,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:a3b2f4303c1f4a540b70d80542c1994a",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 4.5,
+                                "y": 4,
+                                "z": 3.397
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0.707106769,
+                                    "z": 0,
+                                    "w": -0.707106769
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 41,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:a3b2f4303c1f4a540b70d80542c1994a",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 4.5,
+                                "y": 4,
+                                "z": -5.397
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": 0.707106769,
+                                    "z": 0,
+                                    "w": -0.707106769
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        }
+                    ]
+                }
+            },
+            {
+                "$id": 42,
+                "$type": "8|Game.Prefabs.PlaceableNet, Game",
+                "name": "PlaceableNet",
+                "active": true,
+                "m_ElevationRange": {
+                    "$type": "9|Colossal.Mathematics.Bounds1, Colossal.Mathematics",
+                    "min": -100,
+                    "max": 100
+                },
+                "m_AllowParallelMode": false,
+                "m_UndergroundPrefab": null,
+                "m_XPReward": 3
+            },
+            {
+                "$id": 43,
+                "$type": "10|Game.Prefabs.ServiceObject, Game",
+                "name": "ServiceObject",
+                "active": true,
+                "m_Service": $fstrref:"UnityGUID:d4d220e637b0a2743b798fced877190d"
+            },
+            {
+                "$id": 44,
+                "$type": "11|Game.Prefabs.UIObject, Game",
+                "name": "UIObject",
+                "active": true,
+                "m_Group": $fstrref:"UnityGUID:01a34e6844b1060408f630cf940091d2",
+                "m_Priority": 999999,
+                "m_Icon": "coui://javapower-tollbooth-highways/Tollbooth.png",
+                "m_IsDebugObject": false
+            },
+            {
+                "$id": 45,
+                "$type": "12|Game.Prefabs.Unlockable, Game",
+                "name": "Unlockable",
+                "active": true,
+                "m_RequireAll": {
+                    "$id": 46,
+                    "$type": "13|Game.Prefabs.PrefabBase[], Game",
+                    "$rlength": 1,
+                    "$rcontent": [
+                        $fstrref:"UnityGUID:6b53d6c4984e3bc4097b7707ef687186"
+                    ]
+                },
+                "m_RequireAny": {
+                    "$id": 47,
+                    "$type": 13,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_IgnoreDependencies": false
+            },
+            {
+                "$id": 48,
+                "$type": "14|Game.Prefabs.NetPollution, Game",
+                "name": "NetPollution",
+                "active": true,
+                "m_NoisePollutionFactor": 3,
+                "m_AirPollutionFactor": 3
+            },
+            {
+                "$id": 49,
+                "$type": "15|Game.Prefabs.UndergroundNetSections, Game",
+                "name": "UndergroundNetSections",
+                "active": true,
+                "m_Sections": {
+                    "$id": 50,
+                    "$type": "16|Game.Prefabs.NetSectionInfo[], Game",
+                    "$rlength": 1,
+                    "$rcontent": [
+                        {
+                            "$id": 51,
+                            "$type": "17|Game.Prefabs.NetSectionInfo, Game",
+                            "m_Section": $fstrref:"UnityGUID:a8db8a5bd3190c1438bef98c26cbe366",
+                            "m_RequireAll": {
+                                "$id": 52,
+                                "$type": "18|Game.Prefabs.NetPieceRequirements[], Game",
+                                "$rlength": 1,
+                                "$rcontent": [
+                                    63
+                                ]
+                            },
+                            "m_RequireAny": {
+                                "$id": 53,
+                                "$type": 18,
+                                "$rlength": 0,
+                                "$rcontent": [
+                                ]
+                            },
+                            "m_RequireNone": {
+                                "$id": 54,
+                                "$type": 18,
+                                "$rlength": 0,
+                                "$rcontent": [
+                                ]
+                            },
+                            "m_HiddenLayers": 0,
+                            "m_Invert": false,
+                            "m_Flip": false,
+                            "m_Median": false,
+                            "m_HalfLength": false,
+                            "m_Offset": {
+                                "$type": 5,
+                                "x": 0,
+                                "y": -0.65,
+                                "z": 0
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "$id": 55,
+                "$type": "19|Game.Prefabs.ElectricityConnection, Game",
+                "name": "ElectricityConnection",
+                "active": true,
+                "m_Voltage": 0,
+                "m_Direction": 3,
+                "m_Capacity": 400000,
+                "m_RequireAll": {
+                    "$id": 56,
+                    "$type": 18,
+                    "$rlength": 1,
+                    "$rcontent": [
+                        63
+                    ]
+                },
+                "m_RequireAny": {
+                    "$id": 57,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_RequireNone": {
+                    "$id": 58,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                }
+            }
+        ]
+    },
+    "m_Sections": {
+        "$id": 59,
+        "$type": 16,
+        "$rlength": 5,
+        "$rcontent": [
+            {
+                "$id": 60,
+                "$type": 17,
+                "m_Section": $fstrref:"UnityGUID:efe91204fbfced94ea63c05f99c81e1c",
+                "m_RequireAll": {
+                    "$id": 61,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_RequireAny": {
+                    "$id": 62,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_RequireNone": {
+                    "$id": 63,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_HiddenLayers": 0,
+                "m_Invert": true,
+                "m_Flip": false,
+                "m_Median": false,
+                "m_HalfLength": false,
+                "m_Offset": {
+                    "$type": 5,
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "$id": 64,
+                "$type": 17,
+                "m_Section": $fstrref:"CID:a8fa30552ee92b47df786930f0dc532f",
+                "m_RequireAll": {
+                    "$id": 65,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_RequireAny": {
+                    "$id": 66,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_RequireNone": {
+                    "$id": 67,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_HiddenLayers": 0,
+                "m_Invert": true,
+                "m_Flip": false,
+                "m_Median": false,
+                "m_HalfLength": false,
+                "m_Offset": {
+                    "$type": 5,
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "$id": 68,
+                "$type": 17,
+                "m_Section": $fstrref:"UnityGUID:5bad9d5650ca0174f82b62443907f54a",
+                "m_RequireAll": {
+                    "$id": 69,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_RequireAny": {
+                    "$id": 70,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_RequireNone": {
+                    "$id": 71,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_HiddenLayers": 0,
+                "m_Invert": false,
+                "m_Flip": false,
+                "m_Median": true,
+                "m_HalfLength": false,
+                "m_Offset": {
+                    "$type": 5,
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "$id": 72,
+                "$type": 17,
+                "m_Section": $fstrref:"CID:0b4136f91fa9ff117bbc3d46f398c506",
+                "m_RequireAll": {
+                    "$id": 73,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_RequireAny": {
+                    "$id": 74,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_RequireNone": {
+                    "$id": 75,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_HiddenLayers": 0,
+                "m_Invert": false,
+                "m_Flip": false,
+                "m_Median": false,
+                "m_HalfLength": false,
+                "m_Offset": {
+                    "$type": 5,
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            },
+            {
+                "$id": 76,
+                "$type": 17,
+                "m_Section": $fstrref:"UnityGUID:efe91204fbfced94ea63c05f99c81e1c",
+                "m_RequireAll": {
+                    "$id": 77,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_RequireAny": {
+                    "$id": 78,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_RequireNone": {
+                    "$id": 79,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_HiddenLayers": 0,
+                "m_Invert": false,
+                "m_Flip": false,
+                "m_Median": false,
+                "m_HalfLength": false,
+                "m_Offset": {
+                    "$type": 5,
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                }
+            }
+        ]
+    },
+    "m_EdgeStates": {
+        "$id": 80,
+        "$type": "20|Game.Prefabs.NetEdgeStateInfo[], Game",
+        "$rlength": 1,
+        "$rcontent": [
+            {
+                "$id": 81,
+                "$type": "21|Game.Prefabs.NetEdgeStateInfo, Game",
+                "m_RequireAll": {
+                    "$id": 82,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_RequireAny": {
+                    "$id": 83,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_RequireNone": {
+                    "$id": 84,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_SetState": {
+                    "$id": 85,
+                    "$type": 18,
+                    "$rlength": 1,
+                    "$rcontent": [
+                        51
+                    ]
+                }
+            }
+        ]
+    },
+    "m_NodeStates": {
+        "$id": 86,
+        "$type": "22|Game.Prefabs.NetNodeStateInfo[], Game",
+        "$rlength": 1,
+        "$rcontent": [
+            {
+                "$id": 87,
+                "$type": "23|Game.Prefabs.NetNodeStateInfo, Game",
+                "m_RequireAll": {
+                    "$id": 88,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_RequireAny": {
+                    "$id": 89,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_RequireNone": {
+                    "$id": 90,
+                    "$type": 18,
+                    "$rlength": 0,
+                    "$rcontent": [
+                    ]
+                },
+                "m_SetState": {
+                    "$id": 91,
+                    "$type": 18,
+                    "$rlength": 1,
+                    "$rcontent": [
+                        51
+                    ]
+                },
+                "m_MatchType": 0
+            }
+        ]
+    },
+    "m_MaxSlopeSteepness": 0.2,
+    "m_AggregateType": $fstrref:"UnityGUID:29d6188a9f3a1a142947c2c5e647f8ff",
+    "m_StyleType": null,
+    "m_InvertMode": 0,
+    "m_RoadType": 0,
+    "m_SpeedLimit": 60,
+    "m_ZoneBlock": null,
+    "m_TrafficLights": false,
+    "m_HighwayRules": true
+}

@@ -1,0 +1,92 @@
+.mousePanel {
+    position: fixed;
+    top: 10rem;
+    right: 10rem;
+    width: 350rem;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(20, 20, 30, 0.9) 100%);
+    border: 1rem solid rgba(255, 255, 255, 0.2);
+    border-radius: 8rem;
+    padding: 12rem;
+    box-shadow: 0 4rem 20rem rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10rem);
+    transition: all 0.3s ease;
+    color: white;
+    font-family: var(--fontFace);
+    user-select: none;
+    z-index: 1000;
+}
+
+.panelHeader {
+    font-size: 14rem;
+    font-weight: bold;
+    color: #00ff88;
+    margin-bottom: 8rem;
+    text-align: center;
+    border-bottom: 1rem solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 5rem;
+}
+
+.positionInfo {
+    font-size: 12rem;
+    line-height: 1.4;
+}
+
+.positionRow {
+    display: flex;
+    justify-content: space-between;
+    margin: 4rem 0;
+    padding: 2rem 0;
+}
+
+.positionLabel {
+    font-weight: bold;
+    color: #88ccff;
+    min-width: 80rem;
+}
+
+.positionValue {
+    color: #ffffff;
+    font-family: 'Courier New', monospace;
+    text-align: right;
+    flex: 1;
+}
+
+.coordinates {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4rem;
+    padding: 6rem;
+    margin: 4rem 0;
+}
+
+.screenCoords {
+    border-left: 3rem solid #ff6b6b;
+}
+
+.worldCoords {
+    border-left: 3rem solid #4ecdc4;
+}
+
+.formattedPositionRow {
+    margin-top: 8rem;
+    font-size: 11rem;
+    color: #aaa;
+}
+
+.toggleButton {
+    position: fixed;
+    top: 10rem;
+    right: 370rem;
+    background: rgba(0, 100, 200, 0.8) !important;
+    border: none !important;
+    color: white !important;
+    padding: 8rem 12rem !important;
+    border-radius: 4rem !important;
+    cursor: pointer;
+    font-size: 12rem;
+    transition: background 0.3s ease;
+    z-index: 1001;
+
+    &:hover {
+        background: rgba(0, 120, 240, 1) !important;
+    }
+}

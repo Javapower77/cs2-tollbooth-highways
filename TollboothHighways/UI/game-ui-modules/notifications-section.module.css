@@ -1,0 +1,47 @@
+/* Deobfuscated from notifications-section.module.scss */
+.notificationsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* 8px */
+}
+
+.factors {
+  /* Style for factors if needed */
+}
+
+/* Styles from NotificationControl */
+.notification-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* 12px */
+  padding: 0.5rem;
+  background-color: rgba(20, 25, 30, 0.8);
+  border-radius: 4px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.notification-icon {
+  width: 2rem; /* 32px */
+  height: 2rem; /* 32px */
+}
+
+.notification-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-grow: 1;
+}
+
+.notification-badge {
+  background-color: var(--red-color); /* Example color */
+  color: white;
+  padding: 0.125rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: bold;
+  min-width: 1.5rem;
+  text-align: center;
+}

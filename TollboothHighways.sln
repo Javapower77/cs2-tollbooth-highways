@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36310.24
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TollboothHighways", "TollboothHighways\TollboothHighways.csproj", "{6370C6CE-8572-4BCA-800A-944923E57DA5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game", "..\..\ModsOtherAuthors\Base Game-1.3.3f1\Game.csproj", "{851493F4-5E90-6E4D-3E81-3706CC3442C4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6370C6CE-8572-4BCA-800A-944923E57DA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6370C6CE-8572-4BCA-800A-944923E57DA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6370C6CE-8572-4BCA-800A-944923E57DA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6370C6CE-8572-4BCA-800A-944923E57DA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{851493F4-5E90-6E4D-3E81-3706CC3442C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{851493F4-5E90-6E4D-3E81-3706CC3442C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{851493F4-5E90-6E4D-3E81-3706CC3442C4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {19570EC4-B88E-4B58-B444-98009E06C75F}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,190 @@
+/* Base progress bar styles */
+.dailyTargetProgress {
+    width: 150px;
+    height: 16px;
+    
+    .progress-bounds_Fjq {
+        background-color: rgba(0, 100, 200, 0.2);
+        border-color: rgba(0, 100, 200, 0.4);
+    }
+    
+    .progress_JAQ {
+        background: linear-gradient(90deg, #0064c8, #4a90e2);
+    }
+}
+
+.maintenanceProgress {
+    width: 120px;
+    height: 14px;
+    
+    .progress-bounds_Fjq {
+        background-color: rgba(100, 100, 100, 0.2);
+        border-color: rgba(150, 150, 150, 0.4);
+    }
+    
+    .progress_JAQ {
+        background: linear-gradient(90deg, #ffa500, #ffcc00);
+    }
+}
+
+.trafficLoadProgress {
+    width: 140px;
+    height: 16px;
+    
+    .progress_low {
+        background: linear-gradient(90deg, #4caf50, #81c784);
+    }
+    
+    .progress_medium {
+        background: linear-gradient(90deg, #ff9800, #ffb74d);
+    }
+    
+    .progress_high {
+        background: linear-gradient(90deg, #f44336, #ef5350);
+    }
+}
+
+.efficiencyProgress {
+    width: 130px;
+    height: 16px;
+    
+    .progress_success {
+        background: linear-gradient(90deg, #2e7d32, #4caf50);
+    }
+    
+    .progress_warning {
+        background: linear-gradient(90deg, #f57c00, #ff9800);
+    }
+    
+    .progress_error {
+        background: linear-gradient(90deg, #d32f2f, #f44336);
+    }
+}
+
+/* Full-width progress sections */
+.progressSection {
+    margin: 8px 0;
+    padding: 4px 0;
+}
+
+.progressTitle {
+    font-size: 12px;
+    color: var(--textColor, #ffffff);
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.revenueProgress {
+    width: 100%;
+    height: 20px;
+    
+    .progress-bounds_Fjq {
+        background-color: rgba(76, 175, 80, 0.2);
+        border-color: rgba(76, 175, 80, 0.4);
+    }
+    
+    .progress_JAQ {
+        background: linear-gradient(90deg, #388e3c, #66bb6a);
+    }
+    
+    .label_nBK {
+        font-size: 11px;
+        font-weight: 600;
+    }
+}
+
+.capacityProgress {
+    width: 100%;
+    height: 18px;
+    
+    .progress-bounds_Fjq {
+        background-color: rgba(255, 152, 0, 0.2);
+        border-color: rgba(255, 152, 0, 0.4);
+    }
+    
+    .progress_JAQ {
+        background: linear-gradient(90deg, #f57c00, #ffb74d);
+    }
+}
+
+/* Multi-progress layout */
+.multiProgressContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.smallProgressItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.smallProgressLabel {
+    min-width: 50px;
+    font-size: 11px;
+    color: var(--textColor, #ffffff);
+    text-align: right;
+}
+
+.smallProgress {
+    width: 80px;
+    height: 12px;
+    
+    .progress-bounds_Fjq {
+        background-color: rgba(128, 128, 128, 0.2);
+        border-color: rgba(128, 128, 128, 0.3);
+    }
+    
+    .progress_JAQ {
+        background: linear-gradient(90deg, #607d8b, #90a4ae);
+    }
+    
+    .label_nBK {
+        font-size: 9px;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 400px) {
+    .dailyTargetProgress,
+    .maintenanceProgress,
+    .trafficLoadProgress,
+    .efficiencyProgress {
+        width: 100px;
+        height: 14px;
+    }
+    
+    .smallProgress {
+        width: 60px;
+        height: 10px;
+    }
+    
+    .smallProgressLabel {
+        min-width: 40px;
+        font-size: 10px;
+    }
+}
+
+/* Animation for progress changes */
+.progress_JAQ,
+.progress_low,
+.progress_medium,
+.progress_high,
+.progress_success,
+.progress_warning,
+.progress_error {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Hover effects for interactive progress bars */
+.progressSection:hover .revenueProgress .progress-bounds_Fjq,
+.progressSection:hover .capacityProgress .progress-bounds_Fjq {
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.toll-rates {
+  font-weight: 600;
+  color: var(--textColorNormal);
+}

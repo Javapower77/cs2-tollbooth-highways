@@ -1,0 +1,285 @@
+﻿{/* INFO LINK EXAMPLES SECTION */}
+            <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
+                <CS2VanillaUIResolver.instance.InfoRow
+                    left={"Quick Actions"}
+                    tooltip={DescriptionTooltip("Quick Actions", "Access frequently used tollbooth management functions")}
+                    uppercase={true}
+                    disableFocus={true}
+                    className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                />
+
+                {/* Example 1: Basic Info Link */}
+                <CS2VanillaUIResolver.instance.InfoButtonLink
+                    tooltip="View detailed traffic analytics and patterns"
+                    onSelect={() => {
+                        console.log("Opening traffic details");
+                        trigger(mod.id, "openTrafficDetails");
+                    }}
+                >
+                    View Traffic Analytics
+                </CS2VanillaUIResolver.instance.InfoButtonLink>
+
+                {/* Example 2: Info Link with Custom Icon */}
+                <CS2VanillaUIResolver.instance.InfoButtonLink
+                    icon={MoneySrc}
+                    tooltip="Open financial management and revenue tracking"
+                    uppercase={true}
+                    onSelect={() => {
+                        console.log("Opening financial panel");
+                        trigger(mod.id, "openFinancialPanel");
+                    }}
+                >
+                    Manage Finances
+                </CS2VanillaUIResolver.instance.InfoButtonLink>
+
+                {/* Example 3: Info Link with Vehicle Icon */}
+                <CS2VanillaUIResolver.instance.InfoButtonLink
+                    icon={Car01Src}
+                    tooltip="Configure toll rates for different vehicle types"
+                    onSelect={() => {
+                        console.log("Opening vehicle configuration");
+                        setSelectedTab('finance'); // Switch to finance tab
+                    }}
+                >
+                    Vehicle Pricing Configuration
+                </CS2VanillaUIResolver.instance.InfoButtonLink>
+
+                {/* Example 4: Settings Info Link */}
+                <CS2VanillaUIResolver.instance.InfoButtonLink
+                    icon="Media/Game/Icons/Settings.svg"
+                    tooltip="Access tollbooth settings and quality configuration"
+                    onSelect={() => {
+                        console.log("Opening settings");
+                        setSelectedTab('settings');
+                    }}
+                >
+                    Tollbooth Settings
+                </CS2VanillaUIResolver.instance.InfoButtonLink>
+
+                {/* Example 5: Maintenance Info Link */}
+                <CS2VanillaUIResolver.instance.InfoButtonLink
+                    icon="Media/Game/Icons/Tools.svg"
+                    tooltip={DescriptionTooltip("Maintenance Actions", "Perform maintenance tasks to keep your tollbooth running efficiently")}
+                    onSelect={() => {
+                        console.log("Opening maintenance panel");
+                        trigger(mod.id, "performMaintenance");
+                    }}
+                >
+                    Schedule Maintenance
+                </CS2VanillaUIResolver.instance.InfoButtonLink>
+            </InfoSection>
+
+            {/* CONTEXTUAL INFO LINKS SECTION */}
+            <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
+                <CS2VanillaUIResolver.instance.InfoRow
+                    left={"Reports & Analytics"}
+                    tooltip={DescriptionTooltip("Reports", "Access various reports and analytics for this tollbooth")}
+                    uppercase={true}
+                    disableFocus={true}
+                    className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                />
+
+                {/* Example 6: Daily Report Link */}
+                <CS2VanillaUIResolver.instance.InfoButtonLink
+                    icon="Media/Game/Icons/Statistics.svg"
+                    tooltip="View today's traffic and revenue summary"
+                    onSelect={() => {
+                        console.log("Opening daily report");
+                        trigger(mod.id, "generateDailyReport");
+                    }}
+                >
+                    Daily Performance Report
+                </CS2VanillaUIResolver.instance.InfoButtonLink>
+
+                {/* Example 7: Historical Data Link */}
+                <CS2VanillaUIResolver.instance.InfoButtonLink
+                    icon="Media/Game/Icons/Chart.svg"
+                    tooltip="Access historical traffic and revenue data"
+                    uppercase={true}
+                    onSelect={() => {
+                        console.log("Opening historical data");
+                        trigger(mod.id, "openHistoricalData");
+                    }}
+                >
+                    Historical Data Analysis
+                </CS2VanillaUIResolver.instance.InfoButtonLink>
+
+                {/* Example 8: Export Data Link */}
+                <CS2VanillaUIResolver.instance.InfoButtonLink
+                    icon="Media/Game/Icons/Export.svg"
+                    tooltip="Export tollbooth data to external file"
+                    onSelect={() => {
+                        console.log("Exporting data");
+                        trigger(mod.id, "exportTollboothData");
+                    }}
+                >
+                    Export Data
+                </CS2VanillaUIResolver.instance.InfoButtonLink>
+            </InfoSection>
+
+            {/* CONDITIONAL INFO LINKS SECTION */}
+            <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
+                <CS2VanillaUIResolver.instance.InfoRow
+                    left={"Conditional Actions"}
+                    tooltip={DescriptionTooltip("Conditional Actions", "Actions that appear based on current tollbooth status")}
+                    uppercase={true}
+                    disableFocus={true}
+                    className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                />
+
+                {/* Example 9: Conditional Link - Show only if maintenance needed */}
+                {m_MaintenanceLevel < 80 && (
+                    <CS2VanillaUIResolver.instance.InfoButtonLink
+                        icon="Media/Game/Icons/Warning.svg"
+                        tooltip="Maintenance required! Click to schedule immediate maintenance"
+                        uppercase={true}
+                        onSelect={() => {
+                            console.log("Emergency maintenance");
+                            trigger(mod.id, "emergencyMaintenance");
+                        }}
+                    >
+                        ⚠️ Urgent Maintenance Required
+                    </CS2VanillaUIResolver.instance.InfoButtonLink>
+                )}
+
+                {/* Example 10: Conditional Link - Show only if efficiency is low */}
+                {m_CollectionEfficiency < 85 && (
+                    <CS2VanillaUIResolver.instance.InfoButtonLink
+                        icon="Media/Game/Icons/Upgrade.svg"
+                        tooltip="Low efficiency detected. Click to view upgrade options"
+                        onSelect={() => {
+                            console.log("Opening upgrade options");
+                            trigger(mod.id, "showUpgradeOptions");
+                        }}
+                    >
+                        Improve Efficiency
+                    </CS2VanillaUIResolver.instance.InfoButtonLink>
+                )}
+
+                {/* Example 11: Success Status Link */}
+                {m_CollectionEfficiency >= 95 && (
+                    <CS2VanillaUIResolver.instance.InfoButtonLink
+                        icon="Media/Game/Icons/Success.svg"
+                        tooltip="Excellent performance! View optimization tips"
+                        onSelect={() => {
+                            console.log("Opening optimization tips");
+                            trigger(mod.id, "showOptimizationTips");
+                        }}
+                    >
+                        ✅ Optimal Performance
+                    </CS2VanillaUIResolver.instance.InfoButtonLink>
+                )}
+            </InfoSection>
+
+            {/* DYNAMIC INFO LINKS BASED ON VEHICLE TYPES */}
+            <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
+                <CS2VanillaUIResolver.instance.InfoRow
+                    left={"Vehicle Management"}
+                    tooltip={DescriptionTooltip("Vehicle Management", "Manage settings for different vehicle types")}
+                    uppercase={true}
+                    disableFocus={true}
+                    className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                />
+
+                {/* Example 12: Dynamic Links for Each Vehicle Type */}
+                {vehicleTypes.map(vehicle => (
+                    <CS2VanillaUIResolver.instance.InfoButtonLink
+                        key={vehicle.id}
+                        icon={vehicle.icon}
+                        tooltip={`Configure toll settings for ${vehicle.name} (Current: $${vehicle.toll.toFixed(2)})`}
+                        onSelect={() => {
+                            console.log(`Opening ${vehicle.name} settings`);
+                            handleVehicleTypeChange(vehicle.id);
+                            setSelectedTab('finance');
+                        }}
+                    >
+                        {vehicle.name} - ${vehicle.toll.toFixed(2)}
+                    </CS2VanillaUIResolver.instance.InfoButtonLink>
+                ))}
+            </InfoSection>
+
+            {/* HELP AND DOCUMENTATION LINKS */}
+            <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
+                <CS2VanillaUIResolver.instance.InfoRow
+                    left={"Help & Support"}
+                    tooltip={DescriptionTooltip("Help & Support", "Access help documentation and support resources")}
+                    uppercase={true}
+                    disableFocus={true}
+                    className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                />
+
+                {/* Example 13: Help Documentation Link */}
+                <CS2VanillaUIResolver.instance.InfoButtonLink
+                    icon="Media/Game/Icons/Help.svg"
+                    tooltip="Open tollbooth management guide and documentation"
+                    onSelect={() => {
+                        console.log("Opening help documentation");
+                        trigger(mod.id, "openHelp");
+                    }}
+                >
+                    Tollbooth Management Guide
+                </CS2VanillaUIResolver.instance.InfoButtonLink>
+
+                {/* Example 14: Tutorial Link */}
+                <CS2VanillaUIResolver.instance.InfoButtonLink
+                    icon="Media/Game/Icons/Tutorial.svg"
+                    tooltip="Start interactive tollbooth tutorial"
+                    uppercase={true}
+                    onSelect={() => {
+                        console.log("Starting tutorial");
+                        trigger(mod.id, "startTutorial");
+                    }}
+                >
+                    Interactive Tutorial
+                </CS2VanillaUIResolver.instance.InfoButtonLink>
+
+                {/* Example 15: Feedback Link */}
+                <CS2VanillaUIResolver.instance.InfoButtonLink
+                    icon="Media/Game/Icons/Feedback.svg"
+                    tooltip="Send feedback about tollbooth functionality"
+                    onSelect={() => {
+                        console.log("Opening feedback form");
+                        trigger(mod.id, "openFeedback");
+                    }}
+                >
+                    Send Feedback
+                </CS2VanillaUIResolver.instance.InfoButtonLink>
+            </InfoSection>
+
+            {/* STYLED INFO LINKS WITH CUSTOM CLASSES */}
+            <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
+                <CS2VanillaUIResolver.instance.InfoRow
+                    left={"Custom Styled Links"}
+                    tooltip={DescriptionTooltip("Custom Styling", "Examples of Info Links with custom styling")}
+                    uppercase={true}
+                    disableFocus={true}
+                    className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                />
+
+                {/* Example 16: Custom Styled Link */}
+                <CS2VanillaUIResolver.instance.InfoButtonLink
+                    icon="Media/Game/Icons/Premium.svg"
+                    tooltip="Access premium tollbooth features"
+                    uppercase={true}
+                    className="premium-link"
+                    onSelect={() => {
+                        console.log("Opening premium features");
+                        trigger(mod.id, "openPremiumFeatures");
+                    }}
+                >
+                    🌟 Premium Features
+                </CS2VanillaUIResolver.instance.InfoButtonLink>
+
+                {/* Example 17: Warning Styled Link */}
+                <CS2VanillaUIResolver.instance.InfoButtonLink
+                    icon="Media/Game/Icons/Alert.svg"
+                    tooltip="View system alerts and warnings"
+                    className="warning-link"
+                    onSelect={() => {
+                        console.log("Opening alerts");
+                        trigger(mod.id, "showAlerts");
+                    }}
+                >
+                    🚨 System Alerts
+                </CS2VanillaUIResolver.instance.InfoButtonLink>
+            </InfoSection>
