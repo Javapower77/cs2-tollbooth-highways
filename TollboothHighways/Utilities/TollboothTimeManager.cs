@@ -5,7 +5,7 @@ using Game.Simulation;
 using Unity.Entities;
 using Game.Prefabs;
 
-namespace Utilities
+namespace TollboothHighways.Utilities
 {
     /// <summary>
     /// Manages time-based pricing for tollbooth entities in Cities Skylines II.

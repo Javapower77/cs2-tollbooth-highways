@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 
-namespace Domain.Components
+namespace TollboothHighways.Domain.Components
 {
     [ComponentMenu("TollHighways/", new Type[] { typeof(WithNoneAttribute) })]
     public class TollBoothPrefabInfo : ComponentBase

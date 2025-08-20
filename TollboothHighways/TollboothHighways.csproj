@@ -49,6 +49,9 @@
 	  <EmbeddedResource Remove="UI\src\components\**" />
 	  <None Remove="UI\src\components\**" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Compile Remove="Systems\UpdateTollRoadsSystem.cs" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="cohtml.Net">

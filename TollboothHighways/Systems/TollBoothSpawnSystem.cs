@@ -1,5 +1,4 @@
 using Colossal.Entities;
-using Domain.Components;
 using Game;
 using Game.Common;
 using Game.Objects;
@@ -11,6 +10,7 @@ using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using TollboothHighways.Utilities;
 using Unity.Collections;
 using Unity.Entities;
+using TollboothHighways.Domain.Components;
 
 namespace TollboothHighways.Systems
 {

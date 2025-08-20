@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Text;
 using Colossal.Logging;
 
-namespace TollHighways.Utilities
+namespace TollboothHighways
 {
     /// <summary>
     /// Utility routines for logging.

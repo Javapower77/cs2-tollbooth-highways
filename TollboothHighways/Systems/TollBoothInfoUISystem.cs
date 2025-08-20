@@ -1,9 +1,9 @@
 using Colossal.Entities;
 using Colossal.UI.Binding;
-using Domain.Components;
 using Game.Tools;
 using Game.UI;
 using Game.UI.InGame;
+using TollboothHighways.Domain.Components;
 using TollboothHighways.Extensions;
 using TollboothHighways.Utilities;
 using Unity.Entities;

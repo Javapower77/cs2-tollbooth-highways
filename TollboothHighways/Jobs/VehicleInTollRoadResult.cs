@@ -1,9 +1,6 @@
-﻿using Game.Prefabs;
-using System;
-using TollHighways.Domain;
-using Unity.Entities;
+﻿using Unity.Entities;
 
-namespace TollHighways.Jobs
+namespace TollboothHighways.Jobs
 {
     // Result structure for job communication
     public struct VehicleInTollRoadResult

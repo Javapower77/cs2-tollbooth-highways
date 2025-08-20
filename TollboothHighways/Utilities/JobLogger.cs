@@ -4,47 +4,75 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace TollboothHighways.Utilities
 {
-    public static class JobLogger
+    /// <summary>
+    /// A thread-safe logger for use within IJobParallelFor jobs.
+    /// </summary>
+    public struct JobLogger : IDisposable
     {
-        [BurstDiscard] public static void Log<T>(T segment) => Debug.Log(AppendToString(segment));
-        [BurstDiscard] public static void Log<T1, T2>(T1 segment1, T2 segment2) => Debug.Log(AppendToString(segment1, segment2));
-        [BurstDiscard] public static void Log<T1, T2, T3>(T1 segment1, T2 segment2, T3 segment3) => Debug.Log(AppendToString(segment1, segment2, segment3));
-        [BurstDiscard] public static void Log<T1, T2, T3, T4>(T1 segment1, T2 segment2, T3 segment3, T4 segment4) => Debug.Log(AppendToString(segment1, segment2, segment3, segment4));
-        [BurstDiscard] public static void Log<T1, T2, T3, T4, T5>(T1 segment1, T2 segment2, T3 segment3, T4 segment4, T5 segment5) => Debug.Log(AppendToString(segment1, segment2, segment3, segment4, segment5));
-        [BurstDiscard] public static void Log<T1, T2, T3, T4, T5, T6>(T1 segment1, T2 segment2, T3 segment3, T4 segment4, T5 segment5, T6 segment6) => Debug.Log(AppendToString(segment1, segment2, segment3, segment4, segment5, segment6));
-        [BurstDiscard] public static void Log<T1, T2, T3, T4, T5, T6, T7>(T1 segment1, T2 segment2, T3 segment3, T4 segment4, T5 segment5, T6 segment6, T7 segment7) => Debug.Log(AppendToString(segment1, segment2, segment3, segment4, segment5, segment6, segment7));
-        [BurstDiscard] public static void Log<T1, T2, T3, T4, T5, T6, T7, T8>(T1 segment1, T2 segment2, T3 segment3, T4 segment4, T5 segment5, T6 segment6, T7 segment7, T8 segment8) => Debug.Log(AppendToString(segment1, segment2, segment3, segment4, segment5, segment6, segment7, segment8));
+        private NativeList<FixedString512Bytes> m_LogMessages;
 
-        [BurstDiscard] public static void LogWarning<T>(T segment) => Debug.LogWarning(AppendToString(segment));
-        [BurstDiscard] public static void LogWarning<T1, T2>(T1 segment1, T2 segment2) => Debug.LogWarning(AppendToString(segment1, segment2));
-        [BurstDiscard] public static void LogWarning<T1, T2, T3>(T1 segment1, T2 segment2, T3 segment3) => Debug.LogWarning(AppendToString(segment1, segment2, segment3));
-        [BurstDiscard] public static void LogWarning<T1, T2, T3, T4>(T1 segment1, T2 segment2, T3 segment3, T4 segment4) => Debug.LogWarning(AppendToString(segment1, segment2, segment3, segment4));
-        [BurstDiscard] public static void LogWarning<T1, T2, T3, T4, T5>(T1 segment1, T2 segment2, T3 segment3, T4 segment4, T5 segment5) => Debug.LogWarning(AppendToString(segment1, segment2, segment3, segment4, segment5));
-        [BurstDiscard] public static void LogWarning<T1, T2, T3, T4, T5, T6>(T1 segment1, T2 segment2, T3 segment3, T4 segment4, T5 segment5, T6 segment6) => Debug.LogWarning(AppendToString(segment1, segment2, segment3, segment4, segment5, segment6));
-        [BurstDiscard] public static void LogWarning<T1, T2, T3, T4, T5, T6, T7>(T1 segment1, T2 segment2, T3 segment3, T4 segment4, T5 segment5, T6 segment6, T7 segment7) => Debug.LogWarning(AppendToString(segment1, segment2, segment3, segment4, segment5, segment6, segment7));
-        [BurstDiscard] public static void LogWarning<T1, T2, T3, T4, T5, T6, T7, T8>(T1 segment1, T2 segment2, T3 segment3, T4 segment4, T5 segment5, T6 segment6, T7 segment7, T8 segment8) => Debug.LogWarning(AppendToString(segment1, segment2, segment3, segment4, segment5, segment6, segment7, segment8));
-
-        [BurstDiscard] public static void LogError<T>(T segment) => Debug.LogError(AppendToString(segment));
-        [BurstDiscard] public static void LogError<T1, T2>(T1 segment1, T2 segment2) => Debug.LogError(AppendToString(segment1, segment2));
-        [BurstDiscard] public static void LogError<T1, T2, T3>(T1 segment1, T2 segment2, T3 segment3) => Debug.LogError(AppendToString(segment1, segment2, segment3));
-        [BurstDiscard] public static void LogError<T1, T2, T3, T4>(T1 segment1, T2 segment2, T3 segment3, T4 segment4) => Debug.LogError(AppendToString(segment1, segment2, segment3, segment4));
-        [BurstDiscard] public static void LogError<T1, T2, T3, T4, T5>(T1 segment1, T2 segment2, T3 segment3, T4 segment4, T5 segment5) => Debug.LogError(AppendToString(segment1, segment2, segment3, segment4, segment5));
-        [BurstDiscard] public static void LogError<T1, T2, T3, T4, T5, T6>(T1 segment1, T2 segment2, T3 segment3, T4 segment4, T5 segment5, T6 segment6) => Debug.LogError(AppendToString(segment1, segment2, segment3, segment4, segment5, segment6));
-        [BurstDiscard] public static void LogError<T1, T2, T3, T4, T5, T6, T7>(T1 segment1, T2 segment2, T3 segment3, T4 segment4, T5 segment5, T6 segment6, T7 segment7) => Debug.LogError(AppendToString(segment1, segment2, segment3, segment4, segment5, segment6, segment7));
-        [BurstDiscard] public static void LogError<T1, T2, T3, T4, T5, T6, T7, T8>(T1 segment1, T2 segment2, T3 segment3, T4 segment4, T5 segment5, T6 segment6, T7 segment7, T8 segment8) => Debug.LogError(AppendToString(segment1, segment2, segment3, segment4, segment5, segment6, segment7, segment8));
-
-
-        [BurstDiscard]
-        public static string AppendToString(params object[] parts)
+        /// <summary>
+        /// A thread-safe writer that adds log messages from a parallel job.
+        /// </summary>
+        public struct Writer
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            sb.Clear();
-            for (int i = 0, len = parts.Length; i < len; i++) sb.Append(parts[i].ToString());
-            return sb.ToString();
+            internal NativeList<FixedString512Bytes>.ParallelWriter m_ParallelWriter;
+
+            /// <summary>
+            /// Writes a log message, automatically prepending the current thread ID.
+            /// </summary>
+            /// <param name="message">The message to log.</param>
+            public void Log(in FixedString512Bytes message)
+            {
+                // Get the current worker thread index and prepend it to the message.
+                m_ParallelWriter.AddNoResize($"[Thread {JobsUtility.ThreadIndex}] {message}");
+            }
+        }
+
+        /// <summary>
+        /// Initializes the logger. Call this before scheduling the job.
+        /// </summary>
+        /// <param name="allocator">The memory allocator to use.</param>
+        public void Initialize(Allocator allocator)
+        {
+            m_LogMessages = new NativeList<FixedString512Bytes>(allocator);
+        }
+
+        /// <summary>
+        /// Gets a writer to be used inside a job.
+        /// </summary>
+        public Writer GetWriter()
+        {
+            return new Writer { m_ParallelWriter = m_LogMessages.AsParallelWriter() };
+        }
+
+        /// <summary>
+        /// Flushes all collected log messages to the main game log. Call this after the job has completed.
+        /// </summary>
+        public void Flush()
+        {
+            foreach (var message in m_LogMessages)
+            {
+                LogUtil.Info(message.ToString());
+            }
+            m_LogMessages.Clear();
+        }
+
+        /// <summary>
+        /// Disposes the native collection.
+        /// </summary>
+        public void Dispose()
+        {
+            if (m_LogMessages.IsCreated)
+            {
+                m_LogMessages.Dispose();
+            }
         }
     }
 

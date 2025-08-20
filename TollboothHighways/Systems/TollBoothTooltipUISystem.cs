@@ -1,9 +1,11 @@
 using Colossal.Entities;
-using Domain.Components;
 using Game.Input;
 using Game.Tools;
 using Game.UI;
 using Game.UI.Tooltip;
+using Game.UI.Widgets;
+using System.Linq;
+using TollboothHighways.Domain.Components;
 using TollboothHighways.Utilities;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -52,6 +54,7 @@ namespace TollboothHighways.Systems
             Entity hoveredEntity = m_SelectionSystem.GetCurrentHoveredEntity();
 
             m_TollBoothTooltipGroup.children.Clear();
+            m_TollBoothTooltipGroup.path = PathSegment.Empty;
 
             if (hoveredEntity != Entity.Null && EntityManager.HasComponent<TollBoothPrefabData>(hoveredEntity))
             {
@@ -69,7 +72,6 @@ namespace TollboothHighways.Systems
             // Also set the entity's custom name through the NameSystem
             var nameSystem = World.GetOrCreateSystemManaged<Game.UI.NameSystem>();
             nameSystem.TryGetCustomName(entity, out string tollBoothNameSystem);
-
 
             var mousePosition = InputManager.instance.mousePosition;
 
@@ -98,23 +100,61 @@ namespace TollboothHighways.Systems
                 screenHeight - mousePosition.y + offsetY
             );
 
-            m_TollBoothTooltipGroup.path = $"tollBoothsTooltips_{tollBoothNameSystem}";
-            StringTooltip nameTollbooth = new()
+            var tooltipPath = $"tollBoothsTooltips_{tollBoothNameSystem}";
+            
+            // Check if tooltip group already exists
+            var existingGroup = m_TooltipUISystem.groups.FirstOrDefault(g => g.path == tooltipPath);
+            
+            if (existingGroup != null)
             {
-                icon = "coui://javapower-tollbooth-highways/Tollbooth.png",
-                value = $"{tollBoothNameSystem}",
-            };            
-            m_TollBoothTooltipGroup.children.Add(nameTollbooth);
+                // Update existing group
+                existingGroup.children.Clear();
+                existingGroup.position = tooltipPosition;
+                
+                StringTooltip nameTollbooth = new()
+                {
+                    icon = "coui://javapower-tollbooth-highways/Tollbooth.png",
+                    value = $"{tollBoothNameSystem}",
+                };            
+                existingGroup.children.Add(nameTollbooth);
 
-            StringTooltip panelViewTollbooth = new()
+                StringTooltip panelViewTollbooth = new()
+                {
+                    icon = "Media/Mouse/LMB.svg",
+                    value = "Info Panel",
+                };
+                existingGroup.children.Add(panelViewTollbooth);
+                
+                LogUtil.Info($"TollBoothTooltipUISystem: Updating existing tooltip group {tooltipPath} at position {tooltipPosition}");
+            }
+            else
             {
-                icon = "Media/Mouse/LMB.svg",
-                value = "Info Panel",
-            };
-            m_TollBoothTooltipGroup.children.Add(panelViewTollbooth);
+                // Create new tooltip group
+                var newTooltipGroup = new TooltipGroup()
+                {
+                    path = tooltipPath,
+                    position = tooltipPosition,
+                    horizontalAlignment = TooltipGroup.Alignment.Start,
+                    verticalAlignment = TooltipGroup.Alignment.Start
+                };
 
-            m_TollBoothTooltipGroup.position = tooltipPosition;
-            AddGroup(m_TollBoothTooltipGroup);
+                StringTooltip nameTollbooth = new()
+                {
+                    icon = "coui://javapower-tollbooth-highways/Tollbooth.png",
+                    value = $"{tollBoothNameSystem}",
+                };            
+                newTooltipGroup.children.Add(nameTollbooth);
+
+                StringTooltip panelViewTollbooth = new()
+                {
+                    icon = "Media/Mouse/LMB.svg",
+                    value = "Info Panel",
+                };
+                newTooltipGroup.children.Add(panelViewTollbooth);
+
+                AddGroup(newTooltipGroup);
+                LogUtil.Info($"TollBoothTooltipUISystem: Adding new tooltip group {tooltipPath} at position {tooltipPosition}");
+            }
         }
 
         protected override void OnDestroy()

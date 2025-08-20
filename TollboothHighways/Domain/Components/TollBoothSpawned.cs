@@ -1,6 +1,6 @@
 using Unity.Entities;
 
-namespace Domain.Components
+namespace TollboothHighways.Domain.Components
 {
     /// <summary>
     /// Marker component to indicate that a toll booth entity has been spawned and processed.

@@ -1,9 +1,9 @@
 using Unity.Entities;
 using Unity.Collections;
 using Colossal.Serialization.Entities;
-using Domain.Enums;
+using TollboothHighways.Domain.Enums;
 
-namespace Domain.Components
+namespace TollboothHighways.Domain.Components
 {
     /// <summary>
     /// Component to store traffic insights and vehicle statistics for a tollbooth.

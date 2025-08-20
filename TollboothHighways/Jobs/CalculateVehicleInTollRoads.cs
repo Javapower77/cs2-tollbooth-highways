@@ -4,8 +4,8 @@ using Game.Prefabs;
 using Game.Tools;
 using Game.Vehicles;
 using System.Collections.Generic;
-using TollHighways.Domain;
-using TollHighways.Utilities;
+using TollboothHighways.Utilities;
+using TollboothHighways.Domain;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -15,7 +15,7 @@ using Unity.Jobs;
 using UnityEngine;
 using SubLane = Game.Net.SubLane;
 
-namespace TollHighways.Jobs
+namespace TollboothHighways.Jobs
 {
     // Job to calculate the vehicles passing through a toll road
     // thanks to krzychu124 to pointing me to disable burst compilation at build level of the mod
@@ -28,8 +28,8 @@ namespace TollHighways.Jobs
         [ReadOnly] public BufferLookup<SubLane> SubLaneObjectData;
         [ReadOnly] public BufferLookup<LaneObject> LaneObjectData;
         [ReadOnly] public ComponentLookup<PrefabRef> PrefabRefData;
-        [ReadOnly] public ComponentLookup<Game.Net.Edge> EdgeObjectData;
-        [ReadOnly] public ComponentLookup<Game.Vehicles.CarTrailerLane> VehicleTrailerData;
+        [ReadOnly] public ComponentLookup<Edge> EdgeObjectData;
+        [ReadOnly] public ComponentLookup<CarTrailerLane> VehicleTrailerData;
         [WriteOnly] public NativeList<(Entity tollRoad, Entity vehicle)>.ParallelWriter Results;
         public JobLogger.Writer Logger;
 

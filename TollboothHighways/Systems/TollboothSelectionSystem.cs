@@ -1,7 +1,6 @@
 using Colossal.Entities;
 using Colossal.Mathematics;
 using Colossal.UI.Binding;
-using Domain.Components;
 using Game;
 using Game.Common;
 using Game.Input;
@@ -13,6 +12,7 @@ using Game.UI;
 using Game.UI.Editor;
 using System;
 using System.Collections.Generic;
+using TollboothHighways.Domain.Components;
 using TollboothHighways.Utilities;
 using Unity.Collections;
 using Unity.Entities;

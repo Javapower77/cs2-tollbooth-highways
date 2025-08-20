@@ -1,6 +1,6 @@
-﻿using Domain.Components;
-using Game;
+﻿using Game;
 using Game.Prefabs;
+using TollboothHighways.Domain.Components;
 using TollboothHighways.Utilities;
 using Unity.Entities;
 using Unity.Mathematics;
