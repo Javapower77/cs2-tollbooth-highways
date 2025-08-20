@@ -1,4 +1,4 @@
-# Toll Highway for Cities Skylines II
+# Tollbooth Highway for Cities Skylines II
 This project is part of my journey of learning to make mods in this amazing game that I had loved for years.
 Is based on Unity ECS and DOTS.
 The construction of this mod is, of course, thanks to the amazing collobartion of some many people on CS2 Mod Discord server who are very nice, patiente and with high of human quality.
@@ -25,3 +25,4 @@ Well, that is the goal of this mod and that is what I am going to try to achieve
 
 # A very super hyper Alpha version 😆
 <img width="1252" height="643" alt="image" src="https://github.com/user-attachments/assets/6d12f571-b6d7-4f4f-9223-47c0a60f7e65" />
+
