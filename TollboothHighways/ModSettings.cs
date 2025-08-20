@@ -23,7 +23,7 @@ namespace TollboothHighways
         ServiceVehiclesPeakSection, ServiceVehicleNonPeakSection, TruckNonPeakSection, TruckPeakSection, CreditsSection)]
     public partial class ModSettings : ModSetting
     {
-        internal const string SETTINGS_ASSET_NAME = "Toll Highways General Settings";
+        internal const string SETTINGS_ASSET_NAME = "Tollbooth Highways General Settings";
         internal static ModSettings Instance { get; private set; }
 
         // TABs from the Settings UI
@@ -255,7 +255,7 @@ namespace TollboothHighways
             {
                 try
                 {
-                    Application.OpenURL($"https://github.com/Javapower77/cs2-toll-highways/commit/{Mod.InformationalVersion.Split('+')[1]}");
+                    Application.OpenURL($"https://github.com/Javapower77/cs2-tollbooth-highways/commit/{Mod.InformationalVersion.Split('+')[1]}");
                 }
                 catch (Exception e)
                 {
