@@ -1,4 +1,5 @@
 ﻿using Game;
+using Game.Net;
 using Game.Prefabs;
 using TollboothHighways.Domain.Components;
 using TollboothHighways.Utilities;
@@ -20,9 +21,9 @@ namespace Systems
             // in order to be used later in the entity query
             prefabSystem = World.GetOrCreateSystemManaged<PrefabSystem>();
             AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Toll 60kph)");
-            AddTollComponentToRoad("RoadPrefab","Highway Oneway - 1 lane - Public Transport (Toll 60kph)");
+            AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Manual Toll 60kph)");
+            AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane - Public Transport (Toll 60kph)");
             AddTollCabinComponentToRoad("StaticObjectPrefab", "TollBooth");
-
             LogUtil.Info("TollRoadPrefabUpdateSystem: System created and initialized");
         }
 
@@ -52,6 +53,12 @@ namespace Systems
                     tollRoadPrefab.AddComponent<TollRoadPrefabInfo>();
                     LogUtil.Info($"TollHighways::UpdateTollRoadsSystem::AddTollComponentToRoad() - Added TollRoadPrefabInfo to {tollRoadPrefab.name}");
 
+                    if (PrefabNameToSearch.Contains("Manual"))
+                    {
+                        // If the prefab is a manual toll road, add the TollBoothManualInfo component
+                        tollRoadPrefab.AddComponent<TollBoothManualInfo>(); // Add the TollBoothManual component to the prefab
+                    }
+                    
                     // Update the prefab with the new component added to the prefab system in order to be used later in a entity query
                     prefabSystem.UpdatePrefab(tollRoadPrefab); 
                 }

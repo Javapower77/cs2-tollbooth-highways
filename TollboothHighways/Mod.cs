@@ -83,7 +83,7 @@ namespace TollboothHighways
                 updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
                 updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
-                updateSystem.UpdateAt<MousePositionUISystem>(SystemUpdatePhase.UIUpdate);
+                //updateSystem.UpdateAt<MousePositionUISystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
                 //pdateSystem.UpdateAt<UpdateTollRoadsSystem>(SystemUpdatePhase.GameSimulation);
 

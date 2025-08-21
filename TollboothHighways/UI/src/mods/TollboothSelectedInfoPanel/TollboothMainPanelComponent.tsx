@@ -1,7 +1,7 @@
 ﻿import { getModule } from "cs2/modding";
 import { Theme, Color } from "cs2/bindings";
 import { bindValue, trigger, useValue } from "cs2/api"; 
-import { useLocalization } from "cs2/l10n";
+import { LocalizedNumber, LocalizedNumber, useLocalization } from "cs2/l10n";
 import mod from "../../../mod.json";
 import { tool } from "cs2/bindings";
 import { Button } from "cs2/ui";
@@ -381,8 +381,8 @@ export const TollboothMainPanelComponent = () => {
                                         fontSize: '12px',
                                         color: '#cccccc'
                                     }}>
-                                        <span>Total Vehicles: {groupStats.totalQuantity.toLocaleString()}</span>
-                                        <span>Total Revenue: ${groupStats.totalEarnings.toFixed(2)}</span>
+                                        <span>Total Vehicles: <LocalizedNumber unit={Unit.Integer} value={groupStats.totalQuantity as number}></LocalizedNumber></span>
+                                        <span>Total Revenue: <LocalizedNumber unit={Unit.Money} value={groupStats.totalEarnings as number}></LocalizedNumber></span>
                                     </div>
                                 </div>
 
@@ -406,25 +406,35 @@ export const TollboothMainPanelComponent = () => {
                             }}>
                                 <CS2VanillaUIResolver.instance.InfoRow
                                     left="Total Vehicles Processed"
-                                    right={tollBoothInsight?.totalVehiclesPassed?.toLocaleString() || "0"}
+                                    right={
+                                        <LocalizedNumber unit={Unit.Integer} value={tollBoothInsight?.totalVehiclesPassed as number}></LocalizedNumber>
+                                        || <LocalizedNumber unit={Unit.Integer} value={0}></LocalizedNumber>
+                                    }
                                     disableFocus={true}
                                     className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
                                 />
                                 <CS2VanillaUIResolver.instance.InfoRow
                                     left="Total Revenue Generated"
-                                    right={`$${tollBoothInsight?.totalRevenue?.toFixed(2) || "0.00"}`}
+                                    right={
+                                        <LocalizedNumber unit={Unit.Money} signed={true} value={tollBoothInsight?.totalRevenue as number}></LocalizedNumber>
+                                        || <LocalizedNumber unit={Unit.Money} signed={true} value={0}></LocalizedNumber>
+                                    }
                                     disableFocus={true}
                                     className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
                                 />
                                 <CS2VanillaUIResolver.instance.InfoRow
                                     left="Average Revenue per Vehicle"
-                                    right={`$${((tollBoothInsight?.totalRevenue || 0) / Math.max(tollBoothInsight?.totalVehiclesPassed || 1, 1)).toFixed(2)}`}
+                                    right={
+                                        <LocalizedNumber unit={Unit.Money} signed={true} value={((tollBoothInsight?.totalRevenue || 0) / Math.max(tollBoothInsight?.totalVehiclesPassed || 1, 1)) as number}></LocalizedNumber>
+                                    }
                                     disableFocus={true}
                                     className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
                                 />
                                 <CS2VanillaUIResolver.instance.InfoRow
                                     left="Active Vehicle Groups"
-                                    right={groupedVehicleStatistics.length.toString()}
+                                    right={
+                                        <LocalizedNumber unit={Unit.Integer} value={groupedVehicleStatistics.length as number}></LocalizedNumber>
+                                    }
                                     disableFocus={true}
                                     className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
                                 />
@@ -482,14 +492,20 @@ export const TollboothMainPanelComponent = () => {
                             
                             <CS2VanillaUIResolver.instance.InfoRow
                                 left="Total Revenue Today"
-                                right={`$${tollBoothInsight?.totalRevenue?.toFixed(2) || "0.00"}`}
+                                right={
+                                    <LocalizedNumber unit={Unit.Money} signed={true} value={tollBoothInsight?.totalRevenue as number}></LocalizedNumber> 
+                                     || <LocalizedNumber unit={Unit.Money} signed={true} value={0}></LocalizedNumber>
+                                }
                                 disableFocus={true}
                                 className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
                             />
                             
                             <CS2VanillaUIResolver.instance.InfoRow
                                 left="Vehicles Processed Today"
-                                right={tollBoothInsight?.totalVehiclesPassed?.toLocaleString() || "0"}
+                                right={
+                                    <LocalizedNumber unit={Unit.Integer} value={tollBoothInsight?.totalVehiclesPassed as number}></LocalizedNumber>
+                                    || <LocalizedNumber unit={Unit.Integer} value={0}></LocalizedNumber>
+                                }
                                 disableFocus={true}
                                 className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
                             />
@@ -548,7 +564,7 @@ export const TollboothMainPanelComponent = () => {
                                             display: 'flex',
                                             flexBasis: '60px'
                                         }}>
-                                            <span>{groupStats.totalQuantity}&nbsp;vehicles</span>
+                                            <span><LocalizedNumber value={groupStats.totalQuantity as number} unit={Unit.Integer}></LocalizedNumber>&nbsp;vehicles</span>
                                         </div>
                                         <div style={{
                                             fontSize: '12px',
@@ -557,7 +573,7 @@ export const TollboothMainPanelComponent = () => {
                                             display: 'flex',
                                             flexBasis: '30px'
                                         }}>
-                                            <span>${groupStats.totalEarnings.toFixed(2)}</span>
+                                            <span><LocalizedNumber value={groupStats.totalEarnings as number} unit={Unit.Money}></LocalizedNumber></span>
                                         </div>
                                     </div>
                                 </div>

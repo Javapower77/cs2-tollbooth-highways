@@ -172,8 +172,6 @@ export const VehicleStatisticsTable: React.FC<VehicleStatisticsTableProps> = ({
 
     // Formatting functions
     const formatters = {
-        currency: (amount: number): string => `$${amount.toFixed(2)}`,
-        number: (quantity: number): string => useFormattedLargeNumber(quantity),
         text: (text: string): string => text,
         icon: (iconUrl: string, name: string): React.ReactElement =>
             React.createElement("img", {
@@ -198,10 +196,8 @@ export const VehicleStatisticsTable: React.FC<VehicleStatisticsTableProps> = ({
 
         switch (column.type) {
             case 'currency':
-                //return formatters.currency(value as number);
                 return (<LocalizedNumber unit={Unit.Money} value={value as number}></LocalizedNumber>);
             case 'number':
-                //return formatters.number(value as number);
                 return (<LocalizedNumber unit={Unit.Integer} value={value as number}></LocalizedNumber>);
             case 'text':
             default:
@@ -343,8 +339,6 @@ export const VehicleStatisticsFlexGrid: React.FC<VehicleStatisticsTableProps> = 
     };
 
     const formatters = {
-        currency: (amount: number): string => `$${amount.toFixed(2)}`,
-        number: (quantity: number): string => quantity.toLocaleString(),
         text: (text: string): string => text,
         icon: (iconUrl: string, name: string): React.ReactElement =>
             React.createElement("img", {
@@ -363,9 +357,9 @@ export const VehicleStatisticsFlexGrid: React.FC<VehicleStatisticsTableProps> = 
 
         switch (column.type) {
             case 'currency':
-                return formatters.currency(value as number);
+                <LocalizedNumber unit={Unit.Money} value={value as number}></LocalizedNumber>
             case 'number':
-                return formatters.number(value as number);
+                <LocalizedNumber unit={Unit.Integer} value={value as number}></LocalizedNumber>
             case 'text':
             default:
                 return formatters.text(value as string);

@@ -8,16 +8,16 @@ using Unity.Entities;
 namespace TollboothHighways.Domain.Components
 {
     [ComponentMenu("TollHighways/", new Type[] { typeof(WithNoneAttribute) })]
-    public class TollBoothManualInfo : ComponentBase
+    public class TollBoothPrefabInfo : ComponentBase
     {
         public override void GetArchetypeComponents(HashSet<ComponentType> components)
         {
-            components.Add(ComponentType.ReadWrite<TollBoothManualData>());
+            components.Add(ComponentType.ReadWrite<TollBoothPrefabData>());
         }
 
         public override void GetPrefabComponents(HashSet<ComponentType> components)
         {
-            components.Add(ComponentType.ReadWrite<TollBoothManualData>());
+            components.Add(ComponentType.ReadWrite<TollBoothPrefabData>());
         }
 
         public override void Initialize(EntityManager entityManager, Entity entity)
@@ -25,14 +25,14 @@ namespace TollboothHighways.Domain.Components
             base.Initialize(entityManager, entity);
 
             // Set a default name that will be overridden by the spawn system
-            var tollBoothManualData = new TollBoothManualData
+            var tollBoothData = new TollBoothPrefabData
             {
-                ProcessingTime = 2.0f // Default processing time for manual toll booths
+                BelongsToHighwayTollbooth = Entity.Null // Default to null, will be set by the spawn system
             };
 
-            if (entityManager.HasComponent<TollBoothManualData>(entity))
+            if (entityManager.HasComponent<TollBoothPrefabData>(entity))
             {
-                entityManager.SetComponentData(entity, tollBoothManualData);
+                entityManager.SetComponentData(entity, tollBoothData);
             }
         }
     }

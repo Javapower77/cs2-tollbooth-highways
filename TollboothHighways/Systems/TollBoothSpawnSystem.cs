@@ -1,16 +1,18 @@
 using Colossal.Entities;
 using Game;
 using Game.Common;
+using Game.Net;
 using Game.Objects;
 using Game.Prefabs;
-using Game.UI;
 using Game.Simulation;
+using Game.UI;
 using System;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
+using TollboothHighways.Domain.Components;
 using TollboothHighways.Utilities;
 using Unity.Collections;
 using Unity.Entities;
-using TollboothHighways.Domain.Components;
+using static Colossal.IO.AssetDatabase.AtlasFrame;
 
 namespace TollboothHighways.Systems
 {
@@ -19,6 +21,8 @@ namespace TollboothHighways.Systems
         private EntityQuery m_UnprocessedTollBoothQuery;
         private PrefabSystem m_PrefabSystem;
         private SimulationSystem m_SimulationSystem;
+        private BufferLookup<Game.Net.SubLane> SubLaneObjectData;
+        private BufferLookup<Game.Objects.SubObject> SubObjectsObjectData;
 
         // Predefined random names for toll booths
         private readonly string[] m_TollBoothNames = new string[]
@@ -62,6 +66,8 @@ namespace TollboothHighways.Systems
             m_PrefabSystem = World.GetOrCreateSystemManaged<PrefabSystem>();
             m_SimulationSystem = World.GetOrCreateSystemManaged<SimulationSystem>();
             m_Random = new Random((int)DateTime.Now.Ticks);
+            SubLaneObjectData = GetBufferLookup<Game.Net.SubLane>(true);
+            SubObjectsObjectData = GetBufferLookup<Game.Objects.SubObject>(true);
 
             // Query for toll booth entities that haven't been processed yet
             // This excludes entities that already have the TollBoothSpawned marker component
@@ -70,6 +76,7 @@ namespace TollboothHighways.Systems
                 ComponentType.ReadOnly<PrefabRef>(),
                 ComponentType.Exclude<TollBoothSpawned>()  // Only get entities without the spawned marker
             );
+
 
             LogUtil.Info("TollBoothSpawnSystem: System created and initialized");
         }
@@ -120,6 +127,8 @@ namespace TollboothHighways.Systems
                 entities.Dispose();
                 tollBoothDataArray.Dispose();
             }
+
+  
         }
 
         /// <summary>
@@ -284,6 +293,57 @@ namespace TollboothHighways.Systems
                     EntityManager.AddComponentData(roadEntity, newTollRoadData);
 
                     LogUtil.Info($"TollBoothSpawnSystem: Created new TollRoadPrefabData and associated tollbooth {tollBoothEntity.Index} with road {roadEntity.Index}");
+                }
+
+                // Add LaneSignal if tollbooth is manual
+                int subLaneTypeRoad = 0;
+                if (EntityManager.HasComponent<TollBoothManualData>(roadEntity))
+                {
+                    if (SubLaneObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Net.SubLane> sublaneObjects))
+                    {
+                        for (int x = 0; x < sublaneObjects.Length; x++)
+                        {
+                            if (sublaneObjects[x].m_PathMethods == Game.Pathfind.PathMethod.Road)
+                            {
+                                subLaneTypeRoad = x;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!EntityManager.HasComponent<LaneSignal>(sublaneObjects[subLaneTypeRoad].m_SubLane))
+                    { 
+                        EntityManager.AddComponent<LaneSignal>(sublaneObjects[subLaneTypeRoad].m_SubLane);
+                        var laneSignal = new LaneSignal
+                        {
+                            m_Flags = LaneSignalFlags.CanExtend,
+                            m_Signal = LaneSignalType.SafeStop,
+                            m_GroupMask = 1
+                        };
+                        EntityManager.AddComponentData(sublaneObjects[subLaneTypeRoad].m_SubLane, laneSignal);
+                        LogUtil.Info($"TollBoothSpawnSystem: Added LaneSignal to sublane {sublaneObjects[subLaneTypeRoad].m_SubLane.Index} due to manual tollbooth {tollBoothEntity.Index}");
+                    }
+
+                    int subObjectTraffic = 0;
+                    if (SubObjectsObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Objects.SubObject> subObjects))
+                    {
+                        for (int x = 0; x < subObjects.Length; x++)
+                        {
+                            if (EntityManager.HasComponent<Game.Objects.TrafficLight>(subObjects[x].m_SubObject))
+                            {
+                                subObjectTraffic = x;
+                                break;
+                            }
+                        }
+                    }
+
+                    var trafficLight = new Game.Objects.TrafficLight
+                    {
+                        m_State = Game.Objects.TrafficLightState.Red,
+                        m_GroupMask0 = 1,
+                        m_GroupMask1 = 0
+                    };
+                    EntityManager.SetComponentData(subObjects[subObjectTraffic].m_SubObject, trafficLight);
                 }
             }
             catch (System.Exception ex)

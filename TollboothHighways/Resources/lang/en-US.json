@@ -2,10 +2,13 @@
   "Assets.NAME[Tolls Collection Asset Pack Filter]": "Tolls Collection Asset Pack Filter",
   "Assets.DESCRIPTION[Tolls Collection Asset Pack Filter]": "Tolls Collection Asset Pack Filter",
   "Assets.NAME[Highway Oneway - 1 lane - Public Transport (Toll 60kph)]": "Highway Oneway - 1 lane - Public Transport (Toll 60kph)",
-  "Assets.DESCRIPTION[Highway Oneway - 1 lane - Public Transport (Toll 60kph)]": "One lane one-way toll road only for public and service transportation.",
+  "Assets.DESCRIPTION[Highway Oneway - 1 lane - Public Transport (Toll 60kph)]": "One lane one-way highway with automatic tollbooth only for public and service transportation.",
   "Assets.NAME[Highway Oneway - 1 lane (Toll 60kph)]": "Highway Oneway - 1 lane (Toll 60kph)",
-  "Assets.DESCRIPTION[Highway Oneway - 1 lane (Toll 60kph)]": "One lane one-way toll road.",
+  "Assets.DESCRIPTION[Highway Oneway - 1 lane (Toll 60kph)]": "One lane one-way highway with automatic tollbooth.",
   "Assets.NAME[TollBooth]": "Toll Booth Cabin",
-  "Assets.DESCRIPTION[TollBooth]": "Toll booth cabin to place on a road."
+  "Assets.DESCRIPTION[TollBooth]": "Toll booth cabin to place on a road.",
+  "Assets.NAME[Highway Oneway - 1 lane (Manual Toll 60kph)]": "Highway Oneway - 1 lane (Manual Toll 60kph)",
+  "Assets.DESCRIPTION[Highway Oneway - 1 lane (Manual Toll 60kph)]": "One lane one-way highway with manual tollbooth."
+
 
 }

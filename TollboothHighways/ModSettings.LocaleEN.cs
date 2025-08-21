@@ -40,7 +40,7 @@ namespace TollboothHighways
             {
                 return new Dictionary<string, string>
                 {
-                    { _setting.GetSettingsLocaleID(), "Toll Highways" },
+                    { _setting.GetSettingsLocaleID(), "Tollbooth Highways" },
                     { GetLanguageNameLocaleID(), "English"},
                     { _setting.GetOptionTabLocaleID(ModSettings.GeneralTab), "General" },
                     { _setting.GetOptionTabLocaleID(ModSettings.AboutTab), "About" },
