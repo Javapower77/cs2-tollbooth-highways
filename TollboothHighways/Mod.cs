@@ -75,18 +75,23 @@ namespace TollboothHighways
                     return;
                 }
 
-
-                
-                
-                // Register other systems
+                // Register systems with proper update phases and ordering
+                // INPORTANT!!: Register prefab system FIRST and ensure it runs early in PrefabUpdate phase
                 updateSystem.UpdateAfter<TollRoadPrefabUpdateSystem>(SystemUpdatePhase.PrefabUpdate);
-                updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
-                //updateSystem.UpdateAt<MousePositionUISystem>(SystemUpdatePhase.UIUpdate);
-                updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
-                //pdateSystem.UpdateAt<UpdateTollRoadsSystem>(SystemUpdatePhase.GameSimulation);
 
+                // Register game simulation systems after prefab systems
+                updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
+
+                // Register the barrier control system to run after the spawn system
+                updateSystem.UpdateAfter<TollBoothBarrierControlSystem, TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
+
+                updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
+
+                // Register UI systems in the proper phase
+                updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
+                updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
+
+                LogUtil.Info("All systems registered successfully");
             }
             catch (Exception ex)
             {

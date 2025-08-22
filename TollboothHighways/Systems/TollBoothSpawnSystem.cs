@@ -12,7 +12,9 @@ using TollboothHighways.Domain.Components;
 using TollboothHighways.Utilities;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using static Colossal.IO.AssetDatabase.AtlasFrame;
+using Random = System.Random;
 
 namespace TollboothHighways.Systems
 {
@@ -23,6 +25,11 @@ namespace TollboothHighways.Systems
         private SimulationSystem m_SimulationSystem;
         private BufferLookup<Game.Net.SubLane> SubLaneObjectData;
         private BufferLookup<Game.Objects.SubObject> SubObjectsObjectData;
+
+        // Additional lookups for TrafficLights integration
+        private ComponentLookup<TrafficLights> m_TrafficLightsData;
+        private ComponentLookup<LaneSignal> m_LaneSignalData;
+        private ComponentLookup<Game.Objects.TrafficLight> m_TrafficLightObjectData;
 
         // Predefined random names for toll booths
         private readonly string[] m_TollBoothNames = new string[]
@@ -54,7 +61,7 @@ namespace TollboothHighways.Systems
             "Lakeside Plaza"
         };
 
-        private Random m_Random;
+        private System.Random m_Random;
 
         // Event to notify when toll booth data changes
         public static event System.Action<Entity, string> TollBoothDataChanged;
@@ -66,8 +73,15 @@ namespace TollboothHighways.Systems
             m_PrefabSystem = World.GetOrCreateSystemManaged<PrefabSystem>();
             m_SimulationSystem = World.GetOrCreateSystemManaged<SimulationSystem>();
             m_Random = new Random((int)DateTime.Now.Ticks);
+            
+            // Initialize buffer lookups
             SubLaneObjectData = GetBufferLookup<Game.Net.SubLane>(true);
             SubObjectsObjectData = GetBufferLookup<Game.Objects.SubObject>(true);
+            
+            // Initialize component lookups for TrafficLights integration
+            m_TrafficLightsData = GetComponentLookup<TrafficLights>(false);
+            m_LaneSignalData = GetComponentLookup<LaneSignal>(false);
+            m_TrafficLightObjectData = GetComponentLookup<Game.Objects.TrafficLight>(false);
 
             // Query for toll booth entities that haven't been processed yet
             // This excludes entities that already have the TollBoothSpawned marker component
@@ -83,6 +97,13 @@ namespace TollboothHighways.Systems
 
         protected override void OnUpdate()
         {
+            // Update lookups
+            SubLaneObjectData.Update(this);
+            SubObjectsObjectData.Update(this);
+            m_TrafficLightsData.Update(this);
+            m_LaneSignalData.Update(this);
+            m_TrafficLightObjectData.Update(this);
+
             // Early exit if no unprocessed entities
             if (m_UnprocessedTollBoothQuery.IsEmpty)
                 return;
@@ -127,8 +148,6 @@ namespace TollboothHighways.Systems
                 entities.Dispose();
                 tollBoothDataArray.Dispose();
             }
-
-  
         }
 
         /// <summary>
@@ -251,7 +270,7 @@ namespace TollboothHighways.Systems
 
         /// <summary>
         /// Associates a tollbooth entity with its parent road entity by updating the road's TollRoadPrefabData component.
-        /// This creates a bidirectional relationship between the road and its tollbooth.
+        /// This creates a bidirectional relationship between the road and its tollbooth, and sets up manual barrier control if applicable.
         /// </summary>
         /// <param name="tollBoothEntity">The tollbooth entity to associate</param>
         /// <param name="roadEntity">The road entity that owns the tollbooth</param>
@@ -295,60 +314,356 @@ namespace TollboothHighways.Systems
                     LogUtil.Info($"TollBoothSpawnSystem: Created new TollRoadPrefabData and associated tollbooth {tollBoothEntity.Index} with road {roadEntity.Index}");
                 }
 
-                // Add LaneSignal if tollbooth is manual
-                int subLaneTypeRoad = 0;
-                if (EntityManager.HasComponent<TollBoothManualData>(roadEntity))
-                {
-                    if (SubLaneObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Net.SubLane> sublaneObjects))
-                    {
-                        for (int x = 0; x < sublaneObjects.Length; x++)
-                        {
-                            if (sublaneObjects[x].m_PathMethods == Game.Pathfind.PathMethod.Road)
-                            {
-                                subLaneTypeRoad = x;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!EntityManager.HasComponent<LaneSignal>(sublaneObjects[subLaneTypeRoad].m_SubLane))
-                    { 
-                        EntityManager.AddComponent<LaneSignal>(sublaneObjects[subLaneTypeRoad].m_SubLane);
-                        var laneSignal = new LaneSignal
-                        {
-                            m_Flags = LaneSignalFlags.CanExtend,
-                            m_Signal = LaneSignalType.SafeStop,
-                            m_GroupMask = 1
-                        };
-                        EntityManager.AddComponentData(sublaneObjects[subLaneTypeRoad].m_SubLane, laneSignal);
-                        LogUtil.Info($"TollBoothSpawnSystem: Added LaneSignal to sublane {sublaneObjects[subLaneTypeRoad].m_SubLane.Index} due to manual tollbooth {tollBoothEntity.Index}");
-                    }
-
-                    int subObjectTraffic = 0;
-                    if (SubObjectsObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Objects.SubObject> subObjects))
-                    {
-                        for (int x = 0; x < subObjects.Length; x++)
-                        {
-                            if (EntityManager.HasComponent<Game.Objects.TrafficLight>(subObjects[x].m_SubObject))
-                            {
-                                subObjectTraffic = x;
-                                break;
-                            }
-                        }
-                    }
-
-                    var trafficLight = new Game.Objects.TrafficLight
-                    {
-                        m_State = Game.Objects.TrafficLightState.Red,
-                        m_GroupMask0 = 1,
-                        m_GroupMask1 = 0
-                    };
-                    EntityManager.SetComponentData(subObjects[subObjectTraffic].m_SubObject, trafficLight);
-                }
+                // Set up manual barrier control system if this is a manual tollbooth
+                SetupManualBarrierControl(tollBoothEntity, roadEntity);
             }
             catch (System.Exception ex)
             {
                 LogUtil.Error($"TollBoothSpawnSystem: Failed to associate tollbooth {tollBoothEntity.Index} with road {roadEntity.Index}. Error: {ex.Message}");
+            }
+        }
+        /// <summary>
+        /// Sets up manual barrier control system for tollbooths with TollBoothManualData component.
+        /// This configures the lane signals and traffic lights WITHOUT using TrafficLights component.
+        /// IMPORTANT: Barrier is initialized as CLOSED by default.
+        /// </summary>
+        /// <param name="tollBoothEntity">The tollbooth entity</param>
+        /// <param name="roadEntity">The road entity that owns the tollbooth</param>
+        private void SetupManualBarrierControl(Entity tollBoothEntity, Entity roadEntity)
+        {
+            // Only proceed if this tollbooth has manual data (indicating it's a manual tollbooth)
+            if (!EntityManager.HasComponent<TollBoothManualData>(tollBoothEntity))
+            {
+                return;
+            }
+
+            LogUtil.Info($"TollBoothSpawnSystem: Setting up manual barrier control for tollbooth {tollBoothEntity.Index} - BARRIER STARTS CLOSED");
+
+            try
+            {
+                // DO NOT ADD TrafficLights component - it will be managed by TrafficLightSystem
+                // Instead, directly control lane signals and traffic light objects
+
+                // Set up lane signals for barrier control (CLOSED by default)
+                SetupLaneSignalsForBarrier(roadEntity, tollBoothEntity);
+
+                // Set up traffic light control for visual barrier indication (RED by default)
+                SetupTrafficLightForBarrier(roadEntity, tollBoothEntity);
+
+                // CRITICAL: Ensure barrier starts in CLOSED state (without TrafficLights)
+                EnsureBarrierClosedStateDirectly(roadEntity);
+
+                LogUtil.Info($"TollBoothSpawnSystem: Successfully set up manual barrier control for tollbooth {tollBoothEntity.Index} - BARRIER IS CLOSED (NO TRAFFICLIGHTS)");
+            }
+            catch (System.Exception ex)
+            {
+                LogUtil.Error($"TollBoothSpawnSystem: Failed to setup manual barrier control for tollbooth {tollBoothEntity.Index}. Error: {ex.Message}");
+            }
+        }
+
+
+        /// <summary>
+        /// Ensures the barrier is in a closed state after setup WITHOUT using TrafficLights component.
+        /// This is a safety measure to guarantee the default closed state.
+        /// </summary>
+        /// <param name="roadEntity">The road entity</param>
+        private void EnsureBarrierClosedStateDirectly(Entity roadEntity)
+        {
+            try
+            {
+                // Do NOT add or modify TrafficLights component
+                // Instead, directly control lane signals and traffic lights
+
+                // Explicitly set lane signals to STOP
+                if (SubLaneObjectData.TryGetBuffer(roadEntity, out var sublaneObjects))
+                {
+                    for (int i = 0; i < sublaneObjects.Length; i++)
+                    {
+                        if (sublaneObjects[i].m_PathMethods == Game.Pathfind.PathMethod.Road)
+                        {
+                            Entity laneEntity = sublaneObjects[i].m_SubLane;
+
+                            if (m_LaneSignalData.HasComponent(laneEntity))
+                            {
+                                var laneSignal = m_LaneSignalData[laneEntity];
+                                laneSignal.m_Signal = LaneSignalType.Stop;
+                                m_LaneSignalData[laneEntity] = laneSignal;
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                // Explicitly set traffic light objects to RED
+                if (SubObjectsObjectData.TryGetBuffer(roadEntity, out var subObjects))
+                {
+                    for (int i = 0; i < subObjects.Length; i++)
+                    {
+                        if (m_TrafficLightObjectData.HasComponent(subObjects[i].m_SubObject))
+                        {
+                            Entity trafficLightEntity = subObjects[i].m_SubObject;
+
+                            var trafficLight = m_TrafficLightObjectData[trafficLightEntity];
+                            trafficLight.m_State = Game.Objects.TrafficLightState.Red;
+                            m_TrafficLightObjectData[trafficLightEntity] = trafficLight;
+                            break;
+                        }
+                    }
+                }
+
+                LogUtil.Info($"TollBoothSpawnSystem: Barrier closed state enforced DIRECTLY for road {roadEntity.Index} (bypassing TrafficLights system)");
+            }
+            catch (System.Exception ex)
+            {
+                LogUtil.Error($"TollBoothSpawnSystem: Failed to ensure barrier closed state for road {roadEntity.Index}. Error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Sets up lane signals that will control vehicle flow through the toll barrier.
+        /// Uses the same pattern as TrafficLightSystem for lane signal management.
+        /// </summary>
+        /// <param name="roadEntity">The road entity</param>
+        /// <param name="tollBoothEntity">The tollbooth entity</param>
+        private void SetupLaneSignalsForBarrier(Entity roadEntity, Entity tollBoothEntity)
+        {
+            if (!SubLaneObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Net.SubLane> sublaneObjects))
+            {
+                LogUtil.Warn($"TollBoothSpawnSystem: No sublanes found for road {roadEntity.Index}");
+                return;
+            }
+
+            // Find the main road lane (used for vehicle traffic)
+            int mainRoadLaneIndex = -1;
+            for (int i = 0; i < sublaneObjects.Length; i++)
+            {
+                if (sublaneObjects[i].m_PathMethods == Game.Pathfind.PathMethod.Road)
+                {
+                    mainRoadLaneIndex = i;
+                    break;
+                }
+            }
+
+            if (mainRoadLaneIndex == -1)
+            {
+                LogUtil.Warn($"TollBoothSpawnSystem: No road lane found in sublanes for road {roadEntity.Index}");
+                return;
+            }
+
+            Entity laneEntity = sublaneObjects[mainRoadLaneIndex].m_SubLane;
+
+            // Add or update LaneSignal component for barrier control
+            if (!EntityManager.HasComponent<LaneSignal>(laneEntity))
+            {
+                EntityManager.AddComponent<LaneSignal>(laneEntity);
+            }
+
+            // Configure lane signal based on TrafficLightSystem patterns
+            var laneSignal = new LaneSignal
+            {
+                m_Flags = LaneSignalFlags.CanExtend, // Allow signal extension for manual control
+                m_Signal = LaneSignalType.Stop,      // Start with barrier closed (red signal)
+                m_GroupMask = 1,                     // Assign to signal group 1
+                m_Default = 0,                       // Default priority
+                m_Priority = 0,                      // Current priority
+                m_Petitioner = Entity.Null,         // No current petitioner
+                m_Blocker = Entity.Null              // No current blocker
+            };
+
+            EntityManager.SetComponentData(laneEntity, laneSignal);
+
+            LogUtil.Info($"TollBoothSpawnSystem: Added LaneSignal to sublane {laneEntity.Index} for manual barrier control");
+        }
+
+        /// <summary>
+        /// Sets up traffic light visual indicators for the manual toll barrier.
+        /// The traffic light will show red when barrier is closed, green when open.
+        /// </summary>
+        /// <param name="roadEntity">The road entity</param>
+        /// <param name="tollBoothEntity">The tollbooth entity</param>
+        private void SetupTrafficLightForBarrier(Entity roadEntity, Entity tollBoothEntity)
+        {
+            if (!SubObjectsObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Objects.SubObject> subObjects))
+            {
+                LogUtil.Warn($"TollBoothSpawnSystem: No subobjects found for road {roadEntity.Index}");
+                return;
+            }
+
+            // Find the traffic light subobject
+            Entity trafficLightEntity = Entity.Null;
+            for (int i = 0; i < subObjects.Length; i++)
+            {
+                if (EntityManager.HasComponent<Game.Objects.TrafficLight>(subObjects[i].m_SubObject))
+                {
+                    trafficLightEntity = subObjects[i].m_SubObject;
+                    break;
+                }
+            }
+
+            if (trafficLightEntity == Entity.Null)
+            {
+                LogUtil.Warn($"TollBoothSpawnSystem: No traffic light subobject found for road {roadEntity.Index}");
+                return;
+            }
+
+            // Configure traffic light for manual barrier control
+            var trafficLight = new Game.Objects.TrafficLight
+            {
+                // Start with red state (barrier closed) - using pattern from TrafficLightSystem
+                m_State = Game.Objects.TrafficLightState.Red,
+                m_GroupMask0 = 1,  // Assign to signal group 1 (matches lane signal)
+                m_GroupMask1 = 0   // No secondary group for simple barrier control
+            };
+
+            EntityManager.SetComponentData(trafficLightEntity, trafficLight);
+
+            LogUtil.Info($"TollBoothSpawnSystem: Configured traffic light {trafficLightEntity.Index} for manual barrier control");
+        }
+
+       
+        
+
+        /// <summary>
+        /// Closes the manual toll barrier by directly controlling lane signals and traffic lights.
+        /// IMPORTANT: This is the DEFAULT state - barrier should always return to CLOSED.
+        /// </summary>
+        /// <param name="tollBoothEntity">The tollbooth entity</param>
+        public void CloseBarrier(Entity tollBoothEntity)
+        {
+            try
+            {
+                // Get the associated road entity
+                if (!EntityManager.TryGetComponent<TollBoothPrefabData>(tollBoothEntity, out var tollBoothData) ||
+                    tollBoothData.BelongsToHighwayTollbooth == Entity.Null)
+                {
+                    LogUtil.Warn($"TollBoothSpawnSystem: Cannot close barrier - no associated road for tollbooth {tollBoothEntity.Index}");
+                    return;
+                }
+
+                Entity roadEntity = tollBoothData.BelongsToHighwayTollbooth;
+
+                // Directly control lane signals and traffic lights (bypass TrafficLights system)
+                UpdateLaneSignalForBarrierState(roadEntity, LaneSignalType.Stop);
+                UpdateTrafficLightForBarrierState(roadEntity, Game.Objects.TrafficLightState.Red);
+
+                LogUtil.Info($"TollBoothSpawnSystem: CLOSED barrier DIRECTLY for tollbooth {tollBoothEntity.Index} - DEFAULT STATE RESTORED");
+            }
+            catch (System.Exception ex)
+            {
+                LogUtil.Error($"TollBoothSpawnSystem: Failed to close barrier for tollbooth {tollBoothEntity.Index}. Error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Updates the lane signal state for barrier control.
+        /// </summary>
+        /// <param name="roadEntity">The road entity</param>
+        /// <param name="signalType">The signal type to set</param>
+        private void UpdateLaneSignalForBarrierState(Entity roadEntity, LaneSignalType signalType)
+        {
+            if (!SubLaneObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Net.SubLane> sublaneObjects))
+            {
+                return;
+            }
+
+            // Find the main road lane
+            for (int i = 0; i < sublaneObjects.Length; i++)
+            {
+                if (sublaneObjects[i].m_PathMethods == Game.Pathfind.PathMethod.Road)
+                {
+                    Entity laneEntity = sublaneObjects[i].m_SubLane;
+                    
+                    if (EntityManager.HasComponent<LaneSignal>(laneEntity))
+                    {
+                        var laneSignal = EntityManager.GetComponentData<LaneSignal>(laneEntity);
+                        laneSignal.m_Signal = signalType;
+                        EntityManager.SetComponentData(laneEntity, laneSignal);
+                        
+                        LogUtil.Info($"TollBoothSpawnSystem: Updated lane signal to {signalType} for lane {laneEntity.Index}");
+                    }
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates the traffic light state for barrier control.
+        /// </summary>
+        /// <param name="roadEntity">The road entity</param>
+        /// <param name="lightState">The light state to set</param>
+        private void UpdateTrafficLightForBarrierState(Entity roadEntity, Game.Objects.TrafficLightState lightState)
+        {
+            if (!SubObjectsObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Objects.SubObject> subObjects))
+            {
+                return;
+            }
+
+            // Find the traffic light subobject
+            for (int i = 0; i < subObjects.Length; i++)
+            {
+                if (EntityManager.HasComponent<Game.Objects.TrafficLight>(subObjects[i].m_SubObject))
+                {
+                    Entity trafficLightEntity = subObjects[i].m_SubObject;
+                    
+                    var trafficLight = EntityManager.GetComponentData<Game.Objects.TrafficLight>(trafficLightEntity);
+                    trafficLight.m_State = lightState;
+                    EntityManager.SetComponentData(trafficLightEntity, trafficLight);
+                    
+                    LogUtil.Info($"TollBoothSpawnSystem: Updated traffic light to {lightState} for light {trafficLightEntity.Index}");
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks if a manual toll barrier is currently open by checking lane signals directly.
+        /// </summary>
+        /// <param name="tollBoothEntity">The tollbooth entity to check</param>
+        /// <returns>True if barrier is open, false if closed or if not a manual tollbooth</returns>
+        public bool IsBarrierOpen(Entity tollBoothEntity)
+        {
+            try
+            {
+                // Check if this is a manual tollbooth
+                if (!EntityManager.HasComponent<TollBoothManualData>(tollBoothEntity))
+                {
+                    return false; // Not a manual tollbooth
+                }
+
+                // Get the associated road entity
+                if (!EntityManager.TryGetComponent<TollBoothPrefabData>(tollBoothEntity, out var tollBoothData) ||
+                    tollBoothData.BelongsToHighwayTollbooth == Entity.Null)
+                {
+                    return false;
+                }
+
+                Entity roadEntity = tollBoothData.BelongsToHighwayTollbooth;
+
+                // Check lane signal state DIRECTLY (ignore TrafficLights)
+                if (SubLaneObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Net.SubLane> sublaneObjects))
+                {
+                    for (int i = 0; i < sublaneObjects.Length; i++)
+                    {
+                        if (sublaneObjects[i].m_PathMethods == Game.Pathfind.PathMethod.Road)
+                        {
+                            Entity laneEntity = sublaneObjects[i].m_SubLane;
+
+                            if (EntityManager.HasComponent<LaneSignal>(laneEntity))
+                            {
+                                var laneSignal = EntityManager.GetComponentData<LaneSignal>(laneEntity);
+                                return laneSignal.m_Signal == LaneSignalType.Go;
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                return false; // Default to closed
+            }
+            catch (System.Exception ex)
+            {
+                LogUtil.Error($"TollBoothSpawnSystem: Failed to check barrier state for tollbooth {tollBoothEntity.Index}. Error: {ex.Message}");
+                return false; // Default to closed on error
             }
         }
 
