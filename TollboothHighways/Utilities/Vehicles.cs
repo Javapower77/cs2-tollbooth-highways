@@ -9,9 +9,6 @@ namespace TollboothHighways.Utilities
 {
     public class Vehicles
     {
-        private VehicleType m_typeVehicle;
-        private VehicleGroup m_groupVehicle;
-
         public static readonly Dictionary<VehicleType, VehicleGroup> vehicleTypeToGroupMap = new Dictionary<VehicleType, VehicleGroup>
         {
             { VehicleType.PersonalCar, VehicleGroup.PrivateTransport },

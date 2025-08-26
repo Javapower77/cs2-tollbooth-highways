@@ -33,6 +33,10 @@ namespace TollboothHighways.Utilities
         public static void Warn(string message)
         {
             _log.Warn(message);
+
+            // Warn messages are not written to the BepInEx console by the Colossal logger, so write the message explicitly.
+            // Include the mod assembly name and message level to make info messages appear similar to other messages.
+            Console.WriteLine($"[{Assembly.GetExecutingAssembly().GetName().ToString()}] [WARN]  {message}");
         }
 
         /// <summary>
@@ -41,6 +45,10 @@ namespace TollboothHighways.Utilities
         public static void Debug(string message)
         {
             _log.Debug(message);
+
+            // Debug messages are not written to the BepInEx console by the Colossal logger, so write the message explicitly.
+            // Include the mod assembly name and message level to make info messages appear similar to other messages.
+            Console.WriteLine($"[{Assembly.GetExecutingAssembly().GetName().ToString()}] [DEBUG]  {message}");
         }
 
         /// <summary>

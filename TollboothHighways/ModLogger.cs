@@ -14,7 +14,7 @@ namespace TollboothHighways
         // Create a new log just for this mod.
         // This mod will have its own log file in the game's Logs folder.
         private static readonly ILog _log = LogManager.GetLogger("Test-Highway-Tollbooth");
-        private static readonly ILog _logTollInsight = LogManager.GetLogger("Test-Highway-Tollbooth-TollInsights");
+        private static readonly ILog _logTollInsight = LogManager.GetLogger("Test-Highway-Tollbooth");
 
         // Change this for debugging. Leave it false most of the time.
         private static readonly bool _printDebug = false;
@@ -79,7 +79,7 @@ namespace TollboothHighways
 
             // Info messages are not written to the BepInEx console by the Colossal logger, so write the message explicitly.
             // Include the mod assembly name and message level to make info messages appear similar to other messages.
-            Console.WriteLine($"[Test-Highway-Tollbooth] [INFO]  {message}");
+            // Console.WriteLine($"[Test-Highway-Tollbooth] [INFO]  {message}");
         }
 
         /// <summary>

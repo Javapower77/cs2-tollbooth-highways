@@ -83,9 +83,9 @@ namespace TollboothHighways
                 updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
                 // Register the barrier control system to run after the spawn system
-                updateSystem.UpdateAfter<TollBoothBarrierControlSystem, TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAfter<ManualTollBoothBarrierSystem, TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
+                //updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
 
                 // Register UI systems in the proper phase
                 updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
