@@ -1,3 +1,4 @@
+```mermaid
 flowchart TD
     A[OnUpdate] --> B[CheckVehiclesApproachingBarriers]
     A --> C[ProcessBarrierVehicles]
@@ -45,3 +46,4 @@ flowchart TD
     style C8 fill:#fff3e0
     style C10 fill:#e8f5e8
     style E2 fill:#ffebee
+```
