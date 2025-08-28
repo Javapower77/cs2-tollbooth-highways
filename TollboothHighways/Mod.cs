@@ -73,7 +73,7 @@ namespace TollboothHighways
                 {
                     LogUtil.Error("Unable to get mod executable asset.");
                     return;
-                }
+                } 
 
                 // Register systems with proper update phases and ordering
                 // INPORTANT!!: Register prefab system FIRST and ensure it runs early in PrefabUpdate phase

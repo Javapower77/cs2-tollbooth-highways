@@ -306,7 +306,7 @@ namespace TollboothHighways.Systems
                     // Ensure the blocker is set to our barrier entity
                     laneSignal.m_Blocker = barrierEntity;
                     
-                    m_LaneSignalData[laneEntity] = laneSignal;
+                    m_LaneSignalData[laneEntity] = laneSignal; 
                     
                     processingVehicle.HasPetitioned = true;
                     m_ProcessingVehicles[vehicleEntity] = processingVehicle;

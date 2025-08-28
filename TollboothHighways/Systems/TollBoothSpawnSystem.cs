@@ -193,7 +193,7 @@ namespace TollboothHighways.Systems
                         currentFrame = m_SimulationSystem.frameIndex;
                         LogUtil.Info($"TollBoothSpawnSystem: InitializeTollBoothInsight() - Got frame index {currentFrame} for entity {tollBoothEntity.Index}");
                     }
-                    catch (System.Exception ex)
+                    catch (System.Exception ex) 
                     {
                         LogUtil.Warn($"TollBoothSpawnSystem: InitializeTollBoothInsight() - Could not get frameIndex for entity {tollBoothEntity.Index}, using 0. Error: {ex.Message}");
                         currentFrame = 0;
