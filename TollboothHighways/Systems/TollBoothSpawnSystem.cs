@@ -70,130 +70,26 @@ namespace TollboothHighways.Systems
 
         protected override void OnCreate()
         {
-            LogUtil.Info("TollBoothSpawnSystem: OnCreate() - Starting system creation");
-            
+            LogUtil.Info("TollBoothSpawnSystem: OnCreate() - Starting system creation");           
             try
             {
                 base.OnCreate();
-                LogUtil.Info("TollBoothSpawnSystem: OnCreate() - Base.OnCreate() completed successfully");
-
-                LogUtil.Info("TollBoothSpawnSystem: OnCreate() - Getting managed systems");
                 m_PrefabSystem = World.GetOrCreateSystemManaged<PrefabSystem>();
-                LogUtil.Info($"TollBoothSpawnSystem: OnCreate() - PrefabSystem acquired: {(m_PrefabSystem != null ? "SUCCESS" : "FAILED")}");
-                
                 m_SimulationSystem = World.GetOrCreateSystemManaged<SimulationSystem>();
-                LogUtil.Info($"TollBoothSpawnSystem: OnCreate() - SimulationSystem acquired: {(m_SimulationSystem != null ? "SUCCESS" : "FAILED")}");
-                
-                LogUtil.Info("TollBoothSpawnSystem: OnCreate() - Initializing random number generator");
                 m_Random = new Random((int)DateTime.Now.Ticks);
-                LogUtil.Info($"TollBoothSpawnSystem: OnCreate() - Random generator initialized with seed: {(int)DateTime.Now.Ticks}");
-                
-                LogUtil.Info("TollBoothSpawnSystem: OnCreate() - Initializing buffer lookups");
-                try
-                {
-                    SubLaneObjectData = GetBufferLookup<Game.Net.SubLane>(true);
-                    LogUtil.Info("TollBoothSpawnSystem: OnCreate() - SubLaneObjectData lookup initialized");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnCreate() - Failed to initialize SubLaneObjectData: {ex.Message}");
-                    throw;
-                }
-
-                try
-                {
-                    SubObjectsObjectData = GetBufferLookup<Game.Objects.SubObject>(true);
-                    LogUtil.Info("TollBoothSpawnSystem: OnCreate() - SubObjectsObjectData lookup initialized");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnCreate() - Failed to initialize SubObjectsObjectData: {ex.Message}");
-                    throw;
-                }
-                
-                LogUtil.Info("TollBoothSpawnSystem: OnCreate() - Initializing component lookups for TrafficLights integration");
-                try
-                {
-                    m_TrafficLightsData = GetComponentLookup<TrafficLights>(false);
-                    LogUtil.Info("TollBoothSpawnSystem: OnCreate() - TrafficLights lookup initialized");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnCreate() - Failed to initialize TrafficLights lookup: {ex.Message}");
-                    throw;
-                }
-
-                try
-                {
-                    m_LaneSignalData = GetComponentLookup<LaneSignal>(false);
-                    LogUtil.Info("TollBoothSpawnSystem: OnCreate() - LaneSignal lookup initialized");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnCreate() - Failed to initialize LaneSignal lookup: {ex.Message}");
-                    throw;
-                }
-
-                try
-                {
-                    m_TrafficLightObjectData = GetComponentLookup<Game.Objects.TrafficLight>(false);
-                    LogUtil.Info("TollBoothSpawnSystem: OnCreate() - TrafficLight object lookup initialized");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnCreate() - Failed to initialize TrafficLight object lookup: {ex.Message}");
-                    throw;
-                }
-
-                LogUtil.Info("TollBoothSpawnSystem: OnCreate() - Initializing component lookups for Lane/Node transforms");
-                try
-                {
-                    m_LaneData = GetComponentLookup<Lane>(true);
-                    LogUtil.Info("TollBoothSpawnSystem: OnCreate() - Lane data lookup initialized");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnCreate() - Failed to initialize Lane data lookup: {ex.Message}");
-                    throw;
-                }
-
-                try
-                {
-                    m_NodeData = GetComponentLookup<Node>(true);
-                    LogUtil.Info("TollBoothSpawnSystem: OnCreate() - Node data lookup initialized");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnCreate() - Failed to initialize Node data lookup: {ex.Message}");
-                    throw;
-                }
-
-                try
-                {
-                    m_TransformData = GetComponentLookup<Transform>(true);
-                    LogUtil.Info("TollBoothSpawnSystem: OnCreate() - Transform data lookup initialized");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnCreate() - Failed to initialize Transform data lookup: {ex.Message}");
-                    throw;
-                }
-
-                LogUtil.Info("TollBoothSpawnSystem: OnCreate() - Creating entity query for unprocessed toll booths");
-                try
-                {
-                    m_UnprocessedTollBoothQuery = GetEntityQuery(
-                        ComponentType.ReadWrite<TollBoothPrefabData>(),
-                        ComponentType.ReadOnly<PrefabRef>(),
-                        ComponentType.Exclude<TollBoothSpawned>()
-                    );
-                    LogUtil.Info($"TollBoothSpawnSystem: OnCreate() - Entity query created successfully. IsEmpty: {m_UnprocessedTollBoothQuery.IsEmpty}");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnCreate() - Failed to create entity query: {ex.Message}");
-                    throw;
-                }
+                SubLaneObjectData = GetBufferLookup<Game.Net.SubLane>(true);
+                SubObjectsObjectData = GetBufferLookup<Game.Objects.SubObject>(true);
+                m_TrafficLightsData = GetComponentLookup<TrafficLights>(false);
+                m_LaneSignalData = GetComponentLookup<LaneSignal>(false);
+                m_TrafficLightObjectData = GetComponentLookup<Game.Objects.TrafficLight>(false);
+                m_LaneData = GetComponentLookup<Lane>(true);
+                m_NodeData = GetComponentLookup<Node>(true);
+                m_TransformData = GetComponentLookup<Transform>(true);
+                m_UnprocessedTollBoothQuery = GetEntityQuery(
+                    ComponentType.ReadWrite<TollBoothPrefabData>(),
+                    ComponentType.ReadOnly<PrefabRef>(),
+                    ComponentType.Exclude<TollBoothSpawned>()
+                );
 
                 LogUtil.Info("TollBoothSpawnSystem: OnCreate() - System created and initialized successfully");
             }
@@ -207,116 +103,25 @@ namespace TollboothHighways.Systems
 
         protected override void OnUpdate()
         {
-          //  LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - Starting update cycle");
-            
             try
             {
-          //      LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - Updating lookups");
-
-          //      LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - Checking for unprocessed entities");
                 if (m_UnprocessedTollBoothQuery.IsEmpty)
                 {
-                    //LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - No unprocessed toll booth entities found, early exit");
                     return;
                 }
 
-                try
-                {
-                    SubLaneObjectData.Update(this);
-                    LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - SubLaneObjectData updated");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnUpdate() - Failed to update SubLaneObjectData: {ex.Message}");
-                    return;
-                }
-
-                try
-                {
-                    SubObjectsObjectData.Update(this);
-                    LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - SubObjectsObjectData updated");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnUpdate() - Failed to update SubObjectsObjectData: {ex.Message}");
-                    return;
-                }
-
-                try
-                {
-                    m_TrafficLightsData.Update(this);
-                    LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - TrafficLights data updated");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnUpdate() - Failed to update TrafficLights data: {ex.Message}");
-                    return;
-                }
-
-                try
-                {
-                    m_LaneSignalData.Update(this);
-                    LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - LaneSignal data updated");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnUpdate() - Failed to update LaneSignal data: {ex.Message}");
-                    return;
-                }
-
-                try
-                {
-                    m_TrafficLightObjectData.Update(this);
-                    LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - TrafficLight object data updated");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnUpdate() - Failed to update TrafficLight object data: {ex.Message}");
-                    return;
-                }                
-
-                try
-                {
-                    m_LaneData.Update(this);
-                    LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - Lane data updated");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnUpdate() - Failed to update Lane data: {ex.Message}");
-                    return;
-                }
-
-                try
-                {
-                    m_NodeData.Update(this);
-                    LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - Node data updated");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnUpdate() - Failed to update Node data: {ex.Message}");
-                    return;
-                }
-
-                try
-                {
-                    m_TransformData.Update(this);
-                    LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - Transform data updated");
-                }
-                catch (System.Exception ex)
-                {
-                    LogUtil.Error($"TollBoothSpawnSystem: OnUpdate() - Failed to update Transform data: {ex.Message}");
-                    return;
-                }                
+                SubLaneObjectData.Update(this);
+                SubObjectsObjectData.Update(this);
+                m_TrafficLightsData.Update(this);
+                m_LaneSignalData.Update(this);
+                m_TrafficLightObjectData.Update(this);
+                m_LaneData.Update(this);
+                m_NodeData.Update(this);
+                m_TransformData.Update(this);
 
                 int entityCount = m_UnprocessedTollBoothQuery.CalculateEntityCount();
-                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Found {entityCount} unprocessed toll booth entities");
-
-                LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - Allocating arrays for entity processing");
-                var entities = m_UnprocessedTollBoothQuery.ToEntityArray(Allocator.TempJob);
-                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Entities array allocated with {entities.Length} elements");
-                
+                var entities = m_UnprocessedTollBoothQuery.ToEntityArray(Allocator.TempJob);              
                 var tollBoothDataArray = m_UnprocessedTollBoothQuery.ToComponentDataArray<TollBoothPrefabData>(Allocator.TempJob);
-                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - TollBoothData array allocated with {tollBoothDataArray.Length} elements");
 
                 try
                 {
@@ -332,27 +137,20 @@ namespace TollboothHighways.Systems
                         {
                             if (tollBoothData.BelongsToHighwayTollbooth == Entity.Null)
                             {
-                                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Entity {entity.Index} has no highway association, processing...");
-
                                 LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Writing owner entity info for {entity.Index}");
                                 WriteOwnerEntityInfo(entity, ref tollBoothData);
-                                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Owner entity info written for {entity.Index}");
 
                                 LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Assigning random name for {entity.Index}");
                                 AssignRandomName(entity, ref tollBoothData);
-                                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Random name assigned for {entity.Index}");
 
                                 LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Initializing TollBoothInsight for {entity.Index}");
                                 InitializeTollBoothInsight(entity);
-                                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - TollBoothInsight initialized for {entity.Index}");
 
                                 LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Adding TollBoothSpawned component to {entity.Index}");
                                 EntityManager.AddComponent<TollBoothSpawned>(entity);
-                                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - TollBoothSpawned component added to {entity.Index}");
                             }
                             else
                             {
-                                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Entity {entity.Index} already has highway association ({tollBoothData.BelongsToHighwayTollbooth.Index}), marking as processed");
                                 EntityManager.AddComponent<TollBoothSpawned>(entity);
                                 LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Entity {entity.Index} marked as processed");
                             }
@@ -363,11 +161,9 @@ namespace TollboothHighways.Systems
                             LogUtil.Error($"TollBoothSpawnSystem: OnUpdate() - Stack trace for entity {entity.Index}: {ex.StackTrace}");
                         }
                     }
-                    LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - Entity processing loop completed");
                 }
                 finally
                 {
-                    LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - Disposing allocated arrays");
                     entities.Dispose();
                     tollBoothDataArray.Dispose();
                     LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - Arrays disposed successfully");
@@ -378,8 +174,6 @@ namespace TollboothHighways.Systems
                 LogUtil.Error($"TollBoothSpawnSystem: OnUpdate() - CRITICAL ERROR in update cycle: {ex.Message}");
                 LogUtil.Error($"TollBoothSpawnSystem: OnUpdate() - Stack trace: {ex.StackTrace}");
             }
-            
-            LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - Update cycle completed");
         }
 
         private void InitializeTollBoothInsight(Entity tollBoothEntity)
@@ -603,31 +397,22 @@ namespace TollboothHighways.Systems
 
         private void SetupManualBarrierControl(Entity tollBoothEntity, Entity roadEntity)
         {
-            LogUtil.Info($"TollBoothSpawnSystem: SetupManualBarrierControl() - Starting setup for tollbooth {tollBoothEntity.Index} and road {roadEntity.Index}");
-            
             try
             {
-                LogUtil.Info($"TollBoothSpawnSystem: SetupManualBarrierControl() - Checking if tollbooth {tollBoothEntity.Index} has TollBoothManualData component");
-                
                 if (!EntityManager.HasComponent<TollBoothManualData>(tollBoothEntity))
                 {
-                    LogUtil.Info($"TollBoothSpawnSystem: SetupManualBarrierControl() - Tollbooth {tollBoothEntity.Index} is not a manual tollbooth, skipping barrier setup");
                     return;
                 }
 
-                LogUtil.Info($"TollBoothSpawnSystem: SetupManualBarrierControl() - Tollbooth {tollBoothEntity.Index} is manual, setting up barrier control - BARRIER STARTS CLOSED");
-
+                
                 LogUtil.Info($"TollBoothSpawnSystem: SetupManualBarrierControl() - Setting up lane signals for tollbooth {tollBoothEntity.Index}");
                 SetupLaneSignalsForBarrier(tollBoothEntity, roadEntity);
-                LogUtil.Info($"TollBoothSpawnSystem: SetupManualBarrierControl() - Lane signals setup completed for tollbooth {tollBoothEntity.Index}");
 
-                LogUtil.Info($"TollBoothSpawnSystem: SetupManualBarrierControl() - Setting up traffic light for tollbooth {tollBoothEntity.Index}");
-                SetupTrafficLightForBarrier(roadEntity, tollBoothEntity);
-                LogUtil.Info($"TollBoothSpawnSystem: SetupManualBarrierControl() - Traffic light setup completed for tollbooth {tollBoothEntity.Index}");
+                LogUtil.Info($"TollBoothSpawnSystem: SetupManualBarrierControl() - Adding TrafficLights component to road {roadEntity.Index}");
+                SetupTrafficNetLights(roadEntity);
 
                 LogUtil.Info($"TollBoothSpawnSystem: SetupManualBarrierControl() - Ensuring barrier closed state for tollbooth {tollBoothEntity.Index}");
                 EnsureBarrierClosedStateDirectly(roadEntity);
-                LogUtil.Info($"TollBoothSpawnSystem: SetupManualBarrierControl() - Barrier closed state ensured for tollbooth {tollBoothEntity.Index}");
 
                 LogUtil.Info($"TollBoothSpawnSystem: SetupManualBarrierControl() - Successfully set up manual barrier control for tollbooth {tollBoothEntity.Index} - BARRIER IS CLOSED");
             }
@@ -767,6 +552,9 @@ namespace TollboothHighways.Systems
                         TollBoothEntity = tollBoothEntity,
                         ProcessingTime = manualData.ProcessingTime
                     });
+
+                    EntityManager.AddComponent<Game.Vehicles.Vehicle>(blockerEntity);
+                    EntityManager.AddComponent<Game.Objects.Object>(blockerEntity);
                 }
 
                 // Closed by default
@@ -790,59 +578,6 @@ namespace TollboothHighways.Systems
                     EntityManager.SetComponentData(tollBoothEntity, tbData);
                 }
 
-                // ---------------------------------------------------------------------------------
-                // TRAFFIC LIGHTS PLACEMENT (FIX):
-                // Previous implementation incorrectly attached Game.Net.TrafficLights to the lane.
-                // The TrafficLightInitializationSystem expects the component on an entity that owns
-                // the SubLane buffer (the road/edge entity) to build signal groups.
-                // We therefore attach TrafficLights to the ROAD ENTITY (edge) and mark it Updated.
-                // ---------------------------------------------------------------------------------
-                if (!EntityManager.HasComponent<Game.Net.TrafficLights>(roadEntity))
-                {
-                    EntityManager.AddComponentData(roadEntity, new Game.Net.TrafficLights
-                    {
-                        m_State = Game.Net. TrafficLightState.None,
-                        m_Flags = 0,
-                        m_SignalGroupCount = 0,
-                        m_CurrentSignalGroup = 0,
-                        m_NextSignalGroup = 0,
-                        m_Timer = 0
-                    });
-                    LogUtil.Info($"TollBoothSpawnSystem: SetupLaneSignalsForBarrier() - Added TrafficLights component to road(edge) {roadEntity.Index}");
-                }
-                else
-                {
-                    // Reset to ensure clean initialization pass
-                    var tl = EntityManager.GetComponentData<Game.Net.TrafficLights>(roadEntity);
-                    tl.m_State = Game.Net.TrafficLightState.None;
-                    tl.m_CurrentSignalGroup = 0;
-                    tl.m_NextSignalGroup = 0;
-                    tl.m_Timer = 0;
-                    EntityManager.SetComponentData(roadEntity, tl);
-                    LogUtil.Info($"TollBoothSpawnSystem: SetupLaneSignalsForBarrier() - Reset existing TrafficLights on road {roadEntity.Index}");
-                }
-
-                // Ensure Updated so TrafficLightInitializationSystem processes this edge this frame
-                if (!EntityManager.HasComponent<Updated>(roadEntity))
-                {
-                    EntityManager.AddComponent<Updated>(roadEntity);
-                    LogUtil.Info($"TollBoothSpawnSystem: SetupLaneSignalsForBarrier() - Added Updated to road {roadEntity.Index}");
-                }
-
-                // OPTIONAL: Try to choose the node (start/end) closest to the tollbooth for future refinement.
-                // (Currently not required because TrafficLightInitializationSystem works off SubLane buffer
-                // on the road entity. This is here for future directional control.)
-                if (EntityManager.HasComponent<Lane>(laneEntity) &&
-                    EntityManager.HasComponent<Transform>(tollBoothEntity))
-                {
-                    var laneData = EntityManager.GetComponentData<Lane>(laneEntity);
-                    PathNode startNode = default;
-                    PathNode endNode = laneData.m_EndNode; // Lane struct excerpt only exposes m_EndNode in provided signature.
-
-                    // If later you expose start node, compute distance to tollbooth transform and decide orientation.
-                    // Placeholder comment to mark where logic would go.
-                }
-
                 LogUtil.Info($"TollBoothSpawnSystem: SetupLaneSignalsForBarrier() - Completed (lane {laneEntity.Index}, road {roadEntity.Index})");
             }
             catch (System.Exception ex)
@@ -852,323 +587,38 @@ namespace TollboothHighways.Systems
             }
         }
 
-        private void SetupTrafficLightForBarrier(Entity roadEntity, Entity tollBoothEntity)
+        private void SetupTrafficNetLights(Entity roadEntity)
         {
-            LogUtil.Info($"TollBoothSpawnSystem: SetupTrafficLightForBarrier() - Setting up traffic light for road {roadEntity.Index} and tollbooth {tollBoothEntity.Index}");
-            
             try
             {
-                LogUtil.Info($"TollBoothSpawnSystem: SetupTrafficLightForBarrier() - Getting subobjects buffer for road {roadEntity.Index}");
-                
-                if (!SubObjectsObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Objects.SubObject> subObjects))
+                if (!EntityManager.HasComponent<Game.Net.TrafficLights>(roadEntity))
                 {
-                    LogUtil.Warn($"TollBoothSpawnSystem: SetupTrafficLightForBarrier() - No subobjects found for road {roadEntity.Index}");
-                    return;
-                }
-
-                LogUtil.Info($"TollBoothSpawnSystem: SetupTrafficLightForBarrier() - Found {subObjects.Length} subobjects for road {roadEntity.Index}");
-
-                LogUtil.Info($"TollBoothSpawnSystem: SetupTrafficLightForBarrier() - Finding traffic light subobject for road {roadEntity.Index}");
-                Entity trafficLightEntity = Entity.Null;
-                for (int i = 0; i < subObjects.Length; i++)
-                {
-                    LogUtil.Info($"TollBoothSpawnSystem: SetupTrafficLightForBarrier() - Checking subobject {i}: {subObjects[i].m_SubObject.Index}");
-                    
-                    if (EntityManager.HasComponent<Game.Objects.TrafficLight>(subObjects[i].m_SubObject))
+                    EntityManager.AddComponentData(roadEntity, new Game.Net.TrafficLights
                     {
-                        trafficLightEntity = subObjects[i].m_SubObject;
-                        LogUtil.Info($"TollBoothSpawnSystem: SetupTrafficLightForBarrier() - Found traffic light entity: {trafficLightEntity.Index}");
-                        break;
-                    }
+                        m_State = Game.Net.TrafficLightState.None,
+                        m_Flags = Game.Net.TrafficLightFlags.LevelCrossing,
+                        m_SignalGroupCount = 0,
+                        m_CurrentSignalGroup = 0,
+                        m_NextSignalGroup = 0,
+                        m_Timer = 0
+                    });
+                    LogUtil.Info($"TollBoothSpawnSystem: SetupTrafficNetLights() - Added TrafficLights component with LevelCrossing flag to road {roadEntity.Index}");
+                }
+                else
+                {
+                    var trafficLights = EntityManager.GetComponentData<Game.Net.TrafficLights>(roadEntity);
+                    trafficLights.m_Flags = Game.Net.TrafficLightFlags.LevelCrossing;
+                    EntityManager.SetComponentData(roadEntity, trafficLights);
+                    LogUtil.Info($"TollBoothSpawnSystem: SetupTrafficNetLights() - Updated existing TrafficLights component with LevelCrossing flag on road {roadEntity.Index}");
                 }
 
-                if (trafficLightEntity == Entity.Null)
-                {
-                    LogUtil.Warn($"TollBoothSpawnSystem: SetupTrafficLightForBarrier() - No traffic light subobject found for road {roadEntity.Index}");
-                    return;
-                }
-
-                LogUtil.Info($"TollBoothSpawnSystem: SetupTrafficLightForBarrier() - Configuring traffic light {trafficLightEntity.Index} for manual barrier control");
-                var trafficLight = new Game.Objects.TrafficLight
-                {
-                    m_State = Game.Objects.TrafficLightState.Red,
-                    m_GroupMask0 = 1,
-                    m_GroupMask1 = 0
-                };
-
-                LogUtil.Info($"TollBoothSpawnSystem: SetupTrafficLightForBarrier() - Setting traffic light data for entity {trafficLightEntity.Index}");
-                EntityManager.SetComponentData(trafficLightEntity, trafficLight);
-                LogUtil.Info($"TollBoothSpawnSystem: SetupTrafficLightForBarrier() - Traffic light {trafficLightEntity.Index} configured for manual barrier control");
-
-                LogUtil.Info($"TollBoothSpawnSystem: SetupTrafficLightForBarrier() - Successfully configured traffic light {trafficLightEntity.Index} for tollbooth {tollBoothEntity.Index}");
+                // Ensure TrainTrack component
+                EntityManager.AddComponent<Game.Net.TrainTrack>(roadEntity);
             }
             catch (System.Exception ex)
             {
-                LogUtil.Error($"TollBoothSpawnSystem: SetupTrafficLightForBarrier() - FAILED to setup traffic light for road {roadEntity.Index}. Error: {ex.Message}");
-                LogUtil.Error($"TollBoothSpawnSystem: SetupTrafficLightForBarrier() - Stack trace: {ex.StackTrace}");
+                LogUtil.Error($"TollBoothSpawnSystem: SetupTrafficNetLights() - FAILED for road {roadEntity.Index}. Error: {ex.Message}");
                 throw;
-            }
-        }
-
-        /// <summary>
-        /// Open the manual toll barrier by directly controlling lane signals and traffic lights.
-        /// </summary>
-        /// <param name="tollBoothEntity">The tollbooth entity</param>
-        public void OpenBarrier(Entity tollBoothEntity)
-        {
-            LogUtil.Info($"TollBoothSpawnSystem: OpenBarrier() - Opening barrier for tollbooth {tollBoothEntity.Index}");
-            
-            try
-            {
-                LogUtil.Info($"TollBoothSpawnSystem: OpenBarrier() - Getting associated road for tollbooth {tollBoothEntity.Index}");
-                
-                if (!EntityManager.TryGetComponent<TollBoothPrefabData>(tollBoothEntity, out var tollBoothData) ||
-                    tollBoothData.BelongsToHighwayTollbooth == Entity.Null)
-                {
-                    LogUtil.Warn($"TollBoothSpawnSystem: OpenBarrier() - Cannot open barrier - no associated road for tollbooth {tollBoothEntity.Index}");
-                    return;
-                }
-
-                Entity roadEntity = tollBoothData.BelongsToHighwayTollbooth;
-                Entity blockerEntity = tollBoothData.BarrierBlockerEntity;
-                LogUtil.Info($"TollBoothSpawnSystem: OpenBarrier() - Road: {roadEntity.Index}, Blocker: {blockerEntity.Index}");
-
-                LogUtil.Info($"TollBoothSpawnSystem: OpenBarrier() - Finding and updating lane signal for road {roadEntity.Index}");
-                if (SubLaneObjectData.TryGetBuffer(roadEntity, out var sublaneObjects))
-                {
-                    LogUtil.Info($"TollBoothSpawnSystem: OpenBarrier() - Found {sublaneObjects.Length} sublanes");
-                    
-                    for (int i = 0; i < sublaneObjects.Length; i++)
-                    {
-                        if (sublaneObjects[i].m_PathMethods == Game.Pathfind.PathMethod.Road)
-                        {
-                            Entity laneEntity = sublaneObjects[i].m_SubLane;
-                            LogUtil.Info($"TollBoothSpawnSystem: OpenBarrier() - Processing lane {laneEntity.Index}");
-                            
-                            if (EntityManager.HasComponent<LaneSignal>(laneEntity))
-                            {
-                                LogUtil.Info($"TollBoothSpawnSystem: OpenBarrier() - Updating lane signal for lane {laneEntity.Index}");
-                                var laneSignal = EntityManager.GetComponentData<LaneSignal>(laneEntity);
-                                
-                                laneSignal.m_Blocker = Entity.Null;
-                                laneSignal.m_Signal = LaneSignalType.Go;
-                                
-                                EntityManager.SetComponentData(laneEntity, laneSignal);
-                                LogUtil.Info($"TollBoothSpawnSystem: OpenBarrier() - OPENED barrier for tollbooth {tollBoothEntity.Index} (blocker removed)");
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                LogUtil.Info($"TollBoothSpawnSystem: OpenBarrier() - Updating traffic light visuals for road {roadEntity.Index}");
-                UpdateTrafficLightForBarrierState(roadEntity, Game.Objects.TrafficLightState.Green);
-                LogUtil.Info($"TollBoothSpawnSystem: OpenBarrier() - Barrier opening completed for tollbooth {tollBoothEntity.Index}");
-            }
-            catch (System.Exception ex)
-            {
-                LogUtil.Error($"TollBoothSpawnSystem: OpenBarrier() - FAILED to open barrier for tollbooth {tollBoothEntity.Index}. Error: {ex.Message}");
-                LogUtil.Error($"TollBoothSpawnSystem: OpenBarrier() - Stack trace: {ex.StackTrace}");
-            }
-        }
-
-        /// <summary>
-        /// Closes the manual toll barrier by directly controlling lane signals and traffic lights.
-        /// IMPORTANT: This is the DEFAULT state - barrier should always return to CLOSED.
-        /// </summary>
-        /// <param name="tollBoothEntity">The tollbooth entity</param>
-        public void CloseBarrier(Entity tollBoothEntity)
-        {
-            LogUtil.Info($"TollBoothSpawnSystem: CloseBarrier() - Closing barrier for tollbooth {tollBoothEntity.Index}");
-            
-            try
-            {
-                LogUtil.Info($"TollBoothSpawnSystem: CloseBarrier() - Getting associated road for tollbooth {tollBoothEntity.Index}");
-                
-                if (!EntityManager.TryGetComponent<TollBoothPrefabData>(tollBoothEntity, out var tollBoothData) ||
-                    tollBoothData.BelongsToHighwayTollbooth == Entity.Null)
-                {
-                    LogUtil.Warn($"TollBoothSpawnSystem: CloseBarrier() - Cannot close barrier - no associated road for tollbooth {tollBoothEntity.Index}");
-                    return;
-                }
-
-                Entity roadEntity = tollBoothData.BelongsToHighwayTollbooth;
-                Entity blockerEntity = tollBoothData.BarrierBlockerEntity;
-                LogUtil.Info($"TollBoothSpawnSystem: CloseBarrier() - Road: {roadEntity.Index}, Blocker: {blockerEntity.Index}");
-
-                LogUtil.Info($"TollBoothSpawnSystem: CloseBarrier() - Finding and updating lane signal for road {roadEntity.Index}");
-                if (SubLaneObjectData.TryGetBuffer(roadEntity, out var sublaneObjects))
-                {
-                    LogUtil.Info($"TollBoothSpawnSystem: CloseBarrier() - Found {sublaneObjects.Length} sublanes");
-                    
-                    for (int i = 0; i < sublaneObjects.Length; i++)
-                    {
-                        if (sublaneObjects[i].m_PathMethods == Game.Pathfind.PathMethod.Road)
-                        {
-                            Entity laneEntity = sublaneObjects[i].m_SubLane;
-                            LogUtil.Info($"TollBoothSpawnSystem: CloseBarrier() - Processing lane {laneEntity.Index}");
-                            
-                            if (EntityManager.HasComponent<LaneSignal>(laneEntity))
-                            {
-                                LogUtil.Info($"TollBoothSpawnSystem: CloseBarrier() - Updating lane signal for lane {laneEntity.Index}");
-                                var laneSignal = EntityManager.GetComponentData<LaneSignal>(laneEntity);
-                                
-                                laneSignal.m_Blocker = blockerEntity;
-                                laneSignal.m_Petitioner = Entity.Null;
-                                laneSignal.m_Signal = LaneSignalType.Stop;
-                                
-                                EntityManager.SetComponentData(laneEntity, laneSignal);
-                                LogUtil.Info($"TollBoothSpawnSystem: CloseBarrier() - CLOSED barrier for tollbooth {tollBoothEntity.Index} (blocker restored)");
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                LogUtil.Info($"TollBoothSpawnSystem: CloseBarrier() - Updating traffic light visuals for road {roadEntity.Index}");
-                UpdateTrafficLightForBarrierState(roadEntity, Game.Objects.TrafficLightState.Red);
-                LogUtil.Info($"TollBoothSpawnSystem: CloseBarrier() - Barrier closing completed for tollbooth {tollBoothEntity.Index}");
-            }
-            catch (System.Exception ex)
-            {
-                LogUtil.Error($"TollBoothSpawnSystem: CloseBarrier() - FAILED to close barrier for tollbooth {tollBoothEntity.Index}. Error: {ex.Message}");
-                LogUtil.Error($"TollBoothSpawnSystem: CloseBarrier() - Stack trace: {ex.StackTrace}");
-            }
-        }
-
-        private void UpdateLaneSignalForBarrierState(Entity roadEntity, LaneSignalType signalType)
-        {
-            LogUtil.Info($"TollBoothSpawnSystem: UpdateLaneSignalForBarrierState() - Updating signal to {signalType} for road {roadEntity.Index}");
-            
-            try
-            {
-                if (!SubLaneObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Net.SubLane> sublaneObjects))
-                {
-                    LogUtil.Warn($"TollBoothSpawnSystem: UpdateLaneSignalForBarrierState() - No sublanes buffer for road {roadEntity.Index}");
-                    return;
-                }
-
-                for (int i = 0; i < sublaneObjects.Length; i++)
-                {
-                    if (sublaneObjects[i].m_PathMethods == Game.Pathfind.PathMethod.Road)
-                    {
-                        Entity laneEntity = sublaneObjects[i].m_SubLane;
-                        
-                        if (EntityManager.HasComponent<LaneSignal>(laneEntity))
-                        {
-                            var laneSignal = EntityManager.GetComponentData<LaneSignal>(laneEntity);
-                            laneSignal.m_Signal = signalType;
-                            EntityManager.SetComponentData(laneEntity, laneSignal);
-                            
-                            LogUtil.Info($"TollBoothSpawnSystem: UpdateLaneSignalForBarrierState() - Updated lane signal to {signalType} for lane {laneEntity.Index}");
-                        }
-                        break;
-                    }
-                }
-            }
-            catch (System.Exception ex)
-            {
-                LogUtil.Error($"TollBoothSpawnSystem: UpdateLaneSignalForBarrierState() - FAILED to update lane signal for road {roadEntity.Index}. Error: {ex.Message}");
-            }
-        }
-
-        private void UpdateTrafficLightForBarrierState(Entity roadEntity, Game.Objects.TrafficLightState lightState)
-        {
-            LogUtil.Info($"TollBoothSpawnSystem: UpdateTrafficLightForBarrierState() - Updating light to {lightState} for road {roadEntity.Index}");
-            
-            try
-            {
-                if (!SubObjectsObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Objects.SubObject> subObjects))
-                {
-                    LogUtil.Warn($"TollBoothSpawnSystem: UpdateTrafficLightForBarrierState() - No subobjects buffer for road {roadEntity.Index}");
-                    return;
-                }
-
-                for (int i = 0; i < subObjects.Length; i++)
-                {
-                    if (EntityManager.HasComponent<Game.Objects.TrafficLight>(subObjects[i].m_SubObject))
-                    {
-                        Entity trafficLightEntity = subObjects[i].m_SubObject;
-                        
-                        var trafficLight = EntityManager.GetComponentData<Game.Objects.TrafficLight>(trafficLightEntity);
-                        trafficLight.m_State = lightState;
-                        EntityManager.SetComponentData(trafficLightEntity, trafficLight);
-                        
-                        LogUtil.Info($"TollBoothSpawnSystem: UpdateTrafficLightForBarrierState() - Updated traffic light to {lightState} for light {trafficLightEntity.Index}");
-                        break;
-                    }
-                }
-            }
-            catch (System.Exception ex)
-            {
-                LogUtil.Error($"TollBoothSpawnSystem: UpdateTrafficLightForBarrierState() - FAILED to update traffic light for road {roadEntity.Index}. Error: {ex.Message}");
-                LogUtil.Error($"TollBoothSpawnSystem: UpdateTrafficLightForBarrierState() - Stack trace: {ex.StackTrace}");
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Checks if a manual toll barrier is currently open by checking lane signals directly.
-        /// </summary>
-        /// <param name="tollBoothEntity">The tollbooth entity to check</param>
-        /// <returns>True if barrier is open, false if closed or if not a manual tollbooth</returns>
-        public bool IsBarrierOpen(Entity tollBoothEntity)
-        {
-            try
-            {
-                LogUtil.Info($"TollBoothSpawnSystem: IsBarrierOpen() - Checking barrier state for tollbooth {tollBoothEntity.Index}");
-                
-                // Check if this is a manual tollbooth
-                if (!EntityManager.HasComponent<TollBoothManualData>(tollBoothEntity))
-                {
-                    LogUtil.Info($"TollBoothSpawnSystem: IsBarrierOpen() - Entity {tollBoothEntity.Index} is not a manual tollbooth");
-                    return false; // Not a manual tollbooth
-                }
-
-                LogUtil.Info($"TollBoothSpawnSystem: IsBarrierOpen() - Getting associated road for tollbooth {tollBoothEntity.Index}");
-                
-                if (!EntityManager.TryGetComponent<TollBoothPrefabData>(tollBoothEntity, out var tollBoothData) ||
-                    tollBoothData.BelongsToHighwayTollbooth == Entity.Null)
-                {
-                    LogUtil.Info($"TollBoothSpawnSystem: IsBarrierOpen() - Entity {tollBoothEntity.Index} has no associated road");
-                    return false;
-                }
-
-                Entity roadEntity = tollBoothData.BelongsToHighwayTollbooth;
-
-                LogUtil.Info($"TollBoothSpawnSystem: IsBarrierOpen() - Checking lane signal state for road {roadEntity.Index}");
-                // Check lane signal state DIRECTLY (ignore TrafficLights)
-                if (SubLaneObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Net.SubLane> sublaneObjects))
-                {
-                    LogUtil.Info($"TollBoothSpawnSystem: IsBarrierOpen() - Found {sublaneObjects.Length} sublanes for road {roadEntity.Index}");
-                    
-                    for (int i = 0; i < sublaneObjects.Length; i++)
-                    {
-                        LogUtil.Info($"TollBoothSpawnSystem: IsBarrierOpen() - Checking sublane {i} for road {roadEntity.Index}");
-                        
-                        if (sublaneObjects[i].m_PathMethods == Game.Pathfind.PathMethod.Road)
-                        {
-                            Entity laneEntity = sublaneObjects[i].m_SubLane;
-
-                            if (EntityManager.HasComponent<LaneSignal>(laneEntity))
-                            {
-                                var laneSignal = EntityManager.GetComponentData<LaneSignal>(laneEntity);
-                                bool isOpen = laneSignal.m_Signal == LaneSignalType.Go;
-                                LogUtil.Info($"TollBoothSpawnSystem: IsBarrierOpen() - Barrier is currently {(isOpen ? "OPEN" : "CLOSED")} for tollbooth {tollBoothEntity.Index}");
-                                return isOpen;
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                LogUtil.Info($"TollBoothSpawnSystem: IsBarrierOpen() - Barrier state could not be determined, defaulting to CLOSED for tollbooth {tollBoothEntity.Index}");
-                return false; // Default to closed
-            }
-            catch (System.Exception ex)
-            {
-                LogUtil.Error($"TollBoothSpawnSystem: IsBarrierOpen() - Failed to check barrier state for tollbooth {tollBoothEntity.Index}. Error: {ex.Message}");
-                return false; // Default to closed on error
             }
         }
 
