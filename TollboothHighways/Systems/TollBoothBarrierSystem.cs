@@ -107,12 +107,15 @@ namespace TollboothHighways.Systems
                 uint currentFrame = m_SimulationSystem.frameIndex;
 
                 // Check for vehicles approaching toll booth barriers
+                LogUtil.Info($"TollBoothBarrierSystem: CheckVehiclesApproachingBarriers() - Check for vehicles approaching toll booth barriers");
                 CheckVehiclesApproachingBarriers();
 
                 // Process vehicles that are currently at barriers
+                LogUtil.Info($"TollBoothBarrierSystem: ProcessBarrierVehicles() - Process vehicles that are currently at barriers at currentFrame {currentFrame}");
                 ProcessBarrierVehicles(currentFrame);
 
                 // Clean up finished vehicles
+                LogUtil.Info($"TollBoothBarrierSystem: CleanupFinishedVehicles() - Clean up finished vehicles");
                 CleanupFinishedVehicles();
 
                 // Process delayed barrier closes
@@ -120,9 +123,12 @@ namespace TollboothHighways.Systems
                 {
                     for (int i = m_BarrierCloseQueue.Count - 1; i >= 0; i--)
                     {
+                        // Check if it's time to close the barrier
                         var (roadEntity, closeFrame) = m_BarrierCloseQueue[i];
                         if (currentFrame >= closeFrame)
                         {
+                            // Time to close the barrier  
+                            LogUtil.Info($"TollBoothBarrierSystem: CloseBarrier() - Time to close the barrier on RoadEntity {roadEntity.Index}");
                             CloseBarrier(roadEntity);
                             m_BarrierCloseQueue.RemoveAt(i);
                         }
@@ -159,7 +165,8 @@ namespace TollboothHighways.Systems
                         {
                             continue;
                         }
-
+                        
+                        LogUtil.Info($"TollBoothBarrierSystem: CheckRoadForApproachingVehicles() - Check the road {roadEntity.Index} for approaching vehicles in toll {tollRoadData.AssociatedTollbooth.Index}");
                         CheckRoadForApproachingVehicles(roadEntity, tollRoadData.AssociatedTollbooth);
                     }
                 }
@@ -208,6 +215,8 @@ namespace TollboothHighways.Systems
                     if (!m_LaneObjectData.TryGetBuffer(laneEntity, out var laneObjects))
                         continue;
 
+                    // Check the lane for vehicles
+                    LogUtil.Info($"TollBoothBarrierSystem: CheckLaneForVehicles() - Check the lane {laneEntity.Index} for road {roadEntity.Index} in toll {tollBoothEntity.Index}");
                     CheckLaneForVehicles(laneEntity, laneObjects, tollBoothEntity, roadEntity, tollBoothData.BarrierBlockerEntity);
                 }
             }
@@ -257,6 +266,7 @@ namespace TollboothHighways.Systems
                             // If vehicle is close enough to the end of the lane (where barrier would be)
                             if (curvePosition > 0.7f) // Within 30% of lane end
                             {
+                                LogUtil.Info($"TollBoothBarrierSystem: SetupVehiclePetitioning() - Set up petitioning for vehicle {controllerEntity.Index} in road {roadEntity.Index} on lane {laneEntity.Index} for toll {tollBoothEntity.Index}");
                                 SetupVehiclePetitioning(controllerEntity, laneEntity, tollBoothEntity, roadEntity, barrierEntity);
                             }
                         }
@@ -276,8 +286,6 @@ namespace TollboothHighways.Systems
         {
             try
             {
-                LogUtil.Info($"TollBoothBarrierSystem: SetupVehiclePetitioning() - Setting up petitioning for vehicle {vehicleEntity.Index} on lane {laneEntity.Index}");
-
                 // Create processing record
                 var processingVehicle = new ProcessingVehicle
                 {
@@ -334,7 +342,9 @@ namespace TollboothHighways.Systems
                     continue;
                 }
 
+                
                 var processingVehicle = m_ProcessingVehicles[vehicleEntity];
+                LogUtil.Info($"TollBoothBarrierSystem: ProcessBarrierVehicles() - Processing vehicle. Processing Finished: {processingVehicle.IsFinished}, is in processing: {!processingVehicle.IsProcessing}");
 
                 // Skip if already finished
                 if (processingVehicle.IsFinished)
@@ -345,6 +355,7 @@ namespace TollboothHighways.Systems
                 // If not processing yet, set up barrier and vehicle
                 if (!processingVehicle.IsProcessing)
                 {
+                    LogUtil.Info($"TollBoothBarrierSystem: ProcessBarrierVehicles() - Set up vehicle {vehicleEntity.Index} to stop at barrier");
                     SetupBarrierStop(processingVehicle);
                     processingVehicle.IsProcessing = true;
                     processingVehicle.StartTime = currentFrame;
