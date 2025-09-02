@@ -79,14 +79,15 @@ namespace TollboothHighways
                 // INPORTANT!!: Register prefab system FIRST and ensure it runs early in PrefabUpdate phase
                 updateSystem.UpdateAfter<TollRoadPrefabUpdateSystem>(SystemUpdatePhase.PrefabUpdate);
 
+                // Capture immediately in GameSimulation
+                updateSystem.UpdateAt<RoadPlacementCaptureSystem>(SystemUpdatePhase.GameSimulation);
+
+                // Finalize after capture (and after vanilla systems that build lanes).
+                updateSystem.UpdateAfter<RoadPlacementFinalizeSystem, RoadPlacementCaptureSystem>(SystemUpdatePhase.GameSimulation);
+
+
                 // Register game simulation systems after prefab systems
                 updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
-
-                // StopVehiclesOnRoadSystem ordering:
-                // After core CarNavigationSystem (so navigation complete)
-                updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
-                // Before CarMoveSystem (so movement uses zeroed speed)
-                updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
 
                 //updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
 

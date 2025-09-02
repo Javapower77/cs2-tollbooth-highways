@@ -111,12 +111,12 @@
                         {
                             "$id": 7,
                             "$type": 4,
-                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
+                            "m_Object": $fstrref:"UnityGUID:3f62bc6d424390a4cbaa5f643099c0c6",
                             "m_Position": {
                                 "$type": 5,
-                                "x": -4.55,
-                                "y": 0.44,
-                                "z": 5
+                                "x": -4.75,
+                                "y": 1.5,
+                                "z": -4.7
                             },
                             "m_Rotation": {
                                 "$type": 6,
@@ -141,12 +141,12 @@
                         {
                             "$id": 8,
                             "$type": 4,
-                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
+                            "m_Object": $fstrref:"UnityGUID:367fc1206e4645a4fa75bacf40f00c9f",
                             "m_Position": {
                                 "$type": 5,
-                                "x": -4.55,
-                                "y": 0.44,
-                                "z": 6
+                                "x": -1.5,
+                                "y": 0,
+                                "z": -1.1
                             },
                             "m_Rotation": {
                                 "$type": 6,
@@ -171,12 +171,12 @@
                         {
                             "$id": 9,
                             "$type": 4,
-                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
+                            "m_Object": $fstrref:"UnityGUID:367fc1206e4645a4fa75bacf40f00c9f",
                             "m_Position": {
                                 "$type": 5,
-                                "x": -4.55,
-                                "y": 0.44,
-                                "z": 4
+                                "x": -1.5,
+                                "y": 0,
+                                "z": 5.2
                             },
                             "m_Rotation": {
                                 "$type": 6,
@@ -206,7 +206,7 @@
                                 "$type": 5,
                                 "x": -4.55,
                                 "y": 0.44,
-                                "z": 3
+                                "z": 5
                             },
                             "m_Rotation": {
                                 "$type": 6,
@@ -236,7 +236,7 @@
                                 "$type": 5,
                                 "x": -4.55,
                                 "y": 0.44,
-                                "z": 2
+                                "z": 6
                             },
                             "m_Rotation": {
                                 "$type": 6,
@@ -266,7 +266,7 @@
                                 "$type": 5,
                                 "x": -4.55,
                                 "y": 0.44,
-                                "z": 1
+                                "z": 4
                             },
                             "m_Rotation": {
                                 "$type": 6,
@@ -296,7 +296,7 @@
                                 "$type": 5,
                                 "x": -4.55,
                                 "y": 0.44,
-                                "z": 0
+                                "z": 3
                             },
                             "m_Rotation": {
                                 "$type": 6,
@@ -326,7 +326,7 @@
                                 "$type": 5,
                                 "x": -4.55,
                                 "y": 0.44,
-                                "z": -1
+                                "z": 2
                             },
                             "m_Rotation": {
                                 "$type": 6,
@@ -356,7 +356,7 @@
                                 "$type": 5,
                                 "x": -4.55,
                                 "y": 0.44,
-                                "z": -2
+                                "z": 1
                             },
                             "m_Rotation": {
                                 "$type": 6,
@@ -381,21 +381,21 @@
                         {
                             "$id": 16,
                             "$type": 4,
-                            "m_Object": $fstrref:"UnityGUID:185753f3ea6fec143912a7ed23a26a0f",
+                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
                             "m_Position": {
                                 "$type": 5,
-                                "x": -3.984375,
-                                "y": -2.044375,
-                                "z": 6.515625
+                                "x": -4.55,
+                                "y": 0.44,
+                                "z": 0
                             },
                             "m_Rotation": {
                                 "$type": 6,
                                 "value": {
                                     "$type": 7,
                                     "x": 0,
-                                    "y": 1,
+                                    "y": 0,
                                     "z": 0,
-                                    "w": -4.371139E-08
+                                    "w": 1
                                 }
                             },
                             "m_Placement": 2,
@@ -411,21 +411,21 @@
                         {
                             "$id": 17,
                             "$type": 4,
-                            "m_Object": $fstrref:"UnityGUID:367fc1206e4645a4fa75bacf40f00c9f",
+                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
                             "m_Position": {
                                 "$type": 5,
-                                "x": -1.5,
+                                "x": -4.55,
                                 "y": 0.44,
-                                "z": -8
+                                "z": -1
                             },
                             "m_Rotation": {
                                 "$type": 6,
                                 "value": {
                                     "$type": 7,
                                     "x": 0,
-                                    "y": 1,
+                                    "y": 0,
                                     "z": 0,
-                                    "w": -4.371139E-08
+                                    "w": 1
                                 }
                             },
                             "m_Placement": 2,
@@ -441,21 +441,21 @@
                         {
                             "$id": 18,
                             "$type": 4,
-                            "m_Object": $fstrref:"UnityGUID:367fc1206e4645a4fa75bacf40f00c9f",
+                            "m_Object": $fstrref:"UnityGUID:e23cb744dcffd2e4c8aaa9b9854ac8d4",
                             "m_Position": {
                                 "$type": 5,
-                                "x": -1.5,
+                                "x": -4.55,
                                 "y": 0.44,
-                                "z": -1.7
+                                "z": -2
                             },
                             "m_Rotation": {
                                 "$type": 6,
                                 "value": {
                                     "$type": 7,
                                     "x": 0,
-                                    "y": 1,
+                                    "y": 0,
                                     "z": 0,
-                                    "w": -4.371139E-08
+                                    "w": 1
                                 }
                             },
                             "m_Placement": 2,
@@ -471,12 +471,12 @@
                         {
                             "$id": 19,
                             "$type": 4,
-                            "m_Object": $fstrref:"UnityGUID:367fc1206e4645a4fa75bacf40f00c9f",
+                            "m_Object": $fstrref:"UnityGUID:185753f3ea6fec143912a7ed23a26a0f",
                             "m_Position": {
                                 "$type": 5,
                                 "x": -1.5,
-                                "y": 0.44,
-                                "z": 4.5
+                                "y": 0,
+                                "z": 10.516
                             },
                             "m_Rotation": {
                                 "$type": 6,
@@ -926,7 +926,7 @@
                                 "$type": 5,
                                 "x": 4.5,
                                 "y": 4,
-                                "z": 9.396875
+                                "z": 3.397
                             },
                             "m_Rotation": {
                                 "$type": 6,
@@ -956,36 +956,6 @@
                                 "$type": 5,
                                 "x": 4.5,
                                 "y": 4,
-                                "z": 3.397
-                            },
-                            "m_Rotation": {
-                                "$type": 6,
-                                "value": {
-                                    "$type": 7,
-                                    "x": 0,
-                                    "y": 0.707106769,
-                                    "z": 0,
-                                    "w": -0.707106769
-                                }
-                            },
-                            "m_Placement": 2,
-                            "m_FixedIndex": 0,
-                            "m_Spacing": 0,
-                            "m_AnchorTop": false,
-                            "m_AnchorCenter": true,
-                            "m_RequireElevated": false,
-                            "m_RequireOutsideConnection": false,
-                            "m_RequireDeadEnd": false,
-                            "m_RequireOrphan": false
-                        },
-                        {
-                            "$id": 36,
-                            "$type": 4,
-                            "m_Object": $fstrref:"UnityGUID:a3b2f4303c1f4a540b70d80542c1994a",
-                            "m_Position": {
-                                "$type": 5,
-                                "x": 4.5,
-                                "y": 4,
                                 "z": -5.397
                             },
                             "m_Rotation": {
@@ -1009,7 +979,7 @@
                             "m_RequireOrphan": false
                         },
                         {
-                            "$id": 37,
+                            "$id": 36,
                             "$type": 4,
                             "m_Object": $fstrref:"UnityGUID:5b0b9686d53ce084dbfee75d5e2b7d27",
                             "m_Position": {
@@ -1039,7 +1009,7 @@
                             "m_RequireOrphan": false
                         },
                         {
-                            "$id": 38,
+                            "$id": 37,
                             "$type": 4,
                             "m_Object": $fstrref:"UnityGUID:5b0b9686d53ce084dbfee75d5e2b7d27",
                             "m_Position": {
@@ -1056,6 +1026,36 @@
                                     "y": 0,
                                     "z": 0,
                                     "w": 1
+                                }
+                            },
+                            "m_Placement": 2,
+                            "m_FixedIndex": 0,
+                            "m_Spacing": 0,
+                            "m_AnchorTop": false,
+                            "m_AnchorCenter": true,
+                            "m_RequireElevated": false,
+                            "m_RequireOutsideConnection": false,
+                            "m_RequireDeadEnd": false,
+                            "m_RequireOrphan": false
+                        },
+                        {
+                            "$id": 38,
+                            "$type": 4,
+                            "m_Object": $fstrref:"UnityGUID:e38414c3e23a4464aaee781dc7349c26",
+                            "m_Position": {
+                                "$type": 5,
+                                "x": 3,
+                                "y": 4.5,
+                                "z": 12
+                            },
+                            "m_Rotation": {
+                                "$type": 6,
+                                "value": {
+                                    "$type": 7,
+                                    "x": 0,
+                                    "y": -0.258819044,
+                                    "z": 0,
+                                    "w": 0.9659258
                                 }
                             },
                             "m_Placement": 2,
@@ -1494,7 +1494,7 @@
     "m_StyleType": null,
     "m_InvertMode": 0,
     "m_RoadType": 0,
-    "m_SpeedLimit": 60,
+    "m_SpeedLimit": 45,
     "m_ZoneBlock": null,
     "m_TrafficLights": true,
     "m_HighwayRules": true

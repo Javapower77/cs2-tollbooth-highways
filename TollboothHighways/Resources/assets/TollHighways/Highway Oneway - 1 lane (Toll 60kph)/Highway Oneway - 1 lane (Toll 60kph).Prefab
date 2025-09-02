@@ -535,7 +535,7 @@
                             "m_Position": {
                                 "$type": 5,
                                 "x": -1.5,
-                                "y": 0.44,
+                                "y": 0,
                                 "z": 9
                             },
                             "m_Rotation": {
@@ -565,7 +565,7 @@
                             "m_Position": {
                                 "$type": 5,
                                 "x": -1.5,
-                                "y": 0.44,
+                                "y": 0,
                                 "z": -8
                             },
                             "m_Rotation": {
@@ -595,7 +595,7 @@
                             "m_Position": {
                                 "$type": 5,
                                 "x": -1.5,
-                                "y": 0.44,
+                                "y": 0,
                                 "z": -1.7
                             },
                             "m_Rotation": {
@@ -625,7 +625,7 @@
                             "m_Position": {
                                 "$type": 5,
                                 "x": -1.5,
-                                "y": 0.44,
+                                "y": 0,
                                 "z": 4.5
                             },
                             "m_Rotation": {
@@ -1044,9 +1044,9 @@
                             "m_Object": $fstrref:"UnityGUID:cdf3b645fac59aa48993330b3ec311d0",
                             "m_Position": {
                                 "$type": 5,
-                                "x": 3.4,
-                                "y": 1,
-                                "z": 7.85
+                                "x": -4.5,
+                                "y": 0.9,
+                                "z": 12
                             },
                             "m_Rotation": {
                                 "$type": 6,
@@ -1071,21 +1071,21 @@
                         {
                             "$id": 39,
                             "$type": 4,
-                            "m_Object": $fstrref:"UnityGUID:a3b2f4303c1f4a540b70d80542c1994a",
+                            "m_Object": $fstrref:"UnityGUID:132c7afdeda6eb047a81e6bac5bccf3c",
                             "m_Position": {
                                 "$type": 5,
-                                "x": 4.5,
-                                "y": 4,
-                                "z": 9.396875
+                                "x": 3,
+                                "y": 4.6,
+                                "z": 12
                             },
                             "m_Rotation": {
                                 "$type": 6,
                                 "value": {
                                     "$type": 7,
                                     "x": 0,
-                                    "y": 0.707106769,
+                                    "y": -0.258819044,
                                     "z": 0,
-                                    "w": -0.707106769
+                                    "w": 0.9659258
                                 }
                             },
                             "m_Placement": 2,

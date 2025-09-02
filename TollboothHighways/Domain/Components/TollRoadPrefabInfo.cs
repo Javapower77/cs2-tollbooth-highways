@@ -6,7 +6,7 @@ using Unity.Entities;
 namespace TollboothHighways.Domain.Components
 {
     [ComponentMenu("TollHighways/", new Type[] { typeof(WithNoneAttribute) })]
-    public class TollRoadPrefabInfo : ComponentBase
+    public class TollRoadPrefabInfo : ComponentBase, IQueryTypeParameter
     {
         public override void GetArchetypeComponents(HashSet<ComponentType> components)
         {

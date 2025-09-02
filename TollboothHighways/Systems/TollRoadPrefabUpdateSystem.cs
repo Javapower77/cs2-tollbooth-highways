@@ -66,7 +66,7 @@ namespace Systems
                 if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Toll 60kph)"))
                     successCount++;
                     
-                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Manual Toll 60kph)"))
+                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Manual Toll 60kph)", true))
                     successCount++;
                     
                 if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane - Public Transport (Toll 60kph)"))
@@ -104,7 +104,7 @@ namespace Systems
         /// <param name="prefabNameToSearch">The prefab name to search for</param>
         /// <param name="isManual">Whether this is a manual toll booth</param>
         /// <returns>True if successful, false otherwise</returns>
-        private bool AddTollComponentToRoad(string typePrefab, string prefabNameToSearch)
+        private bool AddTollComponentToRoad(string typePrefab, string prefabNameToSearch, bool isManual = false)
         {
             try
             {
@@ -123,6 +123,12 @@ namespace Systems
                     // Add the TollRoadPrefabInfo component
                     var tollRoadInfo = tollRoadPrefab.AddComponent<TollRoadPrefabInfo>();
                     LogUtil.Info($"TollRoadPrefabUpdateSystem: Added TollRoadPrefabInfo to '{prefabNameToSearch}'");
+
+                    // Add the TollRoadManualInfo component if this is a manual toll booth
+                    if (isManual)
+                    {   var manualInfo = tollRoadPrefab.AddComponent<TollBoothManualInfo>();
+                        LogUtil.Info($"TollRoadPrefabUpdateSystem: Added TollRoadManualInfo to '{prefabNameToSearch}'");
+                    }
 
                     // Update the prefab in the system
                     prefabSystem.UpdatePrefab(tollRoadPrefab);

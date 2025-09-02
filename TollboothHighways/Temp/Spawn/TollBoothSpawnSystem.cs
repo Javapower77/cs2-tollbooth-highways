@@ -8,7 +8,6 @@ using Game.Prefabs;
 using Game.Simulation;
 using Game.UI;
 using System;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using TollboothHighways.Domain.Components;
 using TollboothHighways.Utilities;
 using Unity.Collections;
@@ -73,12 +72,13 @@ namespace TollboothHighways.Systems
 
         protected override void OnCreate()
         {
+            LogUtil.Info("TollBoothSpawnSystem: OnCreate() - Starting system creation");           
             try
             {
                 base.OnCreate();
                 m_PrefabSystem = World.GetOrCreateSystemManaged<PrefabSystem>();
-                m_Random = new Random((int)DateTime.Now.Ticks);
                 m_SimulationSystem = World.GetOrCreateSystemManaged<SimulationSystem>();
+                m_Random = new Random((int)DateTime.Now.Ticks);
                 SubLaneObjectData = GetBufferLookup<Game.Net.SubLane>(true);
                 SubObjectsObjectData = GetBufferLookup<Game.Objects.SubObject>(false);
                 m_TrafficLightsData = GetComponentLookup<TrafficLights>(false);
@@ -94,6 +94,7 @@ namespace TollboothHighways.Systems
                     ComponentType.ReadOnly<PrefabRef>(),
                     ComponentType.Exclude<TollBoothSpawned>()
                 );
+
                 LogUtil.Info("TollBoothSpawnSystem: OnCreate() - System created and initialized successfully");
             }
             catch (System.Exception ex)
@@ -130,10 +131,13 @@ namespace TollboothHighways.Systems
 
                 try
                 {
+                    LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - Starting entity processing loop");
                     for (int i = 0; i < entities.Length; i++)
                     {
                         var entity = entities[i];
                         var tollBoothData = tollBoothDataArray[i];
+
+                        LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Processing entity {i + 1}/{entities.Length}: {entity.Index}");
 
                         try
                         {
@@ -147,13 +151,6 @@ namespace TollboothHighways.Systems
 
                                 LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Initializing TollBoothInsight for {entity.Index}");
                                 InitializeTollBoothInsight(entity);
-
-                                // If this is a manual tollbooth, set up barrier control to start closed
-                                if (!EntityManager.HasComponent<TollBoothManualData>(entity))
-                                {
-                                    LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Initializing Barrier to start closed for {entity.Index}");
-                                    InitializeManualBarrier(entity);
-                                }
 
                                 LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Adding TollBoothSpawned component to {entity.Index}");
                                 EntityManager.AddComponent<TollBoothSpawned>(entity);
@@ -175,6 +172,7 @@ namespace TollboothHighways.Systems
                 {
                     entities.Dispose();
                     tollBoothDataArray.Dispose();
+                    LogUtil.Info("TollBoothSpawnSystem: OnUpdate() - Arrays disposed successfully");
                 }
             }
             catch (System.Exception ex)
@@ -190,16 +188,20 @@ namespace TollboothHighways.Systems
             
             try
             {
+                LogUtil.Info($"TollBoothSpawnSystem: InitializeTollBoothInsight() - Getting frame index for entity {tollBoothEntity.Index}");
                 uint currentFrame = 0;
                 
                 if (m_SimulationSystem != null)
                 {
+                    LogUtil.Info($"TollBoothSpawnSystem: InitializeTollBoothInsight() - SimulationSystem is available for entity {tollBoothEntity.Index}");
                     try
                     {
                         currentFrame = m_SimulationSystem.frameIndex;
+                        LogUtil.Info($"TollBoothSpawnSystem: InitializeTollBoothInsight() - Got frame index {currentFrame} for entity {tollBoothEntity.Index}");
                     }
                     catch (System.Exception ex) 
                     {
+                        LogUtil.Warn($"TollBoothSpawnSystem: InitializeTollBoothInsight() - Could not get frameIndex for entity {tollBoothEntity.Index}, using 0. Error: {ex.Message}");
                         currentFrame = 0;
                     }
                 }
@@ -208,15 +210,26 @@ namespace TollboothHighways.Systems
                     LogUtil.Warn($"TollBoothSpawnSystem: InitializeTollBoothInsight() - SimulationSystem is null for entity {tollBoothEntity.Index}, using frame 0");
                 }
 
+                LogUtil.Info($"TollBoothSpawnSystem: InitializeTollBoothInsight() - Checking if entity {tollBoothEntity.Index} already has TollBoothInsight component");
                 if (EntityManager.HasComponent<TollBoothInsight>(tollBoothEntity))
                 {
                     LogUtil.Info($"TollBoothSpawnSystem: InitializeTollBoothInsight() - Entity {tollBoothEntity.Index} already has TollBoothInsight, skipping initialization");
                     return;
                 }
 
+                LogUtil.Info($"TollBoothSpawnSystem: InitializeTollBoothInsight() - Creating new TollBoothInsight for entity {tollBoothEntity.Index}");
                 var tollBoothInsight = new TollBoothInsight();
+                LogUtil.Info($"TollBoothSpawnSystem: InitializeTollBoothInsight() - TollBoothInsight instance created for entity {tollBoothEntity.Index}");
+
+                LogUtil.Info($"TollBoothSpawnSystem: InitializeTollBoothInsight() - Resetting statistics with frame {currentFrame} for entity {tollBoothEntity.Index}");
                 tollBoothInsight.ResetStatistics(currentFrame);
+                LogUtil.Info($"TollBoothSpawnSystem: InitializeTollBoothInsight() - Statistics reset completed for entity {tollBoothEntity.Index}");
+
+                LogUtil.Info($"TollBoothSpawnSystem: InitializeTollBoothInsight() - Adding component to entity {tollBoothEntity.Index}");
                 EntityManager.AddComponentData(tollBoothEntity, tollBoothInsight);
+                LogUtil.Info($"TollBoothSpawnSystem: InitializeTollBoothInsight() - Component added successfully to entity {tollBoothEntity.Index}");
+
+                LogUtil.Info($"TollBoothSpawnSystem: InitializeTollBoothInsight() - Successfully initialized TollBoothInsight for entity {tollBoothEntity.Index}");
             }
             catch (System.Exception ex)
             {
@@ -226,28 +239,37 @@ namespace TollboothHighways.Systems
         }
 
         private string GenerateRandomTollBoothNameAdvanced()
-        {            
+        {
+            LogUtil.Info("TollBoothSpawnSystem: GenerateRandomTollBoothNameAdvanced() - Starting name generation");
+            
             try
             {
                 string[] prefixes = { "North", "South", "East", "West", "Central", "Upper", "Lower", "New", "Old" };
                 string[] types = { "Plaza", "Station", "Gate", "Checkpoint", "Pass", "Junction", "Express", "Bridge" };
                 string[] suffixes = { "A", "B", "C", "1", "2", "3", "Main", "Ext" };
 
+                LogUtil.Info($"TollBoothSpawnSystem: GenerateRandomTollBoothNameAdvanced() - Selecting base name from {m_TollBoothNames.Length} options");
                 string baseName = m_TollBoothNames[m_Random.Next(m_TollBoothNames.Length)];
+                LogUtil.Info($"TollBoothSpawnSystem: GenerateRandomTollBoothNameAdvanced() - Selected base name: '{baseName}'");
+
                 int prefixChance = m_Random.Next(100);
+                LogUtil.Info($"TollBoothSpawnSystem: GenerateRandomTollBoothNameAdvanced() - Prefix chance: {prefixChance}% (40% needed)");
                 
                 if (prefixChance < 40)
                 {
                     string prefix = prefixes[m_Random.Next(prefixes.Length)];
                     baseName = $"{prefix} {baseName}";
+                    LogUtil.Info($"TollBoothSpawnSystem: GenerateRandomTollBoothNameAdvanced() - Added prefix: '{prefix}', result: '{baseName}'");
                 }
 
                 int suffixChance = m_Random.Next(100);
+                LogUtil.Info($"TollBoothSpawnSystem: GenerateRandomTollBoothNameAdvanced() - Suffix chance: {suffixChance}% (20% needed)");
                 
                 if (suffixChance < 20)
                 {
                     string suffix = suffixes[m_Random.Next(suffixes.Length)];
                     baseName = $"{baseName}-{suffix}";
+                    LogUtil.Info($"TollBoothSpawnSystem: GenerateRandomTollBoothNameAdvanced() - Added suffix: '{suffix}', result: '{baseName}'");
                 }
 
                 LogUtil.Info($"TollBoothSpawnSystem: GenerateRandomTollBoothNameAdvanced() - Final generated name: '{baseName}'");
@@ -262,14 +284,26 @@ namespace TollboothHighways.Systems
 
         private void WriteOwnerEntityInfo(Entity tollBoothEntity, ref TollBoothPrefabData tollBoothData)
         {
+            LogUtil.Info($"TollBoothSpawnSystem: WriteOwnerEntityInfo() - Processing entity {tollBoothEntity.Index}");
+            
             try
             {
+                LogUtil.Info($"TollBoothSpawnSystem: WriteOwnerEntityInfo() - Checking for Owner component on entity {tollBoothEntity.Index}");
+                
                 if (EntityManager.TryGetComponent<Owner>(tollBoothEntity, out var ownerComponent))
                 {
+                    LogUtil.Info($"TollBoothSpawnSystem: WriteOwnerEntityInfo() - Owner component found for entity {tollBoothEntity.Index}");
+                    LogUtil.Info($"TollBoothSpawnSystem: WriteOwnerEntityInfo() - Toll booth {tollBoothEntity.Index} belongs to owner {ownerComponent.m_Owner.Index}");
+
+                    LogUtil.Info($"TollBoothSpawnSystem: WriteOwnerEntityInfo() - Setting owner info in tollBoothData for entity {tollBoothEntity.Index}");
                     tollBoothData.BelongsToHighwayTollbooth = ownerComponent.m_Owner;
+                    LogUtil.Info($"TollBoothSpawnSystem: WriteOwnerEntityInfo() - Owner set to {ownerComponent.m_Owner.Index} for entity {tollBoothEntity.Index}");
+
+                    LogUtil.Info($"TollBoothSpawnSystem: WriteOwnerEntityInfo() - Updating component data for entity {tollBoothEntity.Index}");
                     try
                     {
                         EntityManager.SetComponentData(tollBoothEntity, tollBoothData);
+                        LogUtil.Info($"TollBoothSpawnSystem: WriteOwnerEntityInfo() - Component data updated for entity {tollBoothEntity.Index}");
                     }
                     catch (System.Exception ex)
                     {
@@ -279,7 +313,7 @@ namespace TollboothHighways.Systems
 
                     LogUtil.Info($"TollBoothSpawnSystem: WriteOwnerEntityInfo() - Associating tollbooth {tollBoothEntity.Index} with road {ownerComponent.m_Owner.Index}");
                     AssociateTollboothWithRoad(tollBoothEntity, ownerComponent.m_Owner);
-                    
+                    LogUtil.Info($"TollBoothSpawnSystem: WriteOwnerEntityInfo() - Association completed for entity {tollBoothEntity.Index}");
                 }
                 else
                 {
@@ -296,19 +330,31 @@ namespace TollboothHighways.Systems
 
         private void AssociateTollboothWithRoad(Entity tollBoothEntity, Entity roadEntity)
         {
+            LogUtil.Info($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Associating tollbooth {tollBoothEntity.Index} with road {roadEntity.Index}");
+            
             try
             {
+                LogUtil.Info($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Checking if road {roadEntity.Index} has TollRoadPrefabData component");
+                
                 if (EntityManager.HasComponent<TollRoadPrefabData>(roadEntity))
                 {
+                    LogUtil.Info($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Road {roadEntity.Index} has existing TollRoadPrefabData");
+                    
                     try
                     {
                         var tollRoadData = EntityManager.GetComponentData<TollRoadPrefabData>(roadEntity);
+                        LogUtil.Info($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Retrieved existing TollRoadPrefabData for road {roadEntity.Index}");
+
                         if (tollRoadData.HasActiveTollbooth && tollRoadData.AssociatedTollbooth != tollBoothEntity)
                         {
                             LogUtil.Warn($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Road {roadEntity.Index} already has tollbooth {tollRoadData.AssociatedTollbooth.Index} associated. Replacing with new tollbooth {tollBoothEntity.Index}");
                         }
+
+                        LogUtil.Info($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Updating tollbooth association for road {roadEntity.Index}");
                         tollRoadData.AssociatedTollbooth = tollBoothEntity;
                         tollRoadData.HasActiveTollbooth = true;
+
+                        LogUtil.Info($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Setting updated component data for road {roadEntity.Index}");
                         EntityManager.SetComponentData(roadEntity, tollRoadData);
                         LogUtil.Info($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Successfully updated association - tollbooth {tollBoothEntity.Index} with toll road {roadEntity.Index}");
                     }
@@ -320,6 +366,8 @@ namespace TollboothHighways.Systems
                 }
                 else
                 {
+                    LogUtil.Info($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Road {roadEntity.Index} does not have TollRoadPrefabData, creating new one");
+                    
                     try
                     {
                         var newTollRoadData = new TollRoadPrefabData
@@ -327,7 +375,11 @@ namespace TollboothHighways.Systems
                             AssociatedTollbooth = tollBoothEntity,
                             HasActiveTollbooth = true
                         };
+                        LogUtil.Info($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Created new TollRoadPrefabData for road {roadEntity.Index}");
+
                         EntityManager.AddComponentData(roadEntity, newTollRoadData);
+                        LogUtil.Info($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Added new TollRoadPrefabData to road {roadEntity.Index}");
+
                         LogUtil.Info($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Created new TollRoadPrefabData and associated tollbooth {tollBoothEntity.Index} with road {roadEntity.Index}");
                     }
                     catch (System.Exception ex)
@@ -336,6 +388,10 @@ namespace TollboothHighways.Systems
                         throw;
                     }
                 }
+
+                LogUtil.Info($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Setting up manual barrier control for tollbooth {tollBoothEntity.Index}");
+                SetupManualBarrierControl(tollBoothEntity, roadEntity);
+                LogUtil.Info($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Manual barrier control setup completed for tollbooth {tollBoothEntity.Index}");
             }
             catch (System.Exception ex)
             {
@@ -345,26 +401,23 @@ namespace TollboothHighways.Systems
             }
         }
 
-        
-
-        private void InitializeManualBarrier(Entity roadEntity)
+        private void SetupManualBarrierControl(Entity tollBoothEntity, Entity roadEntity)
         {
             try
-            {                
-                if (SubObjectsObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Objects.SubObject> subObjectsBuffer))
-                { 
-                    for (int i = 0; i < subObjectsBuffer.Length; i++)
-                    {                            
-                        if (m_TrafficLightObjectData.TryGetComponent(subObjectsBuffer[i].m_SubObject, out Game.Objects.TrafficLight barrierTrafficLight))
-                        {                                
-                            barrierTrafficLight.m_State = Game.Objects.TrafficLightState.Red; // Start with red light (barrier closed)
-                            barrierTrafficLight.m_GroupMask0 = 1; // Matches first group (binary: 0001)
-                            barrierTrafficLight.m_GroupMask1 = 0; // No secondary groups
-                            EntityManager.SetComponentData(subObjectsBuffer[i].m_SubObject, barrierTrafficLight);                                
-                            break;
-                        }
-                    }
+            {
+                if (!EntityManager.HasComponent<TollBoothManualData>(tollBoothEntity))
+                {
+                    return;
                 }
+
+                // Get the entity representing the edge end of the road
+                if (m_EdgeObjectData.TryGetComponent(roadEntity, out var edges))
+                {
+                    Entity roadEdgeEnd = edges.m_End;
+                    //AddManualBarrierControlToEdgeEnd(tollBoothEntity, roadEdgeEnd);
+                }
+
+
                 LogUtil.Info($"TollBoothSpawnSystem: SetupManualBarrierControl() - Successfully set up manual barrier control for tollbooth {tollBoothEntity.Index} - BARRIER IS CLOSED");
             }
             catch (System.Exception ex)

@@ -45,8 +45,11 @@
 	<Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.props" />
 	<Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.targets" />
 	<ItemGroup>
+	  <Compile Remove="Temp\**" />
 	  <Compile Remove="UI\src\components\**" />
+	  <EmbeddedResource Remove="Temp\**" />
 	  <EmbeddedResource Remove="UI\src\components\**" />
+	  <None Remove="Temp\**" />
 	  <None Remove="UI\src\components\**" />
 	</ItemGroup>
 	<ItemGroup>
