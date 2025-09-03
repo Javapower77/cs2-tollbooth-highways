@@ -149,10 +149,10 @@ namespace TollboothHighways.Systems
                                 InitializeTollBoothInsight(entity);
 
                                 // If this is a manual tollbooth, set up barrier control to start closed
-                                if (!EntityManager.HasComponent<TollBoothManualData>(entity))
+                                if (EntityManager.HasComponent<TollBoothManualData>(entity))
                                 {
-                                    LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Initializing Barrier to start closed for {entity.Index}");
-                                    InitializeManualBarrier(entity);
+                                    LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Initializing traffic light in Red for manual tollbooth {entity.Index}");
+                                    InitializeTollRoadTrafficLight(entity);
                                 }
 
                                 LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Adding TollBoothSpawned component to {entity.Index}");
@@ -345,183 +345,46 @@ namespace TollboothHighways.Systems
             }
         }
 
-        
-
-        private void InitializeManualBarrier(Entity roadEntity)
+        private void InitializeTollRoadTrafficLight(Entity tollBoothEntity)
         {
             try
-            {                
+            {
+               // Get the road entity from the toll booth's owner
+                if (!EntityManager.TryGetComponent<Owner>(tollBoothEntity, out var ownerComponent))
+                {
+                    return;
+                }
+
+                Entity roadEntity = ownerComponent.m_Owner;
+
+                // Try to find an existing TrafficLight sub-object and set its state to Red
                 if (SubObjectsObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Objects.SubObject> subObjectsBuffer))
-                { 
+                {
                     for (int i = 0; i < subObjectsBuffer.Length; i++)
-                    {                            
-                        if (m_TrafficLightObjectData.TryGetComponent(subObjectsBuffer[i].m_SubObject, out Game.Objects.TrafficLight barrierTrafficLight))
-                        {                                
-                            barrierTrafficLight.m_State = Game.Objects.TrafficLightState.Red; // Start with red light (barrier closed)
-                            barrierTrafficLight.m_GroupMask0 = 1; // Matches first group (binary: 0001)
-                            barrierTrafficLight.m_GroupMask1 = 0; // No secondary groups
-                            EntityManager.SetComponentData(subObjectsBuffer[i].m_SubObject, barrierTrafficLight);                                
-                            break;
+                    {
+                        Entity subObject = subObjectsBuffer[i].m_SubObject;
+                        if (EntityManager.HasComponent<Game.Objects.TrafficLight>(subObject))
+                        {
+                            var trafficLight = EntityManager.GetComponentData<Game.Objects.TrafficLight>(subObject);
+                            trafficLight.m_State = Game.Objects.TrafficLightState.Red;
+                            trafficLight.m_GroupMask0 = 1;
+                            trafficLight.m_GroupMask1 = 0;
+                            EntityManager.SetComponentData(subObject, trafficLight);
+                            LogUtil.Info($"TollBoothSpawnSystem: InitializeTollRoadTrafficLight() - Set existing traffic light to Red for road {roadEntity.Index}");
+                            return;
+                        }
+                        else
+                        {
+                            LogUtil.Info($"TollBoothSpawnSystem: InitializeTollRoadTrafficLight() - No subobject with Traffic Lights was found");
+                            return;
                         }
                     }
                 }
-                LogUtil.Info($"TollBoothSpawnSystem: SetupManualBarrierControl() - Successfully set up manual barrier control for tollbooth {tollBoothEntity.Index} - BARRIER IS CLOSED");
             }
             catch (System.Exception ex)
             {
-                LogUtil.Error($"TollBoothSpawnSystem: SetupManualBarrierControl() - FAILED to setup manual barrier control for tollbooth {tollBoothEntity.Index}. Error: {ex.Message}");
-                LogUtil.Error($"TollBoothSpawnSystem: SetupManualBarrierControl() - Stack trace: {ex.StackTrace}");
-                throw;
-            }
-        }
-
-        public void AddManualBarrierControlToEdgeEnd(Entity roadEdgeEndEntity, Entity roadEdge)
-        {
-            try
-            {
-                Entity controlledLane = Entity.Null;
-                float3 positionTrafficBarrier = new float3(0, 0, 0);
-
-                // 1. First ensure the roadEdgeEndEntity has a SubLane buffer, create if it doesn't exist
-                if (SubLaneObjectData.TryGetBuffer(roadEdgeEndEntity, out DynamicBuffer<Game.Net.SubLane> subLanesBuffer))
-                {
-                    // Check if we already have a road lane in the buffer
-                    for (int i = 0; i < subLanesBuffer.Length; i++)
-                    {
-                        if (subLanesBuffer[i].m_PathMethods == Game.Pathfind.PathMethod.Road)
-                        {
-                            controlledLane = subLanesBuffer[i].m_SubLane;
-                            LogUtil.Info($"TollBoothSpawnSystem: AddManualBarrierControlToEdgeEnd() - Found existing road lane {controlledLane.Index}");
-                            break;
-                        }
-                    }
-                }
-
-                // 2. Get the position for the traffic barrier from EndNodeGeometry of the Edge End Road
-                if (m_EndNodeGeometryData.TryGetComponent(roadEdge, out EndNodeGeometry endNodeGeometry))
-                {
-                    positionTrafficBarrier = endNodeGeometry.m_Geometry.m_Right.m_Right.a;
-                }
-
-                // 3. Create blocker entity for visual representation
-                Entity barrierBlocker = EntityManager.CreateEntity();
-                if (!EntityManager.HasComponent<Game.Objects.Transform>(barrierBlocker))
-                {
-                    EntityManager.AddComponentData(barrierBlocker, new Game.Objects.Transform
-                    {
-                        m_Position = new float3(0, 0, 0),
-                        m_Rotation = quaternion.identity
-                    });
-                }
-                EntityManager.AddComponent<Game.Net.TrainTrack>(barrierBlocker); // Mark as a Train Track to block vehicles
-
-                // 4. Add TrafficLights from Game.Net to the Edge End Road entity
-                if (!EntityManager.HasComponent<Game.Net.TrafficLights>(roadEdgeEndEntity))
-                { 
-                    EntityManager.AddComponentData(roadEdgeEndEntity, new Game.Net.TrafficLights
-                    {
-                       m_State = Game.Net.TrafficLightState.Ongoing,
-                       m_Flags = Game.Net.TrafficLightFlags.LevelCrossing,
-                       m_CurrentSignalGroup = 1,
-                       m_SignalGroupCount = 2,
-                       m_NextSignalGroup = 0
-                    });
-                }
-
-                // 5. Ensure the controlled lane exists, create if it doesn't with default values
-                if (!EntityManager.HasComponent<LaneSignal>(controlledLane))
-                {
-                    EntityManager.AddComponentData<LaneSignal>(controlledLane, new LaneSignal
-                    {
-                        m_Signal = LaneSignalType.Stop,
-                        m_Flags = LaneSignalFlags.Physical,
-                        m_GroupMask = 1,
-                        m_Default = 0,
-                        m_Priority = 0,
-                        m_Petitioner = Entity.Null,
-                        m_Blocker = barrierBlocker
-                    });
-                }
-
-                // 5. Get manual processing time
-                //var manual = EntityManager.GetComponentData<TollBoothManualData>(tollBoothEntity);
-                //int openFrames = math.max(30, (int)(manual.ProcessingTime * 60f));
-
-                // 6. Create an entity for the traffic barrier prefab ojbect
-                Entity trafficBarrierEntity = EntityManager.CreateEntity();
-                if (m_PrefabSystem != null)
-                {
-                    if(m_PrefabSystem.TryGetPrefab(new PrefabID("StaticObjectPrefab", "EU_TrafficLightLevelcrossingRight01"), out PrefabBase EU_TrafficBarrier))
-                    {
-                        EntityManager.AddComponentData(trafficBarrierEntity, new PrefabRef(m_PrefabSystem.GetEntity(EU_TrafficBarrier)));
-                        EntityManager.AddComponentData(trafficBarrierEntity, new Game.Objects.Transform
-                        {
-                            m_Position = positionTrafficBarrier,
-                            m_Rotation = quaternion.identity
-                        });
-                        EntityManager.AddComponentData(trafficBarrierEntity, new Game.Objects.TrafficLight
-                        {
-                            m_State = Game.Objects.TrafficLightState.Red, // Start with red light (barrier closed)
-                            m_GroupMask0 = 1,  // Matches first group (binary: 0001)
-                            m_GroupMask1 = 0   // No secondary groups
-                        });
-                        EntityManager.AddComponentData(trafficBarrierEntity, new Game.Common.Owner
-                        {
-                                m_Owner = roadEdge
-                        });
-                        EntityManager.AddComponent<Game.Objects.Object>(trafficBarrierEntity);
-                        EntityManager.AddComponent<Game.Objects.ObjectGeometry>(trafficBarrierEntity);
-                        EntityManager.AddComponent<Game.Objects.Static>(trafficBarrierEntity);
-                        EntityManager.AddComponent<Game.Objects.Secondary>(trafficBarrierEntity);
-
-                        // Initialize the prefab components on the entity
-                        EU_TrafficBarrier.Initialize(EntityManager, trafficBarrierEntity);
-                        EU_TrafficBarrier.LateInitialize(EntityManager, trafficBarrierEntity);
-                    }
-                };
-
-                // 9. Create SubObject buffer if it doesn't exist and add traffic light
-                if (!SubObjectsObjectData.TryGetBuffer(roadEdgeEndEntity, out DynamicBuffer<Game.Objects.SubObject> subObjectsBuffer))
-                {
-                    subObjectsBuffer = EntityManager.AddBuffer<Game.Objects.SubObject>(roadEdgeEndEntity);
-                    LogUtil.Info($"TollBoothSpawnSystem: AddManualBarrierControlToEdgeEnd() - Created new SubObject buffer for road edge {roadEdgeEndEntity.Index}");
-                }
-                subObjectsBuffer.Add(new Game.Objects.SubObject(trafficBarrierEntity));
-
-                /*
-                // 10. Create new TrafficLight SubObject on the edge end road
-                Entity trafficLightEntity = EntityManager.CreateEntity();
-                float3 trafficLightPosition = new float3(0, 0, 0);
-                if (m_TransformData.TryGetComponent(roadEdgeEndEntity, out var roadTransform))
-                {
-                    trafficLightPosition = roadTransform.m_Position + new float3(2, 3, 0); // Offset for visibility
-                }
-
-                EntityManager.AddComponentData(trafficLightEntity, new Game.Objects.Transform
-                {
-                    m_Position = trafficLightPosition,
-                    m_Rotation = quaternion.identity
-                });
-
-                var trafficLight = new Game.Objects.TrafficLight
-                {
-                    m_State = Game.Objects.TrafficLightState.Red, // Start with red light (barrier closed)
-                    m_GroupMask0 = 1,  // Matches first group (binary: 0001)
-                    m_GroupMask1 = 0   // No secondary groups
-                };
-                EntityManager.AddComponentData(trafficLightEntity, trafficLight);
-
-                // Add the traffic light to the SubObject buffer
-                subObjectsBuffer.Add(new Game.Objects.SubObject(trafficLightEntity));
-                */
-
-                LogUtil.Info($"TollBoothSpawnSystem: SetupManualBarrierControl() - Successfully set up manual barrier control for tollbooth road {roadEdgeEndEntity.Index} - BARRIER IS CLOSED");
-            }
-            catch (System.Exception ex)
-            {
-                LogUtil.Error($"TollBoothSpawnSystem: SetupManualBarrierControl() - FAILED to setup manual barrier control for tollbooth road {roadEdgeEndEntity.Index}. Error: {ex.Message}");
-                LogUtil.Error($"TollBoothSpawnSystem: SetupManualBarrierControl() - Stack trace: {ex.StackTrace}");
-                throw;
+                LogUtil.Error($"TollBoothSpawnSystem: InitializeTollRoadTrafficLight() - FAILED for tollbooth {tollBoothEntity.Index}. Error: {ex.Message}");
+                LogUtil.Error($"TollBoothSpawnSystem: InitializeTollRoadTrafficLight() - Stack trace: {ex.StackTrace}");
             }
         }
 

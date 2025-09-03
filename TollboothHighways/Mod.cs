@@ -82,6 +82,7 @@ namespace TollboothHighways
                 // Register game simulation systems after prefab systems
                 updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
+                
                 // StopVehiclesOnRoadSystem ordering:
                 // After core CarNavigationSystem (so navigation complete)
                 updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
