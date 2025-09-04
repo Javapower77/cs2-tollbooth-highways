@@ -8,6 +8,7 @@ using Game.Prefabs;
 using Game.Prefabs.Modes;
 using Game.SceneFlow;
 using Game.UI.InGame;
+using HarmonyLib;
 using System;
 using System.IO;
 using System.Reflection;
@@ -41,6 +42,11 @@ namespace TollboothHighways
         {
             // Log entry for debugging purposes
             LogUtil.Info($"{nameof(Mod)}.{nameof(OnLoad)}, version:{InformationalVersion}");
+
+            // Apply Harmony Patches
+            var harmony = new Harmony(Id);
+            harmony.PatchAll(typeof(Mod).Assembly);
+            LogUtil.Info("Harmony patches applied.");
 
             try
             {
@@ -77,12 +83,17 @@ namespace TollboothHighways
 
                 // Register systems with proper update phases and ordering
                 // INPORTANT!!: Register prefab system FIRST and ensure it runs early in PrefabUpdate phase
-                updateSystem.UpdateAfter<TollRoadPrefabUpdateSystem>(SystemUpdatePhase.PrefabUpdate);
+                updateSystem.UpdateAt<TollRoadPrefabUpdateSystem>(SystemUpdatePhase.PrefabUpdate);
+
+                // Ensure system is present in simulation phase (explicit)
+                updateSystem.UpdateAt<TollboothVehicleRestrictionSystem>(SystemUpdatePhase.GameSimulation);
+
+                // Order it after LaneDataSystem so our Forbidden flag sticks post-refresh
+                updateSystem.UpdateAfter<TollboothVehicleRestrictionSystem, Game.Pathfind.LaneDataSystem>(SystemUpdatePhase.GameSimulation);
 
                 // Register game simulation systems after prefab systems
                 updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                
                 // StopVehiclesOnRoadSystem ordering:
                 // After core CarNavigationSystem (so navigation complete)
                 updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);

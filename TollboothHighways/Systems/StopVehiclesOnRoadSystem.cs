@@ -78,6 +78,16 @@ namespace TollboothHighways.Systems
         private EntityQuery m_CooldownQuery;
 
         /// <summary>
+        /// Query containing all manual toll booth roads (used for existence checks).
+        /// </summary>
+        private EntityQuery m_ManualRoadQuery;
+
+        /// <summary>
+        /// Lookup for toll road metadata component (read-only).
+        /// </summary>
+        private ComponentLookup<TollRoadPrefabData> m_TollRoadLookup;
+
+        /// <summary>
         /// Lookup for lane data (read-only).
         /// </summary>
         private ComponentLookup<Lane> m_LaneLookup;
@@ -93,14 +103,9 @@ namespace TollboothHighways.Systems
         private ComponentLookup<Road> m_RoadLookup;
 
         /// <summary>
-        /// Lookup for toll road metadata component (read-only).
-        /// </summary>
-        private ComponentLookup<TollRoadPrefabData> m_TollRoadLookup;
-
-        /// <summary>
         /// Lookup for toll booth manual payment (read-only).
         /// </summary>
-        private ComponentLookup<TollBoothManualData> m_TollBoothManualLookup;
+        private ComponentLookup<TollBoothManualData> m_ManualTollRoadLookup;
 
         /// <summary>
         /// Lookup for transforms (read-only).
@@ -270,6 +275,10 @@ namespace TollboothHighways.Systems
 
             m_CooldownQuery = GetEntityQuery(ComponentType.ReadOnly<TollPaymentCooldown>());
 
+            m_ManualRoadQuery = GetEntityQuery(
+                ComponentType.ReadOnly<TollBoothManualData>(),
+                ComponentType.ReadOnly <Road>());
+
             RequireForUpdate(m_VehicleQuery);
         }
 
@@ -304,11 +313,11 @@ namespace TollboothHighways.Systems
             m_LaneLookup = GetComponentLookup<Lane>(true);
             m_OwnerLookup = GetComponentLookup<Owner>(true);
             m_RoadLookup = GetComponentLookup<Road>(true);
-            m_TollRoadLookup = GetComponentLookup<TollRoadPrefabData>(true);
             m_TransformLookup = GetComponentLookup<Transform>(true);
             m_SubObjectsLookup = GetBufferLookup<Game.Objects.SubObject>(true);
             m_TrafficLightLookup = GetComponentLookup<Game.Objects.TrafficLight>(false); // write in apply job
-            m_TollBoothManualLookup = GetComponentLookup<TollBoothManualData>(true);
+            m_ManualTollRoadLookup = GetComponentLookup<TollBoothManualData>(true);
+            m_TollRoadLookup = GetComponentLookup<TollRoadPrefabData>(true);
 
             var ecb = m_EndFrameBarrier.CreateCommandBuffer();
             var ecbParallel = ecb.AsParallelWriter();
@@ -318,12 +327,14 @@ namespace TollboothHighways.Systems
             {
                 uint now = frame;
                 var ecbLocal = ecbParallel;
+                var manualRoadL = m_ManualTollRoadLookup;
                 Entities
                     .WithName("CleanupTollCooldowns")
                     .WithStoreEntityQueryInField(ref m_CooldownQuery)
+                    .WithReadOnly(manualRoadL)
                     .ForEach((Entity e, int entityInQueryIndex, in TollPaymentCooldown cd) =>
                     {
-                        if (now >= cd.ExpireFrame || !em.Exists(cd.TollBooth))
+                        if (now >= cd.ExpireFrame || !em.Exists(cd.TollBooth) || !manualRoadL.HasComponent(cd.TollBooth))
                         {
                             ecbLocal.RemoveComponent<TollPaymentCooldown>(entityInQueryIndex, e);
                         }
@@ -334,7 +345,7 @@ namespace TollboothHighways.Systems
             {
                 uint now = frame;
                 var transformL = m_TransformLookup;
-                var manualL = m_TollBoothManualLookup;
+                var manualRoadL = m_ManualTollRoadLookup;
                 var closeWriter = m_CloseBarrierQueue.AsParallelWriter();
                 var ecbLocal = ecbParallel;
 
@@ -342,7 +353,7 @@ namespace TollboothHighways.Systems
                     .WithName("UpdateTollProcessing_BarrierQueue")
                     .WithStoreEntityQueryInField(ref m_ProcessingQuery)
                     .WithReadOnly(transformL)
-                    .WithReadOnly(manualL)
+                    .WithReadOnly(manualRoadL)
                     .ForEach((Entity e, int entityInQueryIndex,
                               ref CarNavigation navigation,
                               ref Moving moving,
@@ -350,7 +361,7 @@ namespace TollboothHighways.Systems
                               in TollPaymentProcessing processing) =>
                     {
                         // Abort if tollbooth is not manual payment
-                        if (processing.TollBooth == Entity.Null || !transformL.HasComponent(processing.TollBooth) || !manualL.HasComponent(processing.TollBooth))
+                        if (processing.TollBooth == Entity.Null || !transformL.HasComponent(processing.TollBooth) || !manualRoadL.HasComponent(processing.TollBooth))
                         {
                             closeWriter.Enqueue(new BarrierChange(processing.RoadEntity, Game.Objects.TrafficLightState.Red));
                             ecbLocal.RemoveComponent<TollPaymentProcessing>(entityInQueryIndex, e);
@@ -395,8 +406,8 @@ namespace TollboothHighways.Systems
                 var laneL = m_LaneLookup;
                 var ownerL = m_OwnerLookup;
                 var roadL = m_RoadLookup;
+                var manualRoadL = m_ManualTollRoadLookup;
                 var tollRoadL = m_TollRoadLookup;
-                var manualL = m_TollBoothManualLookup;
                 var transformL = m_TransformLookup;
                 var subObjsL = m_SubObjectsLookup;
                 var tlLookupRO = GetComponentLookup<Game.Objects.TrafficLight>(true); // detection only
@@ -409,8 +420,8 @@ namespace TollboothHighways.Systems
                     .WithReadOnly(laneL)
                     .WithReadOnly(ownerL)
                     .WithReadOnly(roadL)
+                    .WithReadOnly(manualRoadL)
                     .WithReadOnly(tollRoadL)
-                    .WithReadOnly(manualL)
                     .WithReadOnly(transformL)
                     .WithReadOnly(subObjsL)
                     .WithReadOnly(tlLookupRO)
@@ -434,16 +445,20 @@ namespace TollboothHighways.Systems
                         if (roadEntity == Entity.Null || !roadL.HasComponent(roadEntity))
                             return;
 
+                        // Only proceed if road has manual toll component directly
+                        if (!manualRoadL.HasComponent(roadEntity))
+                            return;
+
                         if (!tollRoadL.TryGetComponent(roadEntity, out var tollRoadData) || !tollRoadData.HasActiveTollbooth)
                             return;
-                                               
-                        Entity tollBooth = tollRoadData.AssociatedTollbooth;
-                        if (tollBooth == Entity.Null || !transformL.HasComponent(tollBooth) || !manualL.HasComponent(tollBooth))
-                            return;  // Only manual toll booths supported
 
+                        Entity tollBooth = tollRoadData.AssociatedTollbooth;
+                        
                         float3 stopPos;
                         if (!TryGetTrafficLightStopPosition(roadEntity, subObjsL, tlLookupRO, transformL, out stopPos))
+                        {
                             stopPos = transformL[tollBooth].m_Position;
+                        }                        
 
                         float3 toStop = stopPos - vehicleTransform.m_Position;
                         float dist = math.length(toStop);

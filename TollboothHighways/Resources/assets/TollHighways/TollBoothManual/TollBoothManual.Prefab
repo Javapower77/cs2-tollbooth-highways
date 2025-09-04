@@ -1,7 +1,7 @@
 {
     "$id": 0,
     "$type": "0|Game.Prefabs.StaticObjectPrefab, Game",
-    "name": "TollBooth",
+    "name": "TollBoothManual",
     "active": true,
     "components": {
         "$id": 1,
@@ -208,7 +208,7 @@
             {
                 "$id": 15,
                 "$type": "13|Game.Prefabs.ObjectMeshInfo, Game",
-                "m_Mesh": $fstrref:"UnityGUID:8105234673f6f81428a8935aae200a5d",
+                "m_Mesh": $fstrref:"UnityGUID:2a7cc9fa2dd07c345bcb84907d223b7c",
                 "m_Position": {
                     "$type": 6,
                     "x": 0,

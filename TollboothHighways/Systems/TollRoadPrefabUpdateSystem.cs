@@ -60,20 +60,23 @@ namespace Systems
             try
             {
                 int successCount = 0;
-                int totalPrefabs = 4; // Total number of prefabs we're trying to initialize
+                int totalPrefabs = 5; // Total number of prefabs we're trying to initialize
 
                 // Add toll components to road prefabs
-                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Toll 60kph)"))
+                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Toll 60kph)", false))
                     successCount++;
                     
                 if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Manual Toll 60kph)", true))
                     successCount++;
                     
-                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane - Public Transport (Toll 60kph)"))
+                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane - Public Transport (Toll 60kph)", false))
                     successCount++;
                 
                 // Add toll cabin components
-                if (AddTollCabinComponentToRoad("StaticObjectPrefab", "TollBooth", true))
+                if (AddTollCabinComponentToRoad("StaticObjectPrefab", "TollBooth", false))
+                    successCount++;
+
+                if (AddTollCabinComponentToRoad("StaticObjectPrefab", "TollBoothManual", true))
                     successCount++;
 
                 bool allSuccessful = successCount == totalPrefabs;
