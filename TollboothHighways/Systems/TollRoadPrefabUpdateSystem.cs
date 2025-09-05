@@ -1,8 +1,11 @@
 ﻿using Game;
 using Game.Net;
 using Game.Prefabs;
+using System;
 using TollboothHighways.Domain.Components;
+using TollboothHighways.Domain.Enums;
 using TollboothHighways.Utilities;
+using TollRoadHighways.Domain.Components;
 using Unity.Entities;
 using Unity.Mathematics;
 
@@ -60,18 +63,36 @@ namespace Systems
             try
             {
                 int successCount = 0;
-                int totalPrefabs = 5; // Total number of prefabs we're trying to initialize
+                int totalPrefabs = 10; // Total number of prefabs we're trying to initialize
 
-                // Add toll components to road prefabs
-                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Toll 60kph)", false))
+                // Automatic Tollbooths Roads Prefab
+                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Automatic - Private Transit)", false, VehicleGroup.PrivateTransport))
                     successCount++;
-                    
-                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Manual Toll 60kph)", true))
+
+                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Automatic - Public Transport)", false, VehicleGroup.PublicTransport))
                     successCount++;
-                    
-                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane - Public Transport (Toll 60kph)", false))
+
+                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Automatic - Heavy Transport)", false, VehicleGroup.Trucks))
                     successCount++;
-                
+
+                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Automatic - Service Transport)", false, VehicleGroup.ServiceVehicles))
+                    successCount++;
+
+                // Manual Tollboooth Roads Prefab
+                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Manual - Private Transit)", true, VehicleGroup.PrivateTransport))
+                    successCount++;
+
+                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Manual - Public Transport)", true, VehicleGroup.PublicTransport))
+                    successCount++;
+
+                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Manual - Heavy Transport)", true, VehicleGroup.PublicTransport))
+                    successCount++;
+
+                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Manual - Service Transport)", true, VehicleGroup.PublicTransport))
+                    successCount++;
+
+
+
                 // Add toll cabin components
                 if (AddTollCabinComponentToRoad("StaticObjectPrefab", "TollBooth", false))
                     successCount++;
@@ -107,7 +128,7 @@ namespace Systems
         /// <param name="prefabNameToSearch">The prefab name to search for</param>
         /// <param name="isManual">Whether this is a manual toll booth</param>
         /// <returns>True if successful, false otherwise</returns>
-        private bool AddTollComponentToRoad(string typePrefab, string prefabNameToSearch, bool isManual = false)
+        private bool AddTollComponentToRoad(string typePrefab, string prefabNameToSearch, bool isManual, VehicleGroup vehicleGroup)
         {
             try
             {
@@ -126,6 +147,9 @@ namespace Systems
                     // Add the TollRoadPrefabInfo component
                     var tollRoadInfo = tollRoadPrefab.AddComponent<TollRoadPrefabInfo>();
                     LogUtil.Info($"TollRoadPrefabUpdateSystem: Added TollRoadPrefabInfo to '{prefabNameToSearch}'");
+
+                    // Add the component corresponding to the group type of vehicles allowed
+                    SetGroupVehicleComponent(tollRoadPrefab, vehicleGroup);
 
                     // Add the TollRoadManualInfo component if this is a manual toll booth
                     if (isManual)
@@ -151,6 +175,37 @@ namespace Systems
                 LogUtil.Exception(ex);
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Configures the specified vehicle group by adding the appropriate component to the given prefab.
+        /// </summary>
+        /// <remarks>This method adds a specific component to the provided prefab based on the vehicle
+        /// group.  The component added corresponds to the type of vehicles in the group, such as private transport,
+        /// public transport, trucks, or service vehicles.</remarks>
+        /// <param name="Prefab">The prefab to which the vehicle group-specific component will be added. Cannot be null.</param>
+        /// <param name="vehicleGroup">The vehicle group that determines the type of component to add.</param>
+        private void SetGroupVehicleComponent(PrefabBase Prefab, VehicleGroup vehicleGroup)
+        {
+            switch(vehicleGroup)
+            {
+                case VehicleGroup.PrivateTransport:
+                    Prefab.AddComponent<TollRoadPrivateTransportInfo>();
+                    break;
+
+                case VehicleGroup.PublicTransport:
+                    Prefab.AddComponent<TollRoadPublicTransportInfo>();
+                    break;
+
+                case VehicleGroup.Trucks:
+                    Prefab.AddComponent<TollRoadTruckInfo>();
+                    break;
+
+                case VehicleGroup.ServiceVehicles:
+                    Prefab.AddComponent<TollRoadServiceVehiclesInfo>();
+                    break;
+            }
+
         }
 
         /// <summary>

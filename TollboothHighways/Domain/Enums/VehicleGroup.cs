@@ -8,9 +8,10 @@ namespace TollboothHighways.Domain.Enums
 {
     public enum VehicleGroup
 {
-        PrivateTransport = 0,
-        Trucks = 1,
-        PublicTransport = 2,
-        ServiceVehicles = 3
+        None = 0,
+        PrivateTransport = 1,
+        Trucks = 2,
+        PublicTransport = 3,
+        ServiceVehicles = 4 
     }
 }

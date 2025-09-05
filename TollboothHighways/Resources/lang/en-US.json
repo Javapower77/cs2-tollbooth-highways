@@ -1,14 +1,24 @@
 {
   "Assets.NAME[Tolls Collection Asset Pack Filter]": "Tolls Collection Asset Pack Filter",
   "Assets.DESCRIPTION[Tolls Collection Asset Pack Filter]": "Tolls Collection Asset Pack Filter",
-  "Assets.NAME[Highway Oneway - 1 lane - Public Transport (Toll 60kph)]": "Highway Oneway - 1 lane - Public Transport (Toll 60kph)",
-  "Assets.DESCRIPTION[Highway Oneway - 1 lane - Public Transport (Toll 60kph)]": "One lane one-way highway with automatic tollbooth only for public and service transportation.",
-  "Assets.NAME[Highway Oneway - 1 lane (Toll 60kph)]": "Highway Oneway - 1 lane (Toll 60kph)",
-  "Assets.DESCRIPTION[Highway Oneway - 1 lane (Toll 60kph)]": "One lane one-way highway with automatic tollbooth.",
+  "Assets.NAME[Highway Oneway - 1 lane (Automatic - Public Transport)]": "Highway Oneway - 1 lane (Automatic - Public Transport)",
+  "Assets.DESCRIPTION[Highway Oneway - 1 lane (Automatic - Public Transport)]": "One lane one-way highway with automatic tollbooth only for buses and taxis.",
+  "Assets.NAME[Highway Oneway - 1 lane (Automatic - Private Transit)]": "Highway Oneway - 1 lane (Automatic - Private Transit)",
+  "Assets.DESCRIPTION[Highway Oneway - 1 lane (Automatic - Private Transit)]": "One lane one-way highway with automatic tollbooth only for personal cars and motorcycles.",
+  "Assets.NAME[Highway Oneway - 1 lane (Automatic - Heavy Transport)]": "Highway Oneway - 1 lane (Automatic - Heavy Transport)",
+  "Assets.DESCRIPTION[Highway Oneway - 1 lane (Automatic - Heavy Transport)]": "One lane one-way highway with automatic tollbooth only for trucks.",
+  "Assets.NAME[Highway Oneway - 1 lane (Automatic - Service Transport)]": "Highway Oneway - 1 lane (Automatic - Service Transport)",
+  "Assets.DESCRIPTION[Highway Oneway - 1 lane (Automatic - Service Transport)]": "One lane one-way highway with automatic tollbooth only for serive transportation.",
   "Assets.NAME[TollBooth]": "Toll Booth Cabin",
   "Assets.DESCRIPTION[TollBooth]": "Toll booth cabin to place on a road.",
-  "Assets.NAME[Highway Oneway - 1 lane (Manual Toll 60kph)]": "Highway Oneway - 1 lane (Manual Toll 60kph)",
-  "Assets.DESCRIPTION[Highway Oneway - 1 lane (Manual Toll 60kph)]": "One lane one-way highway with manual tollbooth."
+  "Assets.NAME[Highway Oneway - 1 lane (Manual - Private Transit)]": "Highway Oneway - 1 lane (Manual - Private Transit)",
+  "Assets.DESCRIPTION[Highway Oneway - 1 lane (Manual - Private Transit)]": "One lane one-way Manual with manual tollbooth only for personal cars and motorcycles.",
+  "Assets.NAME[Highway Oneway - 1 lane (Manual - Public Transport)]": "Highway Oneway - 1 lane (Manual - Public Transport)",
+  "Assets.DESCRIPTION[Highway Oneway - 1 lane (Manual - Public Transport)]": "One lane one-way highway with manual tollbooth only for buses and taxis.",
+  "Assets.NAME[Highway Oneway - 1 lane (AutoManualmatic - Heavy Transport)]": "Highway Oneway - 1 lane (Manual - Heavy Transport)",
+  "Assets.DESCRIPTION[Highway Oneway - 1 lane (Manual - Heavy Transport)]": "One lane one-way highway with manual tollbooth only for trucks.",
+  "Assets.NAME[Highway Oneway - 1 lane (Manual - Service Transport)]": "Highway Oneway - 1 lane (Manual - Service Transport)",
+  "Assets.DESCRIPTION[Highway Oneway - 1 lane (Manual - Service Transport)]": "One lane one-way highway with manual tollbooth only for serive transportation."
 
 
 }
