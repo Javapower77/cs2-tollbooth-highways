@@ -85,21 +85,21 @@ namespace TollboothHighways
                 // INPORTANT!!: Register prefab system FIRST and ensure it runs early in PrefabUpdate phase
                 updateSystem.UpdateAt<TollRoadPrefabUpdateSystem>(SystemUpdatePhase.PrefabUpdate);
 
+                // Classification must run early in simulation
+                updateSystem.UpdateAt<VehicleCategoryAssignmentSystem>(SystemUpdatePhase.GameSimulation);
+
+                
+
                 // Spawn after LaneDataSystem so base lane data exists
                 updateSystem.UpdateAfter<TollBoothSpawnSystem, Game.Pathfind.LaneDataSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation); // remove this line if duplicate
-                                                                                               // Tag lanes after tollbooths spawn
-                updateSystem.UpdateAfter<ManualTollboothLaneTagSystem, TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAt<ManualTollboothLaneTagSystem>(SystemUpdatePhase.GameSimulation);
+                // Build lane masks (after prefab processing & road spawn)
+                updateSystem.UpdateAt<TollLaneMaskBuildSystem>(SystemUpdatePhase.GameSimulation);
 
-                // Path cost system after tagging (before/after CarNavigation / Pathfind as needed)
-                updateSystem.UpdateAfter<PersonalCarTollPathfindCostSystem, ManualTollboothLaneTagSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAt<PersonalCarTollPathfindCostSystem>(SystemUpdatePhase.GameSimulation);
+                // Prune vehicles each frame (after mask build)
+                updateSystem.UpdateAfter<TollLanePathPruneRefCountSystem, TollLaneMaskBuildSystem>(SystemUpdatePhase.GameSimulation);
 
-                // Optional enforcement (after navigation)
-                updateSystem.UpdateAfter<EnforceManualTollLaneUsageSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAt<EnforceManualTollLaneUsageSystem>(SystemUpdatePhase.GameSimulation);
 
                 // StopVehiclesOnRoadSystem ordering:
                 // After core CarNavigationSystem (so navigation complete)

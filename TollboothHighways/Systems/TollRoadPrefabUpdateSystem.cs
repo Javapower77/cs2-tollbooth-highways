@@ -63,7 +63,7 @@ namespace Systems
             try
             {
                 int successCount = 0;
-                int totalPrefabs = 10; // Total number of prefabs we're trying to initialize
+                int totalPrefabs = 12; // Total number of prefabs we're trying to initialize
 
                 // Automatic Tollbooths Roads Prefab
                 if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Automatic - Private Transit)", false, VehicleGroup.PrivateTransport))
@@ -78,6 +78,9 @@ namespace Systems
                 if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Automatic - Service Transport)", false, VehicleGroup.ServiceVehicles))
                     successCount++;
 
+                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Automatic - Any Transport)", false, VehicleGroup.All))
+                    successCount++;
+
                 // Manual Tollboooth Roads Prefab
                 if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Manual - Private Transit)", true, VehicleGroup.PrivateTransport))
                     successCount++;
@@ -85,12 +88,14 @@ namespace Systems
                 if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Manual - Public Transport)", true, VehicleGroup.PublicTransport))
                     successCount++;
 
-                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Manual - Heavy Transport)", true, VehicleGroup.PublicTransport))
+                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Manual - Heavy Transport)", true, VehicleGroup.Trucks))
                     successCount++;
 
-                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Manual - Service Transport)", true, VehicleGroup.PublicTransport))
+                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Manual - Service Transport)", true, VehicleGroup.ServiceVehicles))
                     successCount++;
 
+                if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Manual - Any Transport)", true, VehicleGroup.All))
+                    successCount++;
 
 
                 // Add toll cabin components
@@ -203,6 +208,10 @@ namespace Systems
 
                 case VehicleGroup.ServiceVehicles:
                     Prefab.AddComponent<TollRoadServiceVehiclesInfo>();
+                    break;
+
+                case VehicleGroup.All:
+                    Prefab.AddComponent<TollRoadAllVehiclesInfo>();
                     break;
             }
 

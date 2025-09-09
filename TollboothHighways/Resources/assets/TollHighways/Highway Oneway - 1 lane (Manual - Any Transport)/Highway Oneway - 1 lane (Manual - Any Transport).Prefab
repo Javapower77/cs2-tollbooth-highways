@@ -1,7 +1,7 @@
 {
     "$id": 0,
     "$type": "0|Game.Prefabs.RoadPrefab, Game",
-    "name": "Highway Oneway - 1 lane (Manual - Service Transport)",
+    "name": "Highway Oneway - 1 lane (Manual - Any Transport)",
     "active": true,
     "components": {
         "$id": 1,
@@ -1129,7 +1129,7 @@
                 "active": true,
                 "m_Group": $fstrref:"CID:88b04abef2163d27779488a29daef039",
                 "m_Priority": 999908,
-                "m_Icon": "coui://javapower-tollbooth-highways/Tollbooth-ServiceTransport-Manual.png",
+                "m_Icon": "coui://javapower-tollbooth-highways/Tollbooth.png",
                 "m_IsDebugObject": false
             },
             {

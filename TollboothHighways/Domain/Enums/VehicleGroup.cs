@@ -12,6 +12,7 @@ namespace TollboothHighways.Domain.Enums
         PrivateTransport = 1,
         Trucks = 2,
         PublicTransport = 3,
-        ServiceVehicles = 4 
+        ServiceVehicles = 4,
+        All = 5
     }
 }

@@ -237,36 +237,37 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   const shouldShowTooltip = !disabled && tooltip && (forceVisible || isHovered || isFocused);
 
-  return React.createElement(React.Fragment, {}, [
-    React.createElement(FocusBoundary, {
-      onFocusChange: handleFocusChange,
-      key: "focus-boundary",
-      children: React.createElement("div", {
-        onMouseEnter: handleMouseEnter,
-        onMouseLeave: handleMouseLeave,
-        style: { position: 'relative' }
-      }, [
-        children,
-        shouldShowTooltip && React.createElement("div", {
-          key: "tooltip",
-          className: classNames("tooltip-container", className),
-          style: {
-            position: 'absolute',
-            top: '100%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 1000,
-            backgroundColor: 'rgba(0, 0, 0, 0.9)',
-            color: 'white',
-            padding: '8px 12px',
-            borderRadius: '4px',
-            fontSize: '14px',
-            whiteSpace: 'nowrap',
-            marginTop: '4px',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
-          }
-        }, tooltip)
-      ]))
+    return React.createElement(React.Fragment, {}, [
+        React.createElement(FocusBoundary, {
+            onFocusChange: handleFocusChange,
+            key: "focus-boundary",
+            children: React.createElement("div", {
+                onMouseEnter: handleMouseEnter,
+                onMouseLeave: handleMouseLeave,
+                style: { position: 'relative' }
+            }, [
+                children,
+                shouldShowTooltip && React.createElement("div", {
+                    key: "tooltip",
+                    className: classNames("tooltip-container", className),
+                    style: {
+                        position: 'absolute',
+                        top: '100%',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        zIndex: 1000,
+                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        color: 'white',
+                        padding: '8px 12px',
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        whiteSpace: 'nowrap',
+                        marginTop: '4px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }
+                }, tooltip)
+            ])
+        })
     ]);
 };
 
