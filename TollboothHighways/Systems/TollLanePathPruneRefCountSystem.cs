@@ -40,7 +40,7 @@ namespace TollboothHighways.Systems
             {
                 All = new[]
                 {
-                    ComponentType.ReadOnly<Car>(),
+                    ComponentType.ReadOnly<Vehicle>(),
                     ComponentType.ReadOnly<CarCurrentLane>(),
                     ComponentType.ReadOnly<VehicleCategoryData>()
                 },

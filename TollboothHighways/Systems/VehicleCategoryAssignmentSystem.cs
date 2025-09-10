@@ -22,7 +22,7 @@ namespace TollboothHighways.Systems
             base.OnCreate();
             m_NewCars = GetEntityQuery(new EntityQueryDesc
             {
-                All = new[] { ComponentType.ReadOnly<Car>() },
+                All = new[] { ComponentType.ReadOnly<Vehicle>() },
                 None = new[]
                 {
                     ComponentType.ReadOnly<VehicleCategoryData>(),
@@ -42,17 +42,17 @@ namespace TollboothHighways.Systems
                 byte mask = 0;
 
                 // Private
-                if (em.HasComponent<PersonalCar>(v) || em.HasComponent<Taxi>(v) || HasPassengers(em, v))
-                    mask |= 0b0001;
+                if (em.HasComponent<PersonalCar>(v))
+                    mask = 0b0001;
 
-                // Transit (public transport bus vehicles)
-                if (em.HasComponent<PublicTransport>(v))
-                    mask |= 0b0010;
+                // Transit (public transport bus vehicles and taxi)
+                if (em.HasComponent<PublicTransport>(v) ||
+                    em.HasComponent<Taxi>(v))
+                    mask = 0b0010;
 
                 // Heavy
-                if (em.HasComponent<DeliveryTruck>(v) ||
-                    em.HasComponent<CarTrailerLane>(v)) // trailer indicator for trucks
-                    mask |= 0b0100;
+                if (em.HasComponent<DeliveryTruck>(v))
+                    mask = 0b0100;
 
                 // Service
                 if (em.HasComponent<PoliceCar>(v) ||
@@ -65,7 +65,7 @@ namespace TollboothHighways.Systems
                     em.HasComponent<PrisonerTransport>(v) ||
                     em.HasComponent<PostVan>(v) ||
                     em.HasComponent<EvacuatingTransport>(v))
-                    mask |= 0b1000;
+                    mask = 0b1000;
 
                 // Fallback: if nothing matched but it’s still a Car, treat as private.
                 if (mask == 0)

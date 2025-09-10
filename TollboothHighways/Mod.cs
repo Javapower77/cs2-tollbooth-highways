@@ -5,7 +5,6 @@ using Game;
 using Game.Input;
 using Game.Modding;
 using Game.Prefabs;
-using Game.Prefabs.Modes;
 using Game.SceneFlow;
 using Game.UI.InGame;
 using HarmonyLib;
@@ -21,7 +20,6 @@ namespace TollboothHighways
 {
     public class Mod : IMod
     {
-        
         public const string MOD_NAME = "TollboothHighways";
         public static string uiHostName = "javapower-tollbooth-highways";
         public static readonly string Id = "TollboothHighways";
@@ -50,8 +48,7 @@ namespace TollboothHighways
 
             try
             {
-                // Register Key Binding and Settings UI
-                LogUtil.Info("Registring Settings options in UI and keybindings");
+                LogUtil.Info("Registering settings + key bindings");
                 Settings = new ModSettings(this);
                 Settings.RegisterKeyBindings();
                 Settings.RegisterInOptionsUI();
@@ -79,41 +76,51 @@ namespace TollboothHighways
                 {
                     LogUtil.Error("Unable to get mod executable asset.");
                     return;
-                } 
+                }
 
-                // Register systems with proper update phases and ordering
-                // INPORTANT!!: Register prefab system FIRST and ensure it runs early in PrefabUpdate phase
+                // ---------------------------
+                // SYSTEM REGISTRATION ORDER
+                // ---------------------------
+
+                // 1. Prefab processing (runs only until successful)
                 updateSystem.UpdateAt<TollRoadPrefabUpdateSystem>(SystemUpdatePhase.PrefabUpdate);
 
-                // Classification must run early in simulation
+                // 2. Vehicle category determination (early each simulation frame)
+                // If you only use one of these systems, remove the other line.
                 updateSystem.UpdateAt<VehicleCategoryAssignmentSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAfter<VehicleCategoryMaskBuildSystem, VehicleCategoryAssignmentSystem>(SystemUpdatePhase.GameSimulation);
 
-                
-
-                // Spawn after LaneDataSystem so base lane data exists
+                // 3. Spawn tollbooth / toll road entities after base lane data exists
                 updateSystem.UpdateAfter<TollBoothSpawnSystem, Game.Pathfind.LaneDataSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                // Build lane masks (after prefab processing & road spawn)
-                updateSystem.UpdateAt<TollLaneMaskBuildSystem>(SystemUpdatePhase.GameSimulation);
+                // 4. Build toll lane masks after spawn (bitmask + flags)
+                updateSystem.UpdateAfter<TollLaneMaskBuildSystem, TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                // Prune vehicles each frame (after mask build)
+                // 5. (Optional) Path reference pruning after mask changes
                 updateSystem.UpdateAfter<TollLanePathPruneRefCountSystem, TollLaneMaskBuildSystem>(SystemUpdatePhase.GameSimulation);
 
+                // 6. Category lane filtering BEFORE CarNavigationSystem
+                //    Produces temporary blocked markers per category cycle
+                updateSystem.UpdateAfter<TollLaneCategoryFilterSystem, TollLaneMaskBuildSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollLaneCategoryFilterSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
 
-                // StopVehiclesOnRoadSystem ordering:
-                // After core CarNavigationSystem (so navigation complete)
-                updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
-                // Before CarMoveSystem (so movement uses zeroed speed)
+                // 7. Apply temp blocks (convert to Blocked or equivalent), still before navigation
+                updateSystem.UpdateAfter<TollLaneTempBlockApplySystem, TollLaneCategoryFilterSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollLaneTempBlockApplySystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
+
+                // 8. Eligibility enforcement: repath vehicles that slipped onto disallowed lane
+                updateSystem.UpdateAfter<TollLaneEligibilityEnforceSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollLaneEligibilityEnforceSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
+
+                // 9. Stop vehicles system (after enforcement, still before movement)
+                updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, TollLaneEligibilityEnforceSystem>(SystemUpdatePhase.GameSimulation);
                 updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
 
-                //updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
-
-                // Register UI systems in the proper phase
+                // 10. UI systems (separate phases)
                 updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
 
-                LogUtil.Info("All systems registered successfully");
+                LogUtil.Info("All systems registered (validated order, no duplicates).");
             }
             catch (Exception ex)
             {

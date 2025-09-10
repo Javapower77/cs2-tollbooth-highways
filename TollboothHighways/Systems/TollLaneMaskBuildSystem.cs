@@ -78,12 +78,15 @@ namespace TollboothHighways.Systems
 
                     var carLane = m_CarLaneLookup[lane];
                     var currentManaged = carLane.m_Flags & ManagedMask;
+                    bool flagsChanged = false;
                     if (currentManaged != desiredFlagBits)
                     {
                         carLane.m_Flags = (carLane.m_Flags & ~ManagedMask) | desiredFlagBits;
                         m_CarLaneLookup[lane] = carLane;
+                        flagsChanged = true;
                     }
 
+                    bool maskChanged = false;
                     if (m_LaneMaskLookup.HasComponent(lane))
                     {
                         var lm = m_LaneMaskLookup[lane];
@@ -91,11 +94,20 @@ namespace TollboothHighways.Systems
                         {
                             lm.Mask = allowedMask;
                             EntityManager.SetComponentData(lane, lm);
+                            maskChanged = true;
                         }
                     }
                     else
                     {
                         EntityManager.AddComponentData(lane, new TollLaneAllowedMask { Mask = allowedMask });
+                        maskChanged = true;
+                    }
+
+                    // If anything changed, mark lane Updated so nav / path caches rebuild.
+                    if (flagsChanged || maskChanged)
+                    {
+                        if (!EntityManager.HasComponent<Updated>(lane))
+                            EntityManager.AddComponent<Updated>(lane);
                     }
                 }
             }
@@ -120,17 +132,17 @@ namespace TollboothHighways.Systems
             {
                 case VehicleGroup.PrivateTransport:
                     // allow Private + Service
-                    allowedMask = 0b0001 | 0b1000;
+                    allowedMask = 0b0001; // | 0b1000;
                     flags = CarLaneFlags.ForbidHeavyTraffic | CarLaneFlags.ForbidTransitTraffic;
                     return;
                 case VehicleGroup.PublicTransport:
                     // allow Transit + Service
-                    allowedMask = 0b0010 | 0b1000;
+                    allowedMask = 0b0010; // | 0b1000;
                     flags = CarLaneFlags.ForbidHeavyTraffic | CarLaneFlags.PublicOnly;
                     return;
                 case VehicleGroup.Trucks:
                     // allow Heavy + Private + Service (exclude transit)
-                    allowedMask = 0b0100 | 0b0001 | 0b1000;
+                    allowedMask = 0b0100; // | 0b0001 | 0b1000;
                     flags = CarLaneFlags.ForbidTransitTraffic;
                     return;
                 case VehicleGroup.ServiceVehicles:
