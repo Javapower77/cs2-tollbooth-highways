@@ -1,4 +1,5 @@
 ﻿using Colossal.Entities;
+using Colossal.Win32;
 using Game.Vehicles;
 using System;
 using System.Collections.Generic;
@@ -33,7 +34,7 @@ namespace TollboothHighways.Utilities
             { VehicleType.PrisonerTransport, VehicleGroup.ServiceVehicles }
         };
 
-       public VehicleGroup GetVehicleGroup(VehicleType vehicleType)
+        public VehicleGroup GetVehicleGroup(VehicleType vehicleType)
        {
             if (vehicleTypeToGroupMap.TryGetValue(vehicleType, out VehicleGroup group))
             {

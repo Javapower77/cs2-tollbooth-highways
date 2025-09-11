@@ -85,36 +85,26 @@ namespace TollboothHighways
                 // 1. Prefab processing (runs only until successful)
                 updateSystem.UpdateAt<TollRoadPrefabUpdateSystem>(SystemUpdatePhase.PrefabUpdate);
 
-                // 2. Vehicle category determination (early each simulation frame)
-                // If you only use one of these systems, remove the other line.
-                updateSystem.UpdateAt<VehicleCategoryAssignmentSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAfter<VehicleCategoryMaskBuildSystem, VehicleCategoryAssignmentSystem>(SystemUpdatePhase.GameSimulation);
+                // 2. Spawn tollbooth / toll road entities
+                updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 3. Spawn tollbooth / toll road entities after base lane data exists
-                updateSystem.UpdateAfter<TollBoothSpawnSystem, Game.Pathfind.LaneDataSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 4. Build toll lane masks after spawn (bitmask + flags)
-                updateSystem.UpdateAfter<TollLaneMaskBuildSystem, TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
-
-                // 5. (Optional) Path reference pruning after mask changes
-                updateSystem.UpdateAfter<TollLanePathPruneRefCountSystem, TollLaneMaskBuildSystem>(SystemUpdatePhase.GameSimulation);
-
-                // 6. Category lane filtering BEFORE CarNavigationSystem
-                //    Produces temporary blocked markers per category cycle
-                updateSystem.UpdateAfter<TollLaneCategoryFilterSystem, TollLaneMaskBuildSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollLaneCategoryFilterSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
-
-                // 7. Apply temp blocks (convert to Blocked or equivalent), still before navigation
-                updateSystem.UpdateAfter<TollLaneTempBlockApplySystem, TollLaneCategoryFilterSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollLaneTempBlockApplySystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
-
-                // 8. Eligibility enforcement: repath vehicles that slipped onto disallowed lane
-                updateSystem.UpdateAfter<TollLaneEligibilityEnforceSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollLaneEligibilityEnforceSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
-
-                // 9. Stop vehicles system (after enforcement, still before movement)
-                updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, TollLaneEligibilityEnforceSystem>(SystemUpdatePhase.GameSimulation);
+                // StopVehiclesOnRoadSystem ordering:
+                // After core CarNavigationSystem (so navigation complete)
+                updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
+                // Before CarMoveSystem (so movement uses zeroed speed)
                 updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
+
+                // Selection system for toll booths
+                updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
+
+                // Pathfinding systems (run early in the pathfinding phase)
+                updateSystem.UpdateAt<TollRoadPathfindSystem>(SystemUpdatePhase.Pathfinding);
+                updateSystem.UpdateAt<LaneCostModificationSystem>(SystemUpdatePhase.Pathfinding);
+
+                // Add this line in the OnLoad method after the other system registrations
+                updateSystem.UpdateAfter<VehicleAccessControlSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<VehicleAccessControlSystem, StopVehiclesOnRoadSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 10. UI systems (separate phases)
                 updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
