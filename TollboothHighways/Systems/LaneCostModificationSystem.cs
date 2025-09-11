@@ -14,13 +14,12 @@ using Unity.Jobs;
 namespace TollboothHighways.Systems
 {
     /// <summary>
-    /// System that modifies individual lane costs based on vehicle restrictions
+    /// System that modifies individual lane costs based on vehicle restrictions by adding cost modifier components
     /// </summary>
-    [BurstCompile]
     public partial class LaneCostModificationSystem : GameSystemBase
     {
         private EntityQuery m_LaneQuery;
-        
+
         private ComponentLookup<Lane> m_LaneLookup;
         private ComponentLookup<Owner> m_OwnerLookup;
         private ComponentLookup<Road> m_RoadLookup;
@@ -29,16 +28,17 @@ namespace TollboothHighways.Systems
         private ComponentLookup<TollRoadPublicTransportData> m_PublicTransportLookup;
         private ComponentLookup<TollRoadServiceVehiclesData> m_ServiceVehiclesLookup;
         private ComponentLookup<TollRoadAllVehiclesData> m_AllVehiclesLookup;
+        private ComponentLookup<LaneCostModifier> m_LaneCostModifierLookup;
 
         protected override void OnCreate()
         {
             base.OnCreate();
 
+            // Query for lanes that belong to roads (have Owner component pointing to road)
             m_LaneQuery = GetEntityQuery(new EntityQueryDesc
             {
                 All = new[]
                 {
-                    ComponentType.ReadWrite<PathfindCosts>(),
                     ComponentType.ReadOnly<Lane>(),
                     ComponentType.ReadOnly<Owner>()
                 },
@@ -63,29 +63,28 @@ namespace TollboothHighways.Systems
             m_PublicTransportLookup = GetComponentLookup<TollRoadPublicTransportData>(true);
             m_ServiceVehiclesLookup = GetComponentLookup<TollRoadServiceVehiclesData>(true);
             m_AllVehiclesLookup = GetComponentLookup<TollRoadAllVehiclesData>(true);
+            m_LaneCostModifierLookup = GetComponentLookup<LaneCostModifier>(false);
 
-            var laneLookup = m_LaneLookup;
-            var ownerLookup = m_OwnerLookup;
             var roadLookup = m_RoadLookup;
             var privateTransportLookup = m_PrivateTransportLookup;
             var truckLookup = m_TruckLookup;
             var publicTransportLookup = m_PublicTransportLookup;
             var serviceVehiclesLookup = m_ServiceVehiclesLookup;
             var allVehiclesLookup = m_AllVehiclesLookup;
+            var laneCostModifierLookup = m_LaneCostModifierLookup;
 
+            // Process lanes and add/update cost modifier components
             Entities
                 .WithName("ModifyLaneCosts")
                 .WithStoreEntityQueryInField(ref m_LaneQuery)
-                .WithReadOnly(laneLookup)
-                .WithReadOnly(ownerLookup)
                 .WithReadOnly(roadLookup)
                 .WithReadOnly(privateTransportLookup)
                 .WithReadOnly(truckLookup)
                 .WithReadOnly(publicTransportLookup)
                 .WithReadOnly(serviceVehiclesLookup)
                 .WithReadOnly(allVehiclesLookup)
-                .ForEach((Entity entity,
-                          ref PathfindCosts costs,
+                .WithStructuralChanges()
+                .ForEach((Entity laneEntity,
                           in Lane lane,
                           in Owner owner) =>
                 {
@@ -94,25 +93,42 @@ namespace TollboothHighways.Systems
                         return;
 
                     // Check if this road has vehicle restrictions
-                    if (!HasVehicleRestrictions(roadEntity, privateTransportLookup, truckLookup,
-                                              publicTransportLookup, serviceVehiclesLookup, allVehiclesLookup))
-                        return;
+                    bool hasRestrictions = HasVehicleRestrictions(roadEntity, privateTransportLookup, truckLookup,
+                                              publicTransportLookup, serviceVehiclesLookup, allVehiclesLookup);
 
-                    // Store original costs if not already stored
-                    if (costs.m_Value.x == 0) // Assuming 0 means unmodified
+                    if (hasRestrictions)
                     {
-                        // Set base cost for restricted lanes
-                        costs.m_Value.x = 1f; // Base cost
+                        // Get the allowed vehicle group for this lane
+                        var allowedGroup = GetLaneRestrictions(roadEntity, privateTransportLookup,
+                            truckLookup, publicTransportLookup, serviceVehiclesLookup);
+
+                        var costModifier = new LaneCostModifier
+                        {
+                            AllowedVehicleGroup = allowedGroup,
+                            RestrictedCostMultiplier = 100f, // High cost for unauthorized vehicles
+                            AuthorizedCostMultiplier = 1.1f  // Slight increase for authorized vehicles
+                        };
+
+                        // Add or update the cost modifier component
+                        if (EntityManager.HasComponent<LaneCostModifier>(laneEntity))
+                        {
+                            EntityManager.SetComponentData(laneEntity, costModifier);
+                        }
+                        else
+                        {
+                            EntityManager.AddComponentData(laneEntity, costModifier);
+                        }
+                    }
+                    else
+                    {
+                        // Remove cost modifier if road no longer has restrictions
+                        if (EntityManager.HasComponent<LaneCostModifier>(laneEntity))
+                        {
+                            EntityManager.RemoveComponent<LaneCostModifier>(laneEntity);
+                        }
                     }
 
-                    // Add restriction information to the lane for pathfinding
-                    var restrictionData = GetLaneRestrictions(roadEntity, privateTransportLookup,
-                        truckLookup, publicTransportLookup, serviceVehiclesLookup);
-
-                    // Store restriction info in unused cost components
-                    costs.m_Value.y = (float)restrictionData;
-
-                }).ScheduleParallel();
+                }).Run();
         }
 
         private static bool HasVehicleRestrictions(
@@ -148,5 +164,26 @@ namespace TollboothHighways.Systems
 
             return VehicleGroup.PrivateTransport; // Default
         }
+    }
+
+    /// <summary>
+    /// Component that stores cost modification data for restricted lanes
+    /// </summary>
+    public struct LaneCostModifier : IComponentData
+    {
+        /// <summary>
+        /// Which vehicle group is allowed to use this lane at normal cost
+        /// </summary>
+        public VehicleGroup AllowedVehicleGroup;
+
+        /// <summary>
+        /// Cost multiplier for vehicles NOT in the allowed group
+        /// </summary>
+        public float RestrictedCostMultiplier;
+
+        /// <summary>
+        /// Cost multiplier for vehicles in the allowed group
+        /// </summary>
+        public float AuthorizedCostMultiplier;
     }
 }

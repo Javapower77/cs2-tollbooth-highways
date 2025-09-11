@@ -12,6 +12,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using Systems;
+using TollboothHighways.Domain.Components;
 using TollboothHighways.Systems;
 using TollboothHighways.Utilities;
 using static TollboothHighways.ModSettings;
@@ -30,15 +31,8 @@ namespace TollboothHighways
 
         public string ModPath { get; set; }
 
-        // This is something for the feature if this mod is incompatible with other mod in order to fix
-        // ---
-        // public static bool IsTLEEnabled => _isTLEEnabled ??= GameManager.instance.modManager.ListModsEnabled().Any(x => x.StartsWith("C2VM.CommonLibraries.LaneSystem"));
-        // public static bool IsRBEnabled => _isRBEnabled ??= GameManager.instance.modManager.ListModsEnabled().Any(x => x.StartsWith("RoadBuilder"));
-        // private static bool? _isTLEEnabled;
-        // private static bool? _isRBEnabled;
         public void OnLoad(UpdateSystem updateSystem)
         {
-            // Log entry for debugging purposes
             LogUtil.Info($"{nameof(Mod)}.{nameof(OnLoad)}, version:{InformationalVersion}");
 
             // Apply Harmony Patches
@@ -53,19 +47,13 @@ namespace TollboothHighways
                 Settings.RegisterKeyBindings();
                 Settings.RegisterInOptionsUI();
 
-                // Load all dictonary in English to apply in the objects of the mod
                 GameManager.instance.localizationManager.AddSource("en-US", new LocaleEN(Settings));
-
-                // Load the settings for the current mod
                 AssetDatabase.global.LoadSettings(nameof(TollboothHighways), Settings, new ModSettings(this));
-
                 Settings.ApplyAndSave();
 
-                // Try to fetch the mod asset from the mod manager
                 if (GameManager.instance.modManager.TryGetExecutableAsset(this, out var asset))
                 {
                     ModPath = Path.GetDirectoryName(asset.path);
-                    // Set the thumbnails location for the assets inside the mod
                     UIManager.defaultUISystem.AddHostLocation(uiHostName, Path.Combine(Path.GetDirectoryName(asset.path), "thumbs"), false);
                     LogUtil.Info($"Current mod asset at {asset.path}");
                     LogUtil.Info($"Current mod asset at {Path.GetDirectoryName(asset.path)}");
@@ -85,28 +73,32 @@ namespace TollboothHighways
                 // 1. Prefab processing (runs only until successful)
                 updateSystem.UpdateAt<TollRoadPrefabUpdateSystem>(SystemUpdatePhase.PrefabUpdate);
 
-                // 2. Spawn tollbooth / toll road entities
+                // 2. Spawn tollbooth / toll road entities (early in simulation)
                 updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
+                // 3. Lane cost modification (runs in PreSimulation before pathfinding calculations)
+                updateSystem.UpdateAt<LaneCostModificationSystem>(SystemUpdatePhase.PreSimulation);
 
-                // StopVehiclesOnRoadSystem ordering:
+                // 4. Pathfinding cost systems (run in PreSimulation before main simulation)
+                updateSystem.UpdateAt<TollRoadPathfindSystem>(SystemUpdatePhase.PreSimulation);
+                updateSystem.UpdateAfter<TollRoadPathfindSystem, LaneCostModificationSystem>(SystemUpdatePhase.PreSimulation);
+
+                // 5. Selection system for toll booths
+                updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
+
+                // 6. Vehicle access control (after navigation, before movement)
+                updateSystem.UpdateAfter<VehicleAccessControlSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<VehicleAccessControlSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
+
+                // 7. StopVehiclesOnRoadSystem ordering:
                 // After core CarNavigationSystem (so navigation complete)
                 updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
                 // Before CarMoveSystem (so movement uses zeroed speed)
                 updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
+                // After VehicleAccessControlSystem
+                updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, VehicleAccessControlSystem>(SystemUpdatePhase.GameSimulation);
 
-                // Selection system for toll booths
-                updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
-
-                // Pathfinding systems (run early in the pathfinding phase)
-                updateSystem.UpdateAt<TollRoadPathfindSystem>(SystemUpdatePhase.Pathfinding);
-                updateSystem.UpdateAt<LaneCostModificationSystem>(SystemUpdatePhase.Pathfinding);
-
-                // Add this line in the OnLoad method after the other system registrations
-                updateSystem.UpdateAfter<VehicleAccessControlSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<VehicleAccessControlSystem, StopVehiclesOnRoadSystem>(SystemUpdatePhase.GameSimulation);
-
-                // 10. UI systems (separate phases)
+                // 8. UI systems (separate phases)
                 updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
 

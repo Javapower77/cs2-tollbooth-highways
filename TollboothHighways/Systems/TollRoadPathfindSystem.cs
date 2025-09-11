@@ -37,16 +37,14 @@ namespace TollboothHighways.Systems
         private EntityQuery m_PathfindQuery;
         private EntityQuery m_RestrictedRoadQuery;
 
-        private ComponentLookup<Lane> m_LaneLookup;
         private ComponentLookup<Owner> m_OwnerLookup;
-        private ComponentLookup<Road> m_RoadLookup;
         private ComponentLookup<TollRoadPrivateTransportData> m_PrivateTransportLookup;
         private ComponentLookup<TollRoadTruckData> m_TruckLookup;
         private ComponentLookup<TollRoadPublicTransportData> m_PublicTransportLookup;
         private ComponentLookup<TollRoadServiceVehiclesData> m_ServiceVehiclesLookup;
         private ComponentLookup<TollRoadAllVehiclesData> m_AllVehiclesLookup;
-        private ComponentLookup<PathfindCosts> m_PathfindCostsLookup;
         private ComponentLookup<Game.Vehicles.Vehicle> m_VehicleLookup;
+        private BufferLookup<PathElement> m_PathElementLookup;
 
         private VehiclesUtil m_VehiclesUtil;
 
@@ -97,16 +95,14 @@ namespace TollboothHighways.Systems
         protected override void OnUpdate()
         {
             // Update lookups
-            m_LaneLookup = GetComponentLookup<Lane>(true);
             m_OwnerLookup = GetComponentLookup<Owner>(true);
-            m_RoadLookup = GetComponentLookup<Road>(true);
             m_PrivateTransportLookup = GetComponentLookup<TollRoadPrivateTransportData>(true);
             m_TruckLookup = GetComponentLookup<TollRoadTruckData>(true);
             m_PublicTransportLookup = GetComponentLookup<TollRoadPublicTransportData>(true);
             m_ServiceVehiclesLookup = GetComponentLookup<TollRoadServiceVehiclesData>(true);
             m_AllVehiclesLookup = GetComponentLookup<TollRoadAllVehiclesData>(true);
-            m_PathfindCostsLookup = GetComponentLookup<PathfindCosts>(false);
             m_VehicleLookup = GetComponentLookup<Game.Vehicles.Vehicle>(true);
+            m_PathElementLookup = GetBufferLookup<PathElement>(true);
 
             // Apply pathfinding cost modifications
             ApplyPathfindCosts();
@@ -114,55 +110,120 @@ namespace TollboothHighways.Systems
 
         private void ApplyPathfindCosts()
         {
-            var laneLookup = m_LaneLookup;
             var ownerLookup = m_OwnerLookup;
-            var roadLookup = m_RoadLookup;
             var privateTransportLookup = m_PrivateTransportLookup;
             var truckLookup = m_TruckLookup;
             var publicTransportLookup = m_PublicTransportLookup;
             var serviceVehiclesLookup = m_ServiceVehiclesLookup;
             var allVehiclesLookup = m_AllVehiclesLookup;
-            var pathfindCostsLookup = m_PathfindCostsLookup;
             var vehicleLookup = m_VehicleLookup;
+            var pathElementLookup = m_PathElementLookup;
             var vehiclesUtil = m_VehiclesUtil;
-            var entityManager = EntityManager;
 
             Entities
                 .WithName("ModifyPathfindCosts")
                 .WithStoreEntityQueryInField(ref m_PathfindQuery)
-                .WithReadOnly(laneLookup)
                 .WithReadOnly(ownerLookup)
-                .WithReadOnly(roadLookup)
                 .WithReadOnly(privateTransportLookup)
                 .WithReadOnly(truckLookup)
                 .WithReadOnly(publicTransportLookup)
                 .WithReadOnly(serviceVehiclesLookup)
                 .WithReadOnly(allVehiclesLookup)
                 .WithReadOnly(vehicleLookup)
-                .WithCaptureLocal(vehiclesUtil)
-                .WithCaptureLocal(entityManager)
+                .WithReadOnly(pathElementLookup)
+                .WithStructuralChanges()
                 .ForEach((Entity pathEntity,
                           ref PathfindParameters pathParams,
                           in PathOwner pathOwner) =>
                 {
-                    // Get the vehicle entity that owns this pathfind request
-                    Entity vehicleEntity = pathOwner.m_Owner;
+                    Entity vehicleEntity = Entity.Null;
+
+                    // Method 1: Check if pathfind entity has an Owner component pointing to vehicle
+                    if (ownerLookup.TryGetComponent(pathEntity, out var pathOwnerComponent))
+                    {
+                        var potentialVehicle = pathOwnerComponent.m_Owner;
+                        if (vehicleLookup.HasComponent(potentialVehicle))
+                        {
+                            vehicleEntity = potentialVehicle;
+                        }
+                    }
+
+                    // Method 2: Search for vehicles that have this pathfind entity in their PathElement buffer
+                    if (vehicleEntity == Entity.Null)
+                    {
+                        vehicleEntity = FindVehicleByPathReference(pathEntity, vehicleLookup, pathElementLookup);
+                    }
+
                     if (vehicleEntity == Entity.Null || !vehicleLookup.HasComponent(vehicleEntity))
                         return;
 
                     // Determine vehicle type and group
-                    VehicleType vehicleType = vehiclesUtil.GetVehicleType(vehicleEntity, entityManager);
+                    VehicleType vehicleType = vehiclesUtil.GetVehicleType(vehicleEntity, EntityManager);
                     if (vehicleType == VehicleType.None)
                         return;
 
                     VehicleGroup vehicleGroup = vehiclesUtil.GetVehicleGroup(vehicleType);
 
-                    // Apply custom pathfind costs for this vehicle type
-                    pathParams.m_PathfindCostModifier = CreateCostModifier(vehicleGroup,
+                    // Create and add cost modifier component to the pathfind entity
+                    var costModifier = CreateCostModifier(vehicleGroup,
                         privateTransportLookup, truckLookup, publicTransportLookup,
                         serviceVehiclesLookup, allVehiclesLookup);
 
-                }).ScheduleParallel();
+                    if (EntityManager.HasComponent<PathfindCostModifier>(pathEntity))
+                    {
+                        EntityManager.SetComponentData(pathEntity, costModifier);
+                    }
+                    else
+                    {
+                        EntityManager.AddComponentData(pathEntity, costModifier);
+                    }
+
+                }).Run();
+        }
+
+        // Helper method to find vehicle by checking PathElement buffers
+        private Entity FindVehicleByPathReference(Entity pathEntity,
+            ComponentLookup<Game.Vehicles.Vehicle> vehicleLookup,
+            BufferLookup<PathElement> pathElementLookup)
+        {
+            // Use entity query to iterate through all vehicles with PathElement buffers
+            var vehicleQuery = GetEntityQuery(new EntityQueryDesc
+            {
+                All = new[]
+                {
+                    ComponentType.ReadOnly<Game.Vehicles.Vehicle>(),
+                    ComponentType.ReadOnly<PathElement>()
+                }
+            });
+
+            var vehicleEntities = vehicleQuery.ToEntityArray(Allocator.Temp);
+
+            try
+            {
+                for (int i = 0; i < vehicleEntities.Length; i++)
+                {
+                    var vehicle = vehicleEntities[i];
+
+                    // Check if this vehicle has PathElement buffer that references our pathfind entity
+                    if (pathElementLookup.TryGetBuffer(vehicle, out var pathElements))
+                    {
+                        for (int j = 0; j < pathElements.Length; j++)
+                        {
+                            // Check if any path element targets our pathfind entity
+                            if (pathElements[j].m_Target == pathEntity)
+                            {
+                                return vehicle;
+                            }
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                vehicleEntities.Dispose();
+            }
+
+            return Entity.Null;
         }
 
         private static PathfindCostModifier CreateCostModifier(
