@@ -76,28 +76,17 @@ namespace TollboothHighways
                 // 2. Spawn tollbooth / toll road entities (early in simulation)
                 updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 3. Lane cost modification (runs in PreSimulation before pathfinding calculations)
-                updateSystem.UpdateAt<LaneCostModificationSystem>(SystemUpdatePhase.PreSimulation);
-
-                // 4. Pathfinding cost systems (run in PreSimulation before main simulation)
-                updateSystem.UpdateAt<TollRoadPathfindSystem>(SystemUpdatePhase.PreSimulation);
-                updateSystem.UpdateAfter<TollRoadPathfindSystem, LaneCostModificationSystem>(SystemUpdatePhase.PreSimulation);
-
+          
                 // 5. Selection system for toll booths
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 6. Vehicle access control (after navigation, before movement)
-                updateSystem.UpdateAfter<VehicleAccessControlSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<VehicleAccessControlSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
-
+                
                 // 7. StopVehiclesOnRoadSystem ordering:
                 // After core CarNavigationSystem (so navigation complete)
                 updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
                 // Before CarMoveSystem (so movement uses zeroed speed)
                 updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
-                // After VehicleAccessControlSystem
-                updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, VehicleAccessControlSystem>(SystemUpdatePhase.GameSimulation);
-
+         
                 // 8. UI systems (separate phases)
                 updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
