@@ -13,8 +13,8 @@ namespace TollboothHighways
     {
         // Create a new log just for this mod.
         // This mod will have its own log file in the game's Logs folder.
-        private static readonly ILog _log = LogManager.GetLogger("Test-Highway-Tollbooth");
-        private static readonly ILog _logTollInsight = LogManager.GetLogger("Test-Highway-Tollbooth");
+        private static readonly ILog _log = LogManager.GetLogger("TollboothHighways");
+        private static readonly ILog _logTollInsight = LogManager.GetLogger("TollboothHighways");
 
         // Change this for debugging. Leave it false most of the time.
         private static readonly bool _printDebug = false;

@@ -1,14 +1,13 @@
 ﻿import { getModule } from "cs2/modding";
 import { Theme, Color } from "cs2/bindings";
 import { bindValue, trigger, useValue } from "cs2/api"; 
-import { LocalizedNumber, LocalizedNumber, useLocalization } from "cs2/l10n";
 import mod from "../../../mod.json";
 import { tool } from "cs2/bindings";
 import { Button } from "cs2/ui";
 import { Entity } from "cs2/utils";
 import { FocusDisabled } from "cs2/input";
 import { CS2VanillaUIResolver } from "mods/CS2VanillaUIResolver";
-import { Unit } from "cs2/l10n";
+import { LocalizedNumber, Unit } from "cs2/l10n";
 import { useState, useMemo } from "react";
 import { VehicleStatisticsTable, VehicleStatistic } from './VehicleStatisticsTable';
 
