@@ -164,6 +164,7 @@
 
 	<ItemGroup>
 		<Folder Remove="Temp\" />
+		<Folder Include="Patches\" />
 		<None Remove="C:\Users\jibarra\AppData\LocalLow\Colossal Order\Cities Skylines II\.cache\Modding\Mod.props" />
 		<None Remove="C:\Users\jibarra\AppData\LocalLow\Colossal Order\Cities Skylines II\.cache\Modding\Mod.targets" />
 		<None Remove="Code\Systems\TestFieldsUISystem" />
