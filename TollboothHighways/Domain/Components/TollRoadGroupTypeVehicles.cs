@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.Entities;
-namespace TollRoadHighways.Domain.Components
+namespace TollboothHighways.Domain.Components
 {
     [ComponentMenu("TollHighways/", new Type[] { typeof(WithNoneAttribute) })]
     public class TollRoadPrivateTransportInfo : ComponentBase

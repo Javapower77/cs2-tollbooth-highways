@@ -1,5 +1,6 @@
 ﻿using Colossal.Entities;
 using Colossal.Win32;
+using Game.Simulation;
 using Game.Vehicles;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TollboothHighways.Domain.Enums;
-using TollRoadHighways.Domain.Components;
+using TollboothHighways.Domain.Components;
 using Unity.Entities;
 
 namespace TollboothHighways.Utilities
@@ -215,6 +216,53 @@ namespace TollboothHighways.Utilities
                 return entityManager.HasComponent<TollRoadServiceVehiclesData>(tollboothEntity);
 
             return false;
+        }
+
+        /// <summary>
+        /// Determines whether a specified vehicle is allowed to pass through a given tollbooth.
+        /// </summary>
+        /// <remarks>This method evaluates the compatibility of a vehicle with a tollbooth based on the
+        /// components associated with each entity. Tollbooths may be configured to accept specific types of vehicles
+        /// (e.g., public transport, trucks, service vehicles, or private transport), or they may accept all vehicles if
+        /// no specific configuration is present.</remarks>
+        /// <param name="entityManager">The <see cref="EntityManager"/> instance used to query components of entities.</param>
+        /// <param name="vehicle">The entity representing the vehicle to evaluate.</param>
+        /// <param name="tollbooth">The entity representing the tollbooth to check against.</param>
+        /// <returns><see langword="true"/> if the vehicle is supported by the tollbooth; otherwise, <see langword="false"/>.</returns>
+        private bool IsVehicleSupported(EntityManager entityManager, Entity vehicle, Entity tollbooth)
+        {
+            if (!entityManager.Exists(tollbooth)) return false;
+            bool hasSpecific = entityManager.HasComponent<TollRoadTruckData>(tollbooth) ||
+                               entityManager.HasComponent<TollRoadPublicTransportData>(tollbooth) ||
+                               entityManager.HasComponent<TollRoadServiceVehiclesData>(tollbooth) ||
+                               entityManager.HasComponent<TollRoadPrivateTransportData>(tollbooth);
+            if (!hasSpecific) return true; // booth accepts all
+
+            bool isPublic = entityManager.HasComponent<Game.Vehicles.PublicTransport>(vehicle) || entityManager.HasComponent<Game.Vehicles.Taxi>(vehicle);
+            if (isPublic && (entityManager.HasComponent<TollRoadPublicTransportData>(tollbooth) || entityManager.HasComponent<TollRoadAllVehiclesData>(tollbooth))) return true;
+
+            bool isTruck = entityManager.HasComponent<Game.Vehicles.DeliveryTruck>(vehicle);
+            if (isTruck && (entityManager.HasComponent<TollRoadTruckData>(tollbooth) || entityManager.HasComponent<TollRoadAllVehiclesData>(tollbooth))) return true;
+
+            bool isService = entityManager.HasComponent<Game.Vehicles.Ambulance>(vehicle) ||
+                              entityManager.HasComponent<Game.Vehicles.FireEngine>(vehicle) ||
+                              entityManager.HasComponent<Game.Vehicles.GarbageTruck>(vehicle) ||
+                              entityManager.HasComponent<Game.Vehicles.PoliceCar>(vehicle) ||
+                                entityManager.HasComponent<Game.Vehicles.Hearse>(vehicle) ||
+                              entityManager.HasComponent<Game.Vehicles.ParkMaintenanceVehicle>(vehicle) ||
+                              entityManager.HasComponent<Game.Vehicles.RoadMaintenanceVehicle>(vehicle) ||
+                              entityManager.HasComponent<Game.Vehicles.PrisonerTransport>(vehicle) ||
+                              entityManager.HasComponent<Game.Vehicles.PostVan>(vehicle);
+            if (isService && (entityManager.HasComponent<TollRoadServiceVehiclesData>(tollbooth) || entityManager.HasComponent<TollRoadAllVehiclesData>(tollbooth))) return true;
+
+            // default private cars / motorcycles
+            return entityManager.HasComponent<TollRoadPrivateTransportData>(tollbooth) || entityManager.HasComponent<TollRoadAllVehiclesData>(tollbooth);
+        }
+
+        internal static VehicleType GetVehicleTypeStatic(Entity e, EntityManager em)
+        {
+            VehiclesUtil util = new VehiclesUtil();
+            return util.GetVehicleType(e, em);
         }
     }
 }

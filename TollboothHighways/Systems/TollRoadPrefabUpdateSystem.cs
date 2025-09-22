@@ -5,7 +5,6 @@ using System;
 using TollboothHighways.Domain.Components;
 using TollboothHighways.Domain.Enums;
 using TollboothHighways.Utilities;
-using TollRoadHighways.Domain.Components;
 using Unity.Entities;
 using Unity.Mathematics;
 
@@ -63,7 +62,7 @@ namespace Systems
             try
             {
                 int successCount = 0;
-                int totalPrefabs = 12; // Total number of prefabs we're trying to initialize
+                int totalPrefabs = 14; // Total number of prefabs we're trying to initialize
 
                 // Automatic Tollbooths Roads Prefab
                 if (AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Automatic - Private Transit)", false, VehicleGroup.PrivateTransport))
@@ -103,6 +102,14 @@ namespace Systems
                     successCount++;
 
                 if (AddTollCabinComponentToRoad("StaticObjectPrefab", "TollBoothManual", true))
+                    successCount++;
+
+                // Add motorbike component to Personal Car prefab
+                if (AddMotorbikeComponentToPersonalCar("CarPrefab", "Motorbike01"))
+                    successCount++;
+
+                // Add delivery motorbike component to Personal Car prefab //Prop_Motorbike01//
+                if (AddMotorbikeComponentToPersonalCar("CarPrefab", "MotorbikeDelivery01"))
                     successCount++;
 
                 bool allSuccessful = successCount == totalPrefabs;
@@ -177,6 +184,55 @@ namespace Systems
             catch (System.Exception ex)
             {
                 LogUtil.Error($"TollRoadPrefabUpdateSystem: Failed to add toll component to '{prefabNameToSearch}'. Error: {ex.Message}");
+                LogUtil.Exception(ex);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Attempts to add a <see cref="MotorbikePrefabInfo"/> component to a personal car prefab identified by the
+        /// specified type and name. This is for identifing motorbike vehicles.
+        /// </summary>
+        /// <remarks>This method checks if the specified prefab exists in the system and whether it
+        /// already contains a <see cref="MotorbikePrefabInfo"/> component. If the component is not present, it is added
+        /// to the prefab, and the prefab is updated in the system. Logs are generated to provide detailed information
+        /// about the operation's success or failure.</remarks>
+        /// <param name="typePrefab">The type of the prefab to search for, typically representing the category of the prefab.</param>
+        /// <param name="prefabNameToSearch">The name of the prefab to locate within the system.</param>
+        /// <returns><see langword="true"/> if the <see cref="MotorbikePrefabInfo"/> component was successfully added or already
+        /// exists on the prefab; otherwise, <see langword="false"/> if the prefab could not be found or an error
+        /// occurred.</returns>
+        private bool AddMotorbikeComponentToPersonalCar(string typePrefab, string prefabNameToSearch)
+        { 
+            try
+            {
+                // Check if the prefab for the toll road exists
+                if (prefabSystem.TryGetPrefab(new PrefabID(typePrefab, prefabNameToSearch), out PrefabBase personalCarPrefab))
+                {
+                    LogUtil.Info($"TollRoadPrefabUpdateSystem: Found prefab '{prefabNameToSearch}'");
+                    // Check if the prefab already has the TollRoadPrefabInfo component
+                    if (personalCarPrefab.GetComponent<MotorbikePrefabInfo>())
+                    {
+                        LogUtil.Info($"TollRoadPrefabUpdateSystem: Prefab '{prefabNameToSearch}' already has MotorbikePrefabInfo, skipping");
+                        return true; // Already initialized, consider this a success
+                    }
+                    // Add the TollRoadPrefabInfo component
+                    var motorbikeInfo = personalCarPrefab.AddComponent<MotorbikePrefabInfo>();
+                    LogUtil.Info($"TollRoadPrefabUpdateSystem: Added MotorbikePrefabInfo to '{prefabNameToSearch}'");
+                    // Update the prefab in the system
+                    prefabSystem.UpdatePrefab(personalCarPrefab);
+                    LogUtil.Info($"TollRoadPrefabUpdateSystem: Successfully updated prefab '{prefabNameToSearch}' in PrefabSystem");
+                    return true;
+                }
+                else
+                {
+                    LogUtil.Warn($"TollRoadPrefabUpdateSystem: Could not find prefab '{prefabNameToSearch}' of type '{typePrefab}' - prefab may not be loaded yet");
+                    return false;
+                }
+            }
+            catch (System.Exception ex)
+            {
+                LogUtil.Error($"TollRoadPrefabUpdateSystem: Failed to add motorbike component to '{prefabNameToSearch}'. Error: {ex.Message}");
                 LogUtil.Exception(ex);
                 return false;
             }
