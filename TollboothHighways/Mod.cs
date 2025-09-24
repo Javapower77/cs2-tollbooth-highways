@@ -84,7 +84,7 @@ namespace TollboothHighways
                 updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
                 // Before CarMoveSystem (so movement uses zeroed speed)
                 updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
-        
+
                 // 5. UI systems (separate phases)
                 updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);

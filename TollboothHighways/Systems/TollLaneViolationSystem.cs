@@ -1,8 +1,8 @@
 ﻿using Game.Pathfind;
 using Game.Vehicles;
+using TollboothHighways.Domain;
 using TollboothHighways.Domain.Components;
 using TollboothHighways.Domain.Enums;
-using TollboothHighways.Path;
 using TollboothHighways.Utilities;
 using Unity.Burst;
 using Unity.Collections;

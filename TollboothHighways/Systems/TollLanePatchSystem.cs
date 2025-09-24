@@ -1,12 +1,12 @@
 using Game.Net;
 using Game.Prefabs;
 using TollboothHighways.Domain.Components;
-using TollboothHighways.Path;
 using TollboothHighways.Domain.Enums;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using CarLane = Game.Net.CarLane;
+using TollboothHighways.Domain;
 
 namespace TollboothHighways.Systems
 {

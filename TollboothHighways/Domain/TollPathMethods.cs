@@ -1,7 +1,7 @@
 using Game.Pathfind;
 using TollboothHighways.Domain.Enums;
 
-namespace TollboothHighways.Path
+namespace TollboothHighways.Domain
 {
     public static class TollPathMethods
     {

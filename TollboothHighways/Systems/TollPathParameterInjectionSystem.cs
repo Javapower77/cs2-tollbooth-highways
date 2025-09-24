@@ -1,12 +1,12 @@
 using Game.Vehicles;
 using Game.Pathfind;
-using TollboothHighways.Path;
 using TollboothHighways.Utilities;
 using Unity.Burst;
 using Unity.Entities;
 using Game;
 using TollboothHighways.Domain.Enums;
 using Game.Simulation;
+using TollboothHighways.Domain;
 
 namespace TollboothHighways.Systems
 {
