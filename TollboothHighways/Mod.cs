@@ -73,19 +73,31 @@ namespace TollboothHighways
                 // 1. Prefab processing (runs only until successful)
                 updateSystem.UpdateAt<TollRoadPrefabUpdateSystem>(SystemUpdatePhase.PrefabUpdate);
 
-                // 2. Spawn tollbooth / toll road entities (early in simulation)
+                // 2. Toll lane patching (after prefabs, BEFORE spawn & path building)
+                //    Place before TollBoothSpawnSystem and before path parameter injection.
+                updateSystem.UpdateBefore<TollLanePatchSystem, TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
+
+                // 3. Spawn tollbooth / toll road entities (early in simulation)
                 updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 3. Selection system for toll booths
+                // 4. Selection system for toll booths
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 4. StopVehiclesOnRoadSystem ordering:
+                // 5. Path parameter injection (must be BEFORE CarNavigationSystem and AFTER lane patch)
+                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
+                // Ensure ordering relative to lane patch explicitly (lane patch already registered to be before spawn; this enforces patch < injection)
+                updateSystem.UpdateAfter<TollPathParameterInjectionSystem, TollLanePatchSystem>(SystemUpdatePhase.GameSimulation);
+
+                // 6. Violation validation (AFTER CarNavigation so lane positions are updated)
+                updateSystem.UpdateAfter<TollLaneViolationSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
+
+                // 7. StopVehiclesOnRoadSystem ordering:
                 // After core CarNavigationSystem (so navigation complete)
                 updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
                 // Before CarMoveSystem (so movement uses zeroed speed)
                 updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
-        
-                // 5. UI systems (separate phases)
+
+                // 8. UI systems (separate phases)
                 updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
 
