@@ -6,6 +6,7 @@ using Game.Input;
 using Game.Modding;
 using Game.Prefabs;
 using Game.SceneFlow;
+using Game.Simulation;
 using Game.UI.InGame;
 using HarmonyLib;
 using System;
@@ -83,19 +84,34 @@ namespace TollboothHighways
                 // 4. Selection system for toll booths
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 5. Path parameter injection (must be BEFORE CarNavigationSystem and AFTER lane patch)
-                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
-                // Ensure ordering relative to lane patch explicitly (lane patch already registered to be before spawn; this enforces patch < injection)
+                // 5. Path parameter injection
+                //    Must run:
+                //      - After lane patch (so lane data is ready)
+                //      - Before navigation & any per-vehicle AI systems that might read path params
                 updateSystem.UpdateAfter<TollPathParameterInjectionSystem, TollLanePatchSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
+
+                // Preserve original attribute intent: run before every vehicle AI system previously listed.
+                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, PersonalCarAISystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, AmbulanceAISystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, DeliveryTruckAISystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, FireEngineAISystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, GarbageTruckAISystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, HearseAISystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, MaintenanceVehicleAISystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, PoliceCarAISystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, PostVanAISystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, TaxiAISystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, TransportCarAISystem>(SystemUpdatePhase.GameSimulation);
 
                 // 6. Violation validation (AFTER CarNavigation so lane positions are updated)
-                updateSystem.UpdateAfter<TollLaneViolationSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAfter<TollLaneViolationSystem, CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 7. StopVehiclesOnRoadSystem ordering:
                 // After core CarNavigationSystem (so navigation complete)
-                updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
                 // Before CarMoveSystem (so movement uses zeroed speed)
-                updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, CarMoveSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 8. UI systems (separate phases)
                 updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);

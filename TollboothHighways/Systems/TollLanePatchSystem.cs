@@ -1,18 +1,18 @@
 using Game.Net;
 using Game.Prefabs;
 using TollboothHighways.Domain.Components;
-using TollboothHighways.Path;
 using TollboothHighways.Domain.Enums;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using CarLane = Game.Net.CarLane;
+using TollboothHighways.Domain;
+using Game;
+using Game.Common;
 
 namespace TollboothHighways.Systems
 {
-    [UpdateInGroup(typeof(InitializationSystemGroup))]
-    [UpdateAfter(typeof(TollboothHighways.Systems.TollRoadPrefabUpdateSystem))]
-    public partial struct TollLanePatchSystem : ISystem
+    public partial class TollLanePatchSystem : GameSystemBase
     {
         private EntityQuery _laneQuery;
 
@@ -22,41 +22,42 @@ namespace TollboothHighways.Systems
         private ComponentLookup<TollRoadServiceVehiclesData>  _service;
         private ComponentLookup<TollRoadAllVehiclesData>      _all;
 
-        public void OnCreate(ref SystemState state)
+        protected override void OnCreate()
         {
-            _laneQuery = state.GetEntityQuery(
+            _laneQuery = GetEntityQuery(
                 // Network lane types you want to tag
                 ComponentType.ReadOnly<CarLane>(),
                 ComponentType.ReadOnly<PrefabRef>(),
+                ComponentType.ReadOnly<Owner>(),
                 ComponentType.Exclude<TollPatchedLane>()
             );
-            state.RequireForUpdate(_laneQuery);
+            RequireForUpdate(_laneQuery);
         }
 
-        public void OnUpdate(ref SystemState state)
+        protected override void OnUpdate()
         {
-            _priv    = state.GetComponentLookup<TollRoadPrivateTransportData>(true);
-            _pub     = state.GetComponentLookup<TollRoadPublicTransportData>(true);
-            _truck   = state.GetComponentLookup<TollRoadTruckData>(true);
-            _service = state.GetComponentLookup<TollRoadServiceVehiclesData>(true);
-            _all     = state.GetComponentLookup<TollRoadAllVehiclesData>(true);
+            _priv    = GetComponentLookup<TollRoadPrivateTransportData>(true);
+            _pub     = GetComponentLookup<TollRoadPublicTransportData>(true);
+            _truck   = GetComponentLookup<TollRoadTruckData>(true);
+            _service = GetComponentLookup<TollRoadServiceVehiclesData>(true);
+            _all     = GetComponentLookup<TollRoadAllVehiclesData>(true);
 
-            var prefabRefType = state.GetComponentTypeHandle<PrefabRef>(true);
-            var entityType    = state.GetEntityTypeHandle();
+            //var prefabRefType = GetComponentTypeHandle<PrefabRef>(true);
+            var entityType    = GetEntityTypeHandle();
             var ecb           = new EntityCommandBuffer(Allocator.Temp);
 
             foreach (var chunk in _laneQuery.ToArchetypeChunkArray(Allocator.Temp))
             {
-                var prefabs  = chunk.GetNativeArray(prefabRefType);
+                //var prefabs  = chunk.GetNativeArray(ref prefabRefType);
                 var entities = chunk.GetNativeArray(entityType);
 
                 for (int i = 0; i < chunk.Count; i++)
                 {
-                    var prefabRef = prefabs[i];
-                    if (!state.EntityManager.Exists(prefabRef.m_Prefab))
-                        continue;
+                    //var prefabRef = prefabs[i];
+                    //if (!EntityManager.Exists(prefabRef.m_Prefab))
+                    //    continue;
 
-                    var group = ResolveGroup(prefabRef.m_Prefab);
+                    var group = ResolveGroup(entities[i]);
                     if (group == VehicleGroup.None)
                         continue;
 
@@ -67,17 +68,24 @@ namespace TollboothHighways.Systems
                 }
             }
 
-            ecb.Playback(state.EntityManager);
+            ecb.Playback(EntityManager);
             ecb.Dispose();
         }
 
         private VehicleGroup ResolveGroup(Entity prefab)
         {
-            if (_all.HasComponent(prefab))     return VehicleGroup.All;
-            if (_priv.HasComponent(prefab))    return VehicleGroup.PrivateTransport;
-            if (_pub.HasComponent(prefab))     return VehicleGroup.PublicTransport;
-            if (_truck.HasComponent(prefab))   return VehicleGroup.Trucks;
-            if (_service.HasComponent(prefab)) return VehicleGroup.ServiceVehicles;
+            if (EntityManager.HasComponent<Owner>(prefab))
+            {
+                var owner = EntityManager.GetComponentData<Owner>(prefab);
+                Entity tollRoadEntity = owner.m_Owner;
+
+                // Check toll road components on the owner entity
+                if (_all.HasComponent(tollRoadEntity)) return VehicleGroup.All;
+                if (_priv.HasComponent(tollRoadEntity)) return VehicleGroup.PrivateTransport;
+                if (_pub.HasComponent(tollRoadEntity)) return VehicleGroup.PublicTransport;
+                if (_truck.HasComponent(tollRoadEntity)) return VehicleGroup.Trucks;
+                if (_service.HasComponent(tollRoadEntity)) return VehicleGroup.ServiceVehicles;
+            }
             return VehicleGroup.None;
         }
     }

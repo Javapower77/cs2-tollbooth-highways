@@ -1,44 +1,53 @@
 ﻿using Game.Pathfind;
 using Game.Vehicles;
+using TollboothHighways.Domain;
 using TollboothHighways.Domain.Components;
 using TollboothHighways.Domain.Enums;
-using TollboothHighways.Path;
 using TollboothHighways.Utilities;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Game;
 
 namespace TollboothHighways.Systems
 {
-    [UpdateInGroup(typeof(SimulationSystemGroup))]
-    [UpdateAfter(typeof(TollPathParameterInjectionSystem))]
-    public partial struct TollLaneViolationSystem : ISystem
+    public partial class TollLaneViolationSystem : GameSystemBase
     {
         private ComponentLookup<TollAllowedMethod> _tollAllowed;
+        private EntityQuery _tollAllowedQuery;
 
-        public void OnCreate(ref SystemState state)
+        protected override void OnCreate()
         {
-            _tollAllowed = state.GetComponentLookup<TollAllowedMethod>(true);
+            _tollAllowedQuery = GetEntityQuery(new EntityQueryDesc
+            {
+                All = new ComponentType[]
+                {
+                    typeof(TollAllowedMethod)
+                }
+            });
+
+            RequireForUpdate(_tollAllowedQuery);            
         }
 
-        public void OnUpdate(ref SystemState state)
+        protected override void OnUpdate()
         {
-            _tollAllowed.Update(ref state);
+            _tollAllowed = GetComponentLookup<TollAllowedMethod>(true);
             var ecb = new EntityCommandBuffer(Allocator.Temp);
 
             new ViolationJob
             {
                 TollAllowedLookup = _tollAllowed,
-                EntityManager = state.EntityManager,
+                EntityManager = EntityManager,
                 ECB = ecb.AsParallelWriter()
             }.ScheduleParallel();
 
-            state.Dependency.Complete();
-            ecb.Playback(state.EntityManager);
+            Dependency.Complete();
+            ecb.Playback(EntityManager);
             ecb.Dispose();
         }
-
+#if WITH_BURST
         [BurstCompile]
+#endif
         private partial struct ViolationJob : IJobEntity
         {
             [ReadOnly] public ComponentLookup<TollAllowedMethod> TollAllowedLookup;
