@@ -52,13 +52,6 @@
 	  <None Remove="Temp\**" />
 	  <None Remove="UI\src\components\**" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Compile Remove="Domain\Components\TrafficLightAutoConfig.cs" />
-	  <Compile Remove="Domain\Components\VehicleFlowData.cs" />
-	  <Compile Remove="Systems\TollBarrierControlSystem.cs" />
-	  <Compile Remove="Systems\TollBoothBarrierSystem.cs" />
-	  <Compile Remove="Systems\UpdateTollRoadsSystem.cs" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="cohtml.Net">

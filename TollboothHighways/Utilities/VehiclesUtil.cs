@@ -10,11 +10,15 @@ using System.Threading.Tasks;
 using TollboothHighways.Domain.Enums;
 using TollboothHighways.Domain.Components;
 using Unity.Entities;
+using Unity.Burst;
 
 namespace TollboothHighways.Utilities
 {
     public class VehiclesUtil
     {
+        /// <summary>
+        /// Legacy Dictionary for backward compatibility - prefer GetVehicleGroupBurstCompatible for performance
+        /// </summary>
         public static readonly Dictionary<VehicleType, VehicleGroup> vehicleTypeToGroupMap = new Dictionary<VehicleType, VehicleGroup>
         {
             { VehicleType.PersonalCar, VehicleGroup.PrivateTransport },
@@ -36,16 +40,42 @@ namespace TollboothHighways.Utilities
             { VehicleType.PrisonerTransport, VehicleGroup.ServiceVehicles }
         };
 
+        /// <summary>
+        /// Burst-compatible method to map vehicle type to vehicle group.
+        /// Use this instead of vehicleTypeToGroupMap.TryGetValue for better performance in Burst jobs.
+        /// </summary>
+        /// <param name="vehicleType">The vehicle type to map</param>
+        /// <returns>The corresponding vehicle group</returns>
+        [BurstCompile]
+        public static VehicleGroup GetVehicleGroupBurstCompatible(VehicleType vehicleType)
+        {
+            return vehicleType switch
+            {
+                VehicleType.PersonalCar => VehicleGroup.PrivateTransport,
+                VehicleType.PersonalCarWithTrailer => VehicleGroup.PrivateTransport,
+                VehicleType.Motorcycle => VehicleGroup.PrivateTransport,
+                VehicleType.Taxi => VehicleGroup.PublicTransport,
+                VehicleType.Truck => VehicleGroup.Trucks,
+                VehicleType.TruckWithTrailer => VehicleGroup.Trucks,
+                VehicleType.Bus => VehicleGroup.PublicTransport,
+                VehicleType.ParkMaintenance => VehicleGroup.ServiceVehicles,
+                VehicleType.RoadMaintenance => VehicleGroup.ServiceVehicles,
+                VehicleType.Ambulance => VehicleGroup.ServiceVehicles,
+                VehicleType.EvacuatingTransport => VehicleGroup.ServiceVehicles,
+                VehicleType.FireEngine => VehicleGroup.ServiceVehicles,
+                VehicleType.GarbageTruck => VehicleGroup.ServiceVehicles,
+                VehicleType.Hearse => VehicleGroup.ServiceVehicles,
+                VehicleType.PoliceCar => VehicleGroup.ServiceVehicles,
+                VehicleType.PostVan => VehicleGroup.ServiceVehicles,
+                VehicleType.PrisonerTransport => VehicleGroup.ServiceVehicles,
+                _ => VehicleGroup.PrivateTransport // Default fallback for None and unknown types
+            };
+        }
+
         public VehicleGroup GetVehicleGroup(VehicleType vehicleType)
        {
-            if (vehicleTypeToGroupMap.TryGetValue(vehicleType, out VehicleGroup group))
-            {
-                return group;
-            }
-            else
-            {
-                throw new ArgumentException($"Vehicle type {vehicleType} is not recognized.");
-            }
+            // Use the new Burst-compatible method for better performance
+            return GetVehicleGroupBurstCompatible(vehicleType);
        }
 
         public Domain.Enums.VehicleType GetVehicleType(Entity vehicleEntity, EntityManager entityManager)
@@ -167,17 +197,33 @@ namespace TollboothHighways.Utilities
         };
 
         /// <summary>
+        /// Burst-compatible method to get toll road component type for a vehicle type.
+        /// Use this instead of the Dictionary-based approach for better performance.
+        /// </summary>
+        /// <param name="vehicleType">The vehicle type</param>
+        /// <returns>The corresponding toll road component type</returns>
+        [BurstCompile]
+        public static Type GetTollRoadComponentTypeBurstCompatible(VehicleType vehicleType)
+        {
+            var vehicleGroup = GetVehicleGroupBurstCompatible(vehicleType);
+            
+            return vehicleGroup switch
+            {
+                VehicleGroup.PrivateTransport => typeof(TollRoadPrivateTransportData),
+                VehicleGroup.Trucks => typeof(TollRoadTruckData),
+                VehicleGroup.PublicTransport => typeof(TollRoadPublicTransportData),
+                VehicleGroup.ServiceVehicles => typeof(TollRoadServiceVehiclesData),
+                _ => typeof(TollRoadAllVehiclesData) // Universal fallback
+            };
+        }
+
+        /// <summary>
         /// Gets the appropriate toll road component type for a given vehicle type
         /// </summary>
         public static Type GetTollRoadComponentType(VehicleType vehicleType)
         {
-            var vehicleGroup = VehiclesUtil.vehicleTypeToGroupMap.TryGetValue(vehicleType, out var group)
-                ? group
-                : VehicleGroup.PrivateTransport; // Default fallback
-
-            return VehicleGroupToComponentMap.TryGetValue(vehicleGroup, out var componentType)
-                ? componentType
-                : typeof(TollRoadAllVehiclesData); // Universal fallback
+            // Use the new Burst-compatible method
+            return GetTollRoadComponentTypeBurstCompatible(vehicleType);
         }
 
         /// <summary>
@@ -185,7 +231,7 @@ namespace TollboothHighways.Utilities
         /// </summary>
         public static ComponentType GetTollRoadComponentTypeForQuery(VehicleType vehicleType)
         {
-            var componentType = GetTollRoadComponentType(vehicleType);
+            var componentType = GetTollRoadComponentTypeBurstCompatible(vehicleType);
 
             if (componentType == typeof(TollRoadPrivateTransportData))
                 return ComponentType.ReadOnly<TollRoadPrivateTransportData>();
@@ -204,7 +250,7 @@ namespace TollboothHighways.Utilities
         /// </summary>
         public static bool TollboothSupportsVehicleType(EntityManager entityManager, Entity tollboothEntity, VehicleType vehicleType)
         {
-            var componentType = GetTollRoadComponentType(vehicleType);
+            var componentType = GetTollRoadComponentTypeBurstCompatible(vehicleType);
 
             if (componentType == typeof(TollRoadPrivateTransportData))
                 return entityManager.HasComponent<TollRoadPrivateTransportData>(tollboothEntity);

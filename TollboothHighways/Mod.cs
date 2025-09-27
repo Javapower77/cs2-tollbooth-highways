@@ -6,7 +6,6 @@ using Game.Input;
 using Game.Modding;
 using Game.Prefabs;
 using Game.SceneFlow;
-using Game.Simulation;
 using Game.UI.InGame;
 using HarmonyLib;
 using System;
@@ -74,46 +73,29 @@ namespace TollboothHighways
                 // 1. Prefab processing (runs only until successful)
                 updateSystem.UpdateAt<TollRoadPrefabUpdateSystem>(SystemUpdatePhase.PrefabUpdate);
 
-                // 2. Toll lane patching (after prefabs, BEFORE spawn & path building)
-                //    Place before TollBoothSpawnSystem and before path parameter injection.
-                updateSystem.UpdateBefore<TollLanePatchSystem, TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
-
-                // 3. Spawn tollbooth / toll road entities (early in simulation)
+                // 2. Spawn tollbooth / toll road entities (early in simulation)
                 updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 4. Selection system for toll booths
+                // 3. Selection system for toll booths
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 5. Path parameter injection
-                //    Must run:
-                //      - After lane patch (so lane data is ready)
-                //      - Before navigation & any per-vehicle AI systems that might read path params
-                updateSystem.UpdateAfter<TollPathParameterInjectionSystem, TollLanePatchSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
+                // 4. Vehicle repathing system (after tollbooth spawn, before vehicle movement)
+                updateSystem.UpdateAfter<VehicleRepathSystem, TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<VehicleRepathSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
 
-                // Preserve original attribute intent: run before every vehicle AI system previously listed.
-                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, PersonalCarAISystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, AmbulanceAISystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, DeliveryTruckAISystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, FireEngineAISystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, GarbageTruckAISystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, HearseAISystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, MaintenanceVehicleAISystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, PoliceCarAISystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, PostVanAISystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, TaxiAISystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollPathParameterInjectionSystem, TransportCarAISystem>(SystemUpdatePhase.GameSimulation);
+                // 4a. Cleanup systems (after repathing, before movement)
+                updateSystem.UpdateAfter<RepathCreatedCleanupSystem, VehicleRepathSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 6. Violation validation (AFTER CarNavigation so lane positions are updated)
-                updateSystem.UpdateAfter<TollLaneViolationSystem, CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
+                // 4b. Cleanup access restrictions (after repathing, before movement)
+                updateSystem.UpdateAfter<AccessRestrictionCleanupSystem, VehicleRepathSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 7. StopVehiclesOnRoadSystem ordering:
+                // 5. StopVehiclesOnRoadSystem ordering:
                 // After core CarNavigationSystem (so navigation complete)
-                updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
                 // Before CarMoveSystem (so movement uses zeroed speed)
-                updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, CarMoveSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 8. UI systems (separate phases)
+                // 6. UI systems (separate phases)
                 updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
 
