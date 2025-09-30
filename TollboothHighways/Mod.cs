@@ -79,16 +79,6 @@ namespace TollboothHighways
                 // 3. Selection system for toll booths
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 4. Vehicle repathing system (after tollbooth spawn, before vehicle movement)
-                updateSystem.UpdateAfter<VehicleRepathSystem, TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<VehicleRepathSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
-
-                // 4a. Cleanup systems (after repathing, before movement)
-                updateSystem.UpdateAfter<RepathCreatedCleanupSystem, VehicleRepathSystem>(SystemUpdatePhase.GameSimulation);
-
-                // 4b. Cleanup access restrictions (after repathing, before movement)
-                updateSystem.UpdateAfter<AccessRestrictionCleanupSystem, VehicleRepathSystem>(SystemUpdatePhase.GameSimulation);
-
                 // 5. StopVehiclesOnRoadSystem ordering:
                 // After core CarNavigationSystem (so navigation complete)
                 updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
