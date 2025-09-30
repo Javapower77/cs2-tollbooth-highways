@@ -165,21 +165,13 @@ namespace TollboothHighways.Utilities
                 return VehicleType.PostVan;
             }
             // At the end check for the Passenger component, which indicates the vehicle type is a personal car or a motorcycle.            
-            else if (entityManager.HasBuffer<Game.Vehicles.Passenger>(vehicleEntity))
+            else if (entityManager.HasComponent<MotorbikePrefabInfo>(vehicleEntity))
             {
-                if (entityManager.TryGetBuffer<Game.Vehicles.Passenger>(vehicleEntity, true, out DynamicBuffer<Game.Vehicles.Passenger> passengers))
-                {
-                    // If the vehicle has only one passenger, it is a motorcycle
-                    if (passengers.Length == 1)
-                    {
-                        return VehicleType.Motorcycle;
-                    }
-                    // If the vehicle has no passengers, it is a personal car. Passenger objects are used in other way
-                    if (passengers.Length == 0)
-                    {
-                        return VehicleType.PersonalCar;
-                    }
-                }
+                return VehicleType.Motorcycle;
+            }
+            else if (entityManager.HasComponent<Game.Vehicles.PersonalCar>(vehicleEntity))
+            {
+                 return VehicleType.PersonalCar;
             }
             // If no specific type is found, return None
             return VehicleType.None;
@@ -214,6 +206,21 @@ namespace TollboothHighways.Utilities
                 VehicleGroup.PublicTransport => typeof(TollRoadPublicTransportData),
                 VehicleGroup.ServiceVehicles => typeof(TollRoadServiceVehiclesData),
                 _ => typeof(TollRoadAllVehiclesData) // Universal fallback
+            };
+        }
+
+        [BurstCompile]
+        public static string GetTollRoadType(VehicleType vehicleType)
+        {
+            var vehicleGroup = GetVehicleGroupBurstCompatible(vehicleType);
+
+            return vehicleGroup switch
+            {
+                VehicleGroup.PrivateTransport => "TollRoadPrivateTransportData",
+                VehicleGroup.Trucks => "TollRoadTruckData",
+                VehicleGroup.PublicTransport => "TollRoadPublicTransportData",
+                VehicleGroup.ServiceVehicles => "TollRoadServiceVehiclesData",
+                _ => "NotFound" // Universal fallback
             };
         }
 
@@ -262,6 +269,22 @@ namespace TollboothHighways.Utilities
                 return entityManager.HasComponent<TollRoadServiceVehiclesData>(tollboothEntity);
 
             return false;
+        }
+
+        public static string GetTollboothRoadType(EntityManager entityManager, Entity tollboothEntity)
+        {
+            if (entityManager.HasComponent<TollRoadPrivateTransportData>(tollboothEntity))
+                return "TollRoadPrivateTransportData";
+            else if (entityManager.HasComponent<TollRoadTruckData>(tollboothEntity))
+                return "TollRoadTruckData";
+            else if (entityManager.HasComponent<TollRoadPublicTransportData>(tollboothEntity))
+                return "TollRoadPublicTransportData";
+            else if (entityManager.HasComponent<TollRoadServiceVehiclesData>(tollboothEntity))
+                return "TollRoadServiceVehiclesData";
+            else if (entityManager.HasComponent<TollRoadAllVehiclesData>(tollboothEntity))
+                return "TollRoadAllVehiclesData";
+            else
+                return "NotFound";
         }
 
         /// <summary>
