@@ -24,9 +24,8 @@ namespace TollboothHighways.Systems
     /// inflated lane crossing cost) and request a new pathfind.
     /// Runs on main thread (no burst) for easier debugging.
     /// </summary>    
-    [UpdateInGroup(typeof(SimulationSystemGroup))]
-    [UpdateBefore(typeof(PathfindSetupSystem))]
-    public partial class TollboothRepathSystem : GameSystemBase
+
+    public partial class TollboothRepathSystemOLD : GameSystemBase
     {
         private EntityQuery _vehicleQuery;
         private ComponentLookup<CarCurrentLane> _carCurrentLaneLookup;
@@ -65,7 +64,8 @@ namespace TollboothHighways.Systems
                 },
                 None = new[]
                 {
-                    ComponentType.ReadOnly<Unspawned>()
+                    ComponentType.ReadOnly<Unspawned>(),
+                    ComponentType.ReadOnly<RepathCreated>()
                 }
             });
 
@@ -133,6 +133,9 @@ namespace TollboothHighways.Systems
 
             var em = EntityManager;
             using var vehicles = _vehicleQuery.ToEntityArray(Allocator.Temp);
+
+            var pqs = World.GetOrCreateSystemManaged<PathfindQueueSystem>();
+            var graph = pqs.GetDataContainer(out var dep); dep.Complete();
 
             foreach (var vehicle in vehicles)
             {
@@ -202,10 +205,12 @@ namespace TollboothHighways.Systems
                                     em.AddComponentData(laneEntity, new OriginalCarLaneFlags { Value = (uint)laneData.m_Flags });
                                     laneData.m_BlockageStart = 0;
                                     laneData.m_BlockageEnd = 255;
-                                    laneData.m_Flags = Game.Net.CarLaneFlags.IsSecured | Game.Net.CarLaneFlags.ForbidCombustionEngines | Game.Net.CarLaneFlags.ForbidTransitTraffic | Game.Net.CarLaneFlags.ForbidHeavyTraffic | Game.Net.CarLaneFlags.AllowEnter;
+                                    laneData.m_Flags = Game.Net.CarLaneFlags.Unsafe;
                                     laneData.m_LaneCrossCount = 255;
                                     _carLaneLookup[laneEntity] = laneData;
                                     VehicleDebugLogger.Log(vehicle, $"MODIFIED lane flags, blockage and set laneCross=255");
+
+                                    
                                 }
                             }
                         }
@@ -273,7 +278,7 @@ namespace TollboothHighways.Systems
                         m_ParkingTarget = parkingSource,
                         m_ParkingDelta = currentLane.m_CurvePosition.z,
                         m_ParkingSize = parkingSize,
-                        m_IgnoredRules = VehicleUtils.GetIgnoredPathfindRules(carData),
+                        m_IgnoredRules = RuleFlags.HasBlockage //VehicleUtils.GetIgnoredPathfindRules(carData),
                     };
 
                     VehicleDebugLogger.Log(vehicle, $"Parameters methods=0x{(uint)parameters.m_Methods:X} ignoredRules=0x{(uint)parameters.m_IgnoredRules:X}");
@@ -303,6 +308,11 @@ namespace TollboothHighways.Systems
                     em.AddComponent<RepathCreated>(vehicle);
 
                     VehicleDebugLogger.Log(vehicle, $"RepathCreated added. PathOwner new state=0x{((uint)pathOwner.m_State):X}");
+
+                    
+                    
+                    pqs.AddDataReader(default);
+
                 }
                 catch (Exception ex)
                 {

@@ -2,13 +2,12 @@ using TollboothHighways.Domain.Components;
 using Unity.Collections;
 using Unity.Entities;
 using Game.Net;
+using Game;
 
 namespace TollboothHighways.Systems
 {
     // Restores original lane flags after repath is completed (simple immediate restore next frame)
-    [UpdateInGroup(typeof(SimulationSystemGroup))]
-    [UpdateAfter(typeof(TollboothRepathSystem))]
-    public partial class RestoreOriginalLaneFlagsSystem : SystemBase
+    public partial class RestoreOriginalLaneFlagsSystem : GameSystemBase
     {
         private EntityQuery _modifiedLanesQuery;
 

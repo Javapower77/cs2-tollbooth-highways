@@ -10,11 +10,13 @@ using Game.UI.InGame;
 using HarmonyLib;
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Systems;
 using TollboothHighways.Domain.Components;
 using TollboothHighways.Systems;
 using TollboothHighways.Utilities;
+using Unity.Entities;
 using static TollboothHighways.ModSettings;
 
 namespace TollboothHighways
@@ -28,17 +30,13 @@ namespace TollboothHighways
         public static string Version => Assembly.GetExecutingAssembly().GetName().Version.ToString(4);
         public static string InformationalVersion => Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
         internal static ModSettings Settings { get; private set; }
+        public static readonly string harmonyID = "TollboothHighways";
 
         public string ModPath { get; set; }
 
         public void OnLoad(UpdateSystem updateSystem)
         {
             LogUtil.Info($"{nameof(Mod)}.{nameof(OnLoad)}, version:{InformationalVersion}");
-
-            // Apply Harmony Patches
-            var harmony = new Harmony(Id);
-            harmony.PatchAll(typeof(Mod).Assembly);
-            LogUtil.Info("Harmony patches applied.");
 
             try
             {
@@ -80,10 +78,10 @@ namespace TollboothHighways
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 4. Toll path incompatibility repath system (generic simulation stage)
-                updateSystem.UpdateAt<TollboothRepathSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAt<TollboothVehicleRepathSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 5. Restore lane flags after repath effects; place after repath
-                updateSystem.UpdateAfter<RestoreOriginalLaneFlagsSystem, TollboothRepathSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAfter<RestoreOriginalLaneFlagsSystem, TollboothVehicleRepathSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 6. StopVehiclesOnRoadSystem ordering:
                 // After core CarNavigationSystem (so navigation complete)
@@ -96,6 +94,17 @@ namespace TollboothHighways
                 updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
 
                 LogUtil.Info("All systems registered (including repath + lane restore).");
+
+                //Harmony
+                var harmony = new Harmony(harmonyID);
+                //Harmony.DEBUG = true;
+                harmony.PatchAll(typeof(Mod).Assembly);
+                var patchedMethods = harmony.GetPatchedMethods().ToArray();
+                LogUtil.Info($"Plugin {harmonyID} made patches! Patched methods: " + patchedMethods);
+                foreach (var patchedMethod in patchedMethods)
+                {
+                    LogUtil.Info($"Patched: {patchedMethod.DeclaringType?.FullName}.{patchedMethod.Name}");
+                }
             }
             catch (Exception ex)
             {
