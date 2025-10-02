@@ -1,11 +1,13 @@
 using Game;
 using Game.Common;
 using Game.Net;
+using Game.Objects;
 using Game.Pathfind;
 using Game.Prefabs;
 using Game.Simulation;
 using Game.Vehicles;
 using System;
+using System.IO;
 using System.Reflection;
 using TollboothHighways.Domain.Components;
 using TollboothHighways.Utilities;
@@ -33,6 +35,8 @@ namespace TollboothHighways.Systems
         private ComponentLookup<CarData> m_CarDataLookup;
         private ComponentLookup<Game.Net.ParkingLane> m_ParkingLaneLookup;
         private ComponentLookup<Game.Net.ConnectionLane> m_ConnectionLaneLookup;
+        private BufferLookup<Game.Net.SubLane> m_SubLaneLookup;
+        private ComponentLookup<Game.Net.CarLane> m_CarLaneLookup;
 
         private EntityQuery m_VehicleQuery;
         private EntityQuery m_TollRoadQuery;
@@ -55,22 +59,21 @@ namespace TollboothHighways.Systems
             m_CarDataLookup = GetComponentLookup<CarData>(true);
             m_ParkingLaneLookup = GetComponentLookup<Game.Net.ParkingLane>(true);
             m_ConnectionLaneLookup = GetComponentLookup<Game.Net.ConnectionLane>(true);
+            m_SubLaneLookup = GetBufferLookup<Game.Net.SubLane>(true);
+            m_CarLaneLookup = GetComponentLookup<Game.Net.CarLane>();
 
             m_VehicleQuery = GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[]
                 {
-                    ComponentType.ReadOnly<Car>(),
-                    ComponentType.ReadWrite<CarCurrentLane>(),
-                    ComponentType.ReadWrite<PathOwner>(),
-                    ComponentType.ReadOnly<PrefabRef>(),
-                    ComponentType.ReadOnly<Target>(),
-                    ComponentType.ReadOnly<PathElement>()
+                    ComponentType.ReadOnly<Vehicle>(),
+                    ComponentType.ReadWrite<CarCurrentLane>()
                 },
                 None = new ComponentType[]
                 {
                     ComponentType.ReadOnly<RepathCreated>(),
-                    ComponentType.ReadOnly<NoRepathNeeded>()
+                    ComponentType.ReadOnly<NoRepathNeeded>(),
+                    ComponentType.ReadOnly<Unspawned>()
                 }
             });
 
@@ -79,7 +82,6 @@ namespace TollboothHighways.Systems
             {
                 All = new ComponentType[]
                 {
-                    ComponentType.ReadOnly<Car>(),
                     ComponentType.ReadOnly<RepathCreated>()
                 }
             });
@@ -87,7 +89,6 @@ namespace TollboothHighways.Systems
             {
                 All = new ComponentType[]
                 {
-                    ComponentType.ReadOnly<Car>(),
                     ComponentType.ReadOnly<NoRepathNeeded>()
                 }
             });
@@ -119,6 +120,8 @@ namespace TollboothHighways.Systems
             m_CarDataLookup.Update(this);
             m_ParkingLaneLookup.Update(this);
             m_ConnectionLaneLookup.Update(this);
+            m_SubLaneLookup.Update(this);
+            m_CarLaneLookup.Update(this);
 
             bool tollNetworkChanged = false;
             if (!m_TollRoadQuery.IsEmptyIgnoreFilter)
@@ -163,6 +166,8 @@ namespace TollboothHighways.Systems
             var carDataLookup = m_CarDataLookup;
             var parkingLaneLookup = m_ParkingLaneLookup;
             var connectionLaneLookup = m_ConnectionLaneLookup;
+            var subLaneLookup = m_SubLaneLookup;
+            var carLaneLookup = m_CarLaneLookup;
 
             Entities
                 .WithName("EvaluateVehicleTollPaths")
@@ -173,7 +178,7 @@ namespace TollboothHighways.Systems
                           in PrefabRef prefabRef,
                           in Target target,
                           in DynamicBuffer<PathElement> pathElements) =>
-                {
+                {   
                     int elementIndex = pathOwner.m_ElementIndex;
                     if (!pathElements.IsCreated || pathElements.Length == 0 || elementIndex >= pathElements.Length)
                     {
@@ -197,10 +202,9 @@ namespace TollboothHighways.Systems
                         return;
                     }
 
-                    bool seenActiveToll = false;
-                    bool requiresRepath = false;
-                    bool unsupportedBooth = false;
-                    bool missingBooth = false;
+                    int wrongTollBoothCount = 0;
+                    int okTollBoothCount = 0;
+                    int subLaneRoad = 0;
 
                     VehicleDebugLogger.Log(vehicle, "Path Elements Length: " + pathElements.Length + ", Starting at index: " + elementIndex );
                     for (int i = elementIndex; i < pathElements.Length; i++)
@@ -211,48 +215,66 @@ namespace TollboothHighways.Systems
                             continue;
                         }
 
-                        if (!tollRoadLookup.TryGetComponent(laneOwner.m_Owner, out var tollData) || !tollData.HasActiveTollbooth)
+                        // If the current index of the path elements contains a toll road segment, 
+                        // check if it supports the vehicle type
+                        if (tollRoadLookup.HasComponent(laneOwner.m_Owner))
                         {
-                            continue;
-                        }
+                            VehicleDebugLogger.Log(vehicle, "Tollbooth road found in Path Element Index: " + i);
 
-                        seenActiveToll = true;
+                            if (!VehiclesUtil.TollboothSupportsVehicleType(entityManager, laneOwner.m_Owner, vehicleType))
+                            {
+                                VehicleDebugLogger.Log(vehicle, "Tollbooth does not support the current vehicle type: " + vehicleType.ToString());
+                                VehicleDebugLogger.Log(vehicle, "Type of the Tollbooth Road found: " + VehiclesUtil.GetTollboothRoadType(entityManager, laneOwner.m_Owner));
+                                wrongTollBoothCount++;
+                                //BlockTempTollboothRoadLane(ref laneOwner.m_Owner);
 
-                        if (tollData.AssociatedTollbooth == Entity.Null || !entityManager.Exists(tollData.AssociatedTollbooth))
-                        {
-                            missingBooth = true;
-                            requiresRepath = true;
-                            break;
-                        }
+                                if (subLaneLookup.TryGetBuffer(laneEntity, out var subLanes))
+                                {
+                                    for (int sl = 0; sl < subLanes.Length; sl++)
+                                    {
+                                        if (subLanes[sl].m_PathMethods == PathMethod.Road)
+                                        {
+                                            subLaneRoad = sl;
+                                            break;
+                                        }
+                                    }
 
-                        if (!VehiclesUtil.TollboothSupportsVehicleType(entityManager, laneOwner.m_Owner, vehicleType))
-                        {
-                            unsupportedBooth = true;
-                            requiresRepath = true;
-                            VehicleDebugLogger.Log(vehicle, "Tollbooth does not support vehicle type: " + vehicleType + ", found in Path Element Index: " + i);
-                            VehicleDebugLogger.Log(vehicle, "Tollbooth Road Type found: " + VehiclesUtil.GetTollboothRoadType(entityManager, laneOwner.m_Owner));
-                            break;
+                                    if (carLaneLookup.TryGetComponent(subLanes[subLaneRoad].m_SubLane, out var carLane))
+                                    {
+                                        if (!entityManager.HasComponent<OriginalCarLaneFlags>(subLanes[subLaneRoad].m_SubLane))
+                                        {
+                                            VehicleDebugLogger.Log(vehicle, "Storing original CarLane flags: " + carLane.m_Flags);
+                                            ecb.AddComponent(subLanes[subLaneRoad].m_SubLane, new OriginalCarLaneFlags
+                                            {
+                                                Value = (uint)carLane.m_Flags
+                                            });
+                                        }
+                                        carLane.m_Flags = Game.Net.CarLaneFlags.Unsafe;
+                                        carLane.m_BlockageEnd = 255;
+                                        carLane.m_BlockageStart = 0;
+                                        VehicleDebugLogger.Log(vehicle, "Modified CarLane flags to: " + carLane.m_Flags + ", BlockageStart: " + carLane.m_BlockageStart + ", and BlockageEnd: " + carLane.m_BlockageEnd);
+                                        VehicleDebugLogger.Log(vehicle, "Added component OriginalCarLaneFlags to lane entity: " + subLanes[subLaneRoad].m_SubLane + " for later restoration");
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                okTollBoothCount++;
+                                VehicleDebugLogger.Log(vehicle, "Tollbooth Road match with the vehicle typein Path Element Index: " + i);
+                            }
                         }
                     }
 
-                    if (!seenActiveToll)
+                    if (okTollBoothCount == 0 && wrongTollBoothCount == 0)
                     {
                         ecb.AddComponent<NoRepathNeeded>(vehicle);
-                        VehicleDebugLogger.Log(vehicle, "Path contains no toll segment; marked as compliant");
-                        return;
-                    }
-
-                    if (!requiresRepath)
-                    {
-                        ecb.AddComponent<NoRepathNeeded>(vehicle);
-                        VehicleDebugLogger.Log(vehicle, "Toll path already valid for vehicle type");
+                        VehicleDebugLogger.Log(vehicle, "Tollbooth roads were not found in the path; skipping repath");
                         return;
                     }
 
                     VehicleDebugLogger.Log(vehicle, "Path Owner State: " + pathOwner.m_State.ToString());
                     if ((pathOwner.m_State & PathFlags.Pending) != 0)
                     {
-                        //ecb.AddComponent<RepathCreated>(vehicle);
                         VehicleDebugLogger.Log(vehicle, "Repath already pending; tagging vehicle");
                         return;
                     }
@@ -306,15 +328,8 @@ namespace TollboothHighways.Systems
 
                     var queueItem = new SetupQueueItem(vehicle, parameters, origin, destination);
 
-                    if (!entityManager.HasComponent<OriginalCarLaneFlags>(currentLane.m_Lane))
-                    {
-                        ecb.AddComponent(currentLane.m_Lane, new OriginalCarLaneFlags
-                        {
-                            Value = (uint)currentLane.m_LaneFlags
-                        });
-                    }
-                    VehicleDebugLogger.Log(vehicle, $"Original lane flags recorded: {(uint)currentLane.m_LaneFlags}, lane index: {currentLane.m_Lane.Index}");
-
+                    
+                    
                     if ((pathOwner.m_State & (PathFlags.Obsolete | PathFlags.Divert)) == (PathFlags.Obsolete | PathFlags.Divert))
                     {
                         pathOwner.m_State |= PathFlags.CachedObsolete;
@@ -325,24 +340,14 @@ namespace TollboothHighways.Systems
                     currentLane.m_LaneFlags &= ~CarLaneFlags.EndOfPath;
                     currentLane.m_LaneFlags |= CarLaneFlags.FixedLane;
                     
+                    
                     VehicleDebugLogger.Log(vehicle, $"Modified current lane flags to: {(uint)currentLane.m_LaneFlags}");
 
                     pathfindQueueWriter.Enqueue(queueItem);
 
                     ecb.AddComponent<RepathCreated>(vehicle);
 
-                    if (unsupportedBooth)
-                    {
-                        VehicleDebugLogger.Log(vehicle, "Enqueued new path due to incompatible tollbooth");
-                    }
-                    else if (missingBooth)
-                    {
-                        VehicleDebugLogger.Log(vehicle, "Enqueued new path due to missing tollbooth entity");
-                    }
-                    else
-                    {
-                        VehicleDebugLogger.Log(vehicle, "Enqueued new path for toll constraint change");
-                    }
+                    VehicleDebugLogger.Log(vehicle, "Repath triggered; vehicle tagged, WrongTollBoothCount: " + wrongTollBoothCount + ", OkTollBoothCount: " + okTollBoothCount);
                 })
                 .WithoutBurst()
                 .Run();
