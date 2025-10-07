@@ -22,9 +22,18 @@ using DomainVehicleType = TollboothHighways.Domain.Enums.VehicleType;
 namespace TollboothHighways.Systems
 {
     /// <summary>
+    /// Component to track which vehicle caused a lane to be blocked
+    /// </summary>
+    public struct LaneBlockedByVehicle : IComponentData
+    {
+        public Entity Vehicle;
+        public uint FrameBlocked;
+    }
+
+    /// <summary>
     /// Main-thread system that evaluates vehicles currently travelling through toll road segments
     /// and triggers a repath when the assigned tollbooth no longer supports the vehicle type.
-    /// Uses dynamic pathfinding costs to make incompatible lanes prohibitively expensive.
+    /// Temporarily blocks incompatible toll lanes by setting appropriate flags.
     /// </summary>
     [WorldSystemFilter(WorldSystemFilterFlags.Default | WorldSystemFilterFlags.Editor)]
     public partial class TollboothVehicleRepathSystem : GameSystemBase
@@ -36,22 +45,18 @@ namespace TollboothHighways.Systems
         private ComponentLookup<Game.Net.ConnectionLane> m_ConnectionLaneLookup;
         private BufferLookup<Game.Net.SubLane> m_SubLaneLookup;
         private ComponentLookup<Game.Net.CarLane> m_CarLaneLookup;
-        private ComponentLookup<Curve> m_CurveLookup;
-        private ComponentLookup<PathfindCostInfo> m_PathfindCostLookup;
-
-        private EntityQuery m_VehicleQuery;
-        private EntityQuery m_TollRoadQuery;
+        private ComponentLookup<PathOwner> m_PathOwnerLookup;
+        private ComponentLookup<Deleted> m_DeletedLookup;
         private EntityQuery m_RepathedVehiclesQuery;
         private EntityQuery m_NoRepathVehiclesQuery;
-        private EntityQuery m_ModifiedCostLanesQuery;
+        private EntityQuery m_VehicleQuery;
+        private EntityQuery m_TollRoadQuery;
+        private EntityQuery m_BlockedLanesQuery;
 
         private EndFrameBarrier m_EndFrameBarrier;
         private PathfindSetupSystem m_PathfindSetupSystem;
         private bool m_LogInitialized;
         private SimulationSystem m_SimulationSystem;
-
-        // High cost to make lanes effectively unusable for pathfinding
-        private const float PROHIBITIVE_COST = 1000000f;
 
         protected override void OnCreate()
         {
@@ -67,9 +72,12 @@ namespace TollboothHighways.Systems
             m_ParkingLaneLookup = GetComponentLookup<Game.Net.ParkingLane>(true);
             m_ConnectionLaneLookup = GetComponentLookup<Game.Net.ConnectionLane>(true);
             m_SubLaneLookup = GetBufferLookup<Game.Net.SubLane>(true);
-            m_CarLaneLookup = GetComponentLookup<Game.Net.CarLane>(true);
-            m_CurveLookup = GetComponentLookup<Curve>(true);
-            m_PathfindCostLookup = GetComponentLookup<PathfindCostInfo>();
+            m_CarLaneLookup = GetComponentLookup<Game.Net.CarLane>();
+            m_PathOwnerLookup = GetComponentLookup<PathOwner>(true);
+            m_DeletedLookup = GetComponentLookup<Deleted>(true);
+            m_RepathedVehiclesQuery = GetEntityQuery(ComponentType.ReadOnly<RepathCreated>());
+            m_NoRepathVehiclesQuery = GetEntityQuery(ComponentType.ReadOnly<NoRepathNeeded>());
+
 
             m_VehicleQuery = GetEntityQuery(new EntityQueryDesc
             {
@@ -77,19 +85,22 @@ namespace TollboothHighways.Systems
                 {
                     ComponentType.ReadOnly<Vehicle>(),
                     ComponentType.ReadWrite<CarCurrentLane>(),
-                    ComponentType.ReadWrite<PathOwner>()
+                    ComponentType.ReadOnly<PathOwner>()
                 },
                 None = new ComponentType[]
                 {
+                    ComponentType.ReadOnly<RepathCreated>(),
+                    ComponentType.ReadOnly<NoRepathNeeded>(),
                     ComponentType.ReadOnly<Deleted>(),
                     ComponentType.ReadOnly<Unspawned>()
                 }
             });
 
             m_TollRoadQuery = GetEntityQuery(ComponentType.ReadOnly<TollRoadPrefabData>());
-            m_RepathedVehiclesQuery = GetEntityQuery(ComponentType.ReadOnly<RepathCreated>());
-            m_NoRepathVehiclesQuery = GetEntityQuery(ComponentType.ReadOnly<NoRepathNeeded>());
-            m_ModifiedCostLanesQuery = GetEntityQuery(ComponentType.ReadOnly<OriginalPathfindCost>());
+            m_BlockedLanesQuery = GetEntityQuery(
+                ComponentType.ReadOnly<OriginalCarLaneFlags>(),
+                ComponentType.ReadOnly<LaneBlockedByVehicle>()
+            );
         }
 
         protected override void OnUpdate()
@@ -118,11 +129,13 @@ namespace TollboothHighways.Systems
             m_ConnectionLaneLookup.Update(this);
             m_SubLaneLookup.Update(this);
             m_CarLaneLookup.Update(this);
-            m_CurveLookup.Update(this);
-            m_PathfindCostLookup.Update(this);
+            m_PathOwnerLookup.Update(this);
+            m_DeletedLookup.Update(this);
 
-            // Restore previously modified costs FIRST
-            RestoreModifiedCosts();
+            uint currentFrame = m_SimulationSystem.frameIndex;
+
+            // First, restore lanes where the blocking vehicle has completed pathfinding or been deleted
+            RestoreBlockedLanes(currentFrame);
 
             bool tollNetworkChanged = false;
             if (!m_TollRoadQuery.IsEmptyIgnoreFilter)
@@ -167,10 +180,11 @@ namespace TollboothHighways.Systems
             var parkingLaneLookup = m_ParkingLaneLookup;
             var connectionLaneLookup = m_ConnectionLaneLookup;
             var subLaneLookup = m_SubLaneLookup;
-            var pathfindCostLookup = m_PathfindCostLookup;
+            var carLaneLookup = m_CarLaneLookup;
 
             Entities
                 .WithName("EvaluateVehicleTollPaths")
+                .WithNone<RepathCreated, NoRepathNeeded>()
                 .WithNone<Deleted, Unspawned>()
                 .ForEach((Entity vehicle,
                           ref CarCurrentLane currentLane,
@@ -179,21 +193,11 @@ namespace TollboothHighways.Systems
                           in Target target,
                           in DynamicBuffer<PathElement> pathElements) =>
                 {
-                    VehicleDebugLogger.Log(vehicle, "Current frame index: " + m_SimulationSystem.frameIndex);
-                    VehicleDebugLogger.Log(vehicle, "Path Owner State: " + pathOwner.m_State.ToString());
-                    
-                    // Check if vehicle already has RepathCreated - if so, skip unless pending completed
-                    if (entityManager.HasComponent<RepathCreated>(vehicle))
-                    {
-                        // Only clear RepathCreated if pathfind completed successfully
-                        if ((pathOwner.m_State & PathFlags.Pending) == 0 && 
-                            (pathOwner.m_State & PathFlags.Updated) != 0)
-                        {
-                            ecb.RemoveComponent<RepathCreated>(vehicle);
-                            VehicleDebugLogger.Log(vehicle, "Path updated successfully, clearing RepathCreated");
-                        }
-                        return;
-                    }
+                    // Skip if already pending - wait for pathfind to complete
+                    VehicleDebugLogger.Log(vehicle, $"Current frame: {currentFrame}");
+                    VehicleDebugLogger.Log(vehicle, $"Evaluating vehicle at pathOwner element index {pathOwner.m_ElementIndex}, state: {pathOwner.m_State}");
+
+        
 
                     // Skip if already pending - wait for pathfind to complete
                     if ((pathOwner.m_State & PathFlags.Pending) != 0)
@@ -203,37 +207,28 @@ namespace TollboothHighways.Systems
                     }
 
                     int elementIndex = pathOwner.m_ElementIndex;
-                    if (!pathElements.IsCreated || pathElements.Length == 0)
+                    if (!pathElements.IsCreated || pathElements.Length == 0 || target.m_Target == Entity.Null)
                     {
-                        VehicleDebugLogger.Log(vehicle, "No path elements available");
-                        return;
-                    }
-
-                    if (target.m_Target == Entity.Null)
-                    {
-                        VehicleDebugLogger.Log(vehicle, "Vehicle has no target");
+                        VehicleDebugLogger.Log(vehicle, "No path elements created yet or invalid target - skipping current frame");
                         return;
                     }
 
                     if (!carDataLookup.HasComponent(prefabRef.m_Prefab))
                     {
-                        VehicleDebugLogger.Log(vehicle, "No CarData on prefab");
+                        VehicleDebugLogger.Log(vehicle, "No CarData found for vehicle prefab - skipping current frame");
                         return;
                     }
 
                     DomainVehicleType vehicleType = VehiclesUtil.GetVehicleTypeStatic(vehicle, entityManager);
                     if (vehicleType == DomainVehicleType.None)
                     {
-                        VehicleDebugLogger.Log(vehicle, "Unable to resolve vehicle type");
                         return;
                     }
 
                     int wrongTollBoothCount = 0;
                     int okTollBoothCount = 0;
 
-                    VehicleDebugLogger.Log(vehicle, "Scanning path for incompatible tollbooths...");
-
-                    // Scan path and modify costs for incompatible tollbooths BEFORE triggering repath
+                    // Scan path for incompatible tollbooths and block lanes BEFORE pathfinding
                     for (int i = elementIndex; i < pathElements.Length; i++)
                     {
                         Entity laneEntity = pathElements[i].m_Target;
@@ -244,41 +239,43 @@ namespace TollboothHighways.Systems
 
                         if (tollRoadLookup.HasComponent(laneOwner.m_Owner))
                         {
-                            VehicleDebugLogger.Log(vehicle, "Tollbooth road found at path element " + i);
+                            VehicleDebugLogger.Log(vehicle, "Tollbooth road found in Path Element Index: " + i);
 
-                            if (!VehiclesUtil.TollboothSupportsVehicleType(entityManager, laneOwner.m_Owner, vehicleType))
+                            if (VehiclesUtil.TollboothSupportsVehicleType(entityManager, laneOwner.m_Owner, vehicleType) == false)
                             {
-                                VehicleDebugLogger.Log(vehicle, "Incompatible tollbooth - increasing lane costs");
-                                VehicleDebugLogger.Log(vehicle, "Tollbooth road type: " + VehiclesUtil.GetTollboothRoadType(entityManager, laneOwner.m_Owner) + ", Vehicle needs: " + VehiclesUtil.GetTollRoadType(vehicleType));
                                 wrongTollBoothCount++;
-
-                                // Increase pathfinding cost for these lanes
-                                IncreasePathfindCost(laneOwner.m_Owner, ecb, subLaneLookup, pathfindCostLookup, entityManager, vehicle);
+                                VehicleDebugLogger.Log(vehicle, $"Incompatible tollbooth at path element {i} - blocking lanes");
+                                VehicleDebugLogger.Log(vehicle, $"Tollbooth {laneOwner.m_Owner.Index} does not support vehicle type {vehicleType}");
+                                VehicleDebugLogger.Log(vehicle, $"Tollbooth Road Found: {VehiclesUtil.GetTollboothRoadType(entityManager, laneOwner.m_Owner)}, Tollbooth Road Expected: {VehiclesUtil.GetTollRoadType(vehicleType)} ");
+                                // Block lanes and associate with this vehicle
+                                BlockTollRoadLanes(laneOwner.m_Owner, vehicleType, ecb, subLaneLookup,
+                                    carLaneLookup, entityManager, vehicle, currentFrame);
                             }
                             else
                             {
                                 okTollBoothCount++;
-                                VehicleDebugLogger.Log(vehicle, "Compatible tollbooth");
+                                VehicleDebugLogger.Log(vehicle, "Tollbooth road of type [" + VehiclesUtil.GetTollRoadType(vehicleType) + "] matches vehicle type [" + vehicleType.ToString() + "] at Path Element Index: " + i);
                             }
                         }
                     }
 
-                    if (okTollBoothCount == 0 && wrongTollBoothCount == 0)
+                    if (wrongTollBoothCount == 0 && okTollBoothCount == 0)
                     {
-                        VehicleDebugLogger.Log(vehicle, "No tollbooths in path");
+                        ecb.AddComponent<NoRepathNeeded>(vehicle);
+                        VehicleDebugLogger.Log(vehicle, "No tollbooths found on the paths of the vehicle - no action needed");
                         return;
                     }
 
                     if (wrongTollBoothCount == 0)
                     {
-                        VehicleDebugLogger.Log(vehicle, "All tollbooths compatible");
+                        ecb.AddComponent<NoRepathNeeded>(vehicle);
+                        VehicleDebugLogger.Log(vehicle, "All tollbooths on the path are compatible - no repath needed");
                         return;
                     }
 
-                    // Now trigger the repath with costs already modified
+                    // Now trigger the repath with lanes already blocked
                     var carData = carDataLookup[prefabRef.m_Prefab];
 
-                    // Determine parking source
                     Entity parkingSource = vehicle;
                     if (parkingLaneLookup.HasComponent(currentLane.m_Lane))
                     {
@@ -290,7 +287,6 @@ namespace TollboothHighways.Systems
                         parkingSource = currentLane.m_Lane;
                     }
 
-                    // Setup pathfinding parameters
                     PathfindParameters parameters = new PathfindParameters
                     {
                         m_MaxSpeed = new float2(carData.m_MaxSpeed, VehicleUtils.MAX_VEHICLE_SPEED),
@@ -319,100 +315,180 @@ namespace TollboothHighways.Systems
 
                     var queueItem = new SetupQueueItem(vehicle, parameters, origin, destination);
 
-                    // Clear the old path
-                    pathOwner.m_State |= PathFlags.Obsolete;
-                    
-                    // Enqueue the new pathfind request
-                    pathfindQueue.Enqueue(queueItem);
-                    
-                    // Mark as repathed to avoid re-processing this frame
-                    ecb.AddComponent<RepathCreated>(vehicle);
+                    // Update path owner state
+                    if ((pathOwner.m_State & (PathFlags.Obsolete | PathFlags.Divert)) == (PathFlags.Obsolete | PathFlags.Divert))
+                    {
+                        pathOwner.m_State |= PathFlags.CachedObsolete;
+                    }
 
-                    VehicleDebugLogger.Log(vehicle, "**REPATH TRIGGERED** -- Incompatible: " + wrongTollBoothCount + ", Compatible: " + okTollBoothCount);
+                    pathOwner.m_State &= ~(PathFlags.Failed | PathFlags.Obsolete | PathFlags.DivertObsolete | PathFlags.Stuck);
+                    pathOwner.m_State |= PathFlags.Pending;
+                    
+                    currentLane.m_LaneFlags &= ~Game.Vehicles.CarLaneFlags.EndOfPath;
+                    currentLane.m_LaneFlags |= Game.Vehicles.CarLaneFlags.FixedLane;
+
+                    pathfindQueue.Enqueue(queueItem);
+                    VehicleDebugLogger.Log(vehicle, $"Path Owner State updated to {pathOwner.m_State}");
+                    VehicleDebugLogger.Log(vehicle, $"**REPATH TRIGGERED** Frame:{currentFrame} -- Incompatible:{wrongTollBoothCount}, Compatible:{okTollBoothCount}");
                 })
                 .WithoutBurst()
                 .Run();
 
             m_PathfindSetupSystem.AddQueueWriter(Dependency);
         }
-
+        
         /// <summary>
-        /// Increases pathfinding cost for all lanes of a toll road segment
+        /// Blocks all car lanes of a toll road segment by applying appropriate flags based on vehicle type.
+        /// Associates the block with the requesting vehicle so we can track when to restore.
         /// </summary>
-        private void IncreasePathfindCost(Entity roadEntity, EntityCommandBuffer ecb,
-            BufferLookup<Game.Net.SubLane> subLaneLookup,
-            ComponentLookup<PathfindCostInfo> pathfindCostLookup,
-            EntityManager entityManager, Entity vehicle)
+        private void BlockTollRoadLanes(Entity roadEntity, DomainVehicleType vehicleType,
+            EntityCommandBuffer ecb, BufferLookup<Game.Net.SubLane> subLaneLookup,
+            ComponentLookup<Game.Net.CarLane> carLaneLookup, EntityManager entityManager, 
+            Entity blockingVehicle, uint currentFrame)
         {
             if (!subLaneLookup.TryGetBuffer(roadEntity, out var subLanes))
             {
                 return;
             }
 
+            CarLaneFlags blockFlags = GetBlockingFlagsForVehicleType(vehicleType);
+
             for (int i = 0; i < subLanes.Length; i++)
             {
                 Entity subLaneEntity = subLanes[i].m_SubLane;
                 
-                // Only process road lanes
                 if (subLanes[i].m_PathMethods != PathMethod.Road)
                 {
                     continue;
                 }
 
-                // Get or create PathfindCostInfo
-                PathfindCostInfo costInfo;
-                if (pathfindCostLookup.TryGetComponent(subLaneEntity, out var existingCost))
+                if (!carLaneLookup.TryGetComponent(subLaneEntity, out var carLane))
                 {
-                    costInfo = existingCost;
-                }
-                else
-                {
-                    costInfo = new PathfindCostInfo { m_Value = 0f };
+                    continue;
                 }
 
-                // Store original cost if not already stored
-                if (!entityManager.HasComponent<OriginalPathfindCost>(subLaneEntity))
+                // Only store original if not already blocked
+                if (!entityManager.HasComponent<OriginalCarLaneFlags>(subLaneEntity))
                 {
-                    ecb.AddComponent(subLaneEntity, new OriginalPathfindCost
+                    ecb.AddComponent(subLaneEntity, new OriginalCarLaneFlags
                     {
-                        Value = costInfo.m_Value
+                        Value = (uint)carLane.m_Flags
                     });
 
-                    VehicleDebugLogger.Log(vehicle, $"Storing original cost {costInfo.m_Value} for lane {subLaneEntity.Index}");
+                    // Track which vehicle caused this block
+                    ecb.AddComponent(subLaneEntity, new LaneBlockedByVehicle
+                    {
+                        Vehicle = blockingVehicle,
+                        FrameBlocked = currentFrame
+                    });
+
+                    VehicleDebugLogger.Log(blockingVehicle, $"Storing original flags {carLane.m_Flags} for lane {subLaneEntity.Index}");
                 }
 
-                // Apply prohibitive cost
-                costInfo.m_Value = PROHIBITIVE_COST;
-                ecb.SetComponent(subLaneEntity, costInfo);
+                // Apply blocking flags
+                carLane.m_Flags |= blockFlags;
+                carLane.m_BlockageStart = 0;
+                carLane.m_BlockageEnd = 255;
 
-                VehicleDebugLogger.Log(vehicle, $"Increased cost for lane {subLaneEntity.Index} to {PROHIBITIVE_COST}");
+                ecb.SetComponent(subLaneEntity, carLane);
+
+                VehicleDebugLogger.Log(blockingVehicle, $"Blocked Tollbooth Road lane {subLaneEntity.Index} with flags: {blockFlags}");
             }
         }
 
         /// <summary>
-        /// Restores original pathfinding costs for lanes that were temporarily modified
+        /// Determines which CarLaneFlags to set based on the vehicle type that should be blocked.
         /// </summary>
-        private void RestoreModifiedCosts()
+        private CarLaneFlags GetBlockingFlagsForVehicleType(DomainVehicleType vehicleType)
         {
-            if (m_ModifiedCostLanesQuery.IsEmptyIgnoreFilter)
+            VehicleGroup vehicleGroup = VehiclesUtil.GetVehicleGroupBurstCompatible(vehicleType);
+
+            switch (vehicleGroup)
+            {
+                case VehicleGroup.PrivateTransport:
+                    return CarLaneFlags.Forbidden | CarLaneFlags.Unsafe;
+
+                case VehicleGroup.Trucks:
+                    return CarLaneFlags.ForbidHeavyTraffic | CarLaneFlags.Forbidden;
+
+                case VehicleGroup.PublicTransport:
+                    return CarLaneFlags.Forbidden | CarLaneFlags.Unsafe;
+
+                case VehicleGroup.ServiceVehicles:
+                    return CarLaneFlags.Forbidden | CarLaneFlags.Unsafe | CarLaneFlags.ForbidTransitTraffic;
+
+                default:
+                    return CarLaneFlags.Forbidden | CarLaneFlags.Unsafe;
+            }
+        }
+        
+        /// <summary>
+        /// Restores lanes that were blocked by vehicles which have now completed pathfinding,
+        /// been deleted, or timed out.
+        /// </summary>
+        private void RestoreBlockedLanes(uint currentFrame)
+        {
+            if (m_BlockedLanesQuery.IsEmptyIgnoreFilter)
             {
                 return;
             }
 
             var ecb = m_EndFrameBarrier.CreateCommandBuffer();
-            var pathfindCostLookup = m_PathfindCostLookup;
+            var carLaneLookup = m_CarLaneLookup;
+            var pathOwnerLookup = m_PathOwnerLookup;
+            var deletedLookup = m_DeletedLookup;
+
+            const uint MAX_BLOCK_FRAMES = 300; // ~5 seconds timeout
 
             Entities
-                .WithName("RestoreModifiedCosts")
-                .WithAll<OriginalPathfindCost>()
-                .ForEach((Entity laneEntity, in OriginalPathfindCost originalCost) =>
+                .WithName("RestoreBlockedLanes")
+                .WithAll<OriginalCarLaneFlags, LaneBlockedByVehicle>()
+                .ForEach((Entity laneEntity, in OriginalCarLaneFlags originalFlags, in LaneBlockedByVehicle blockedBy) =>
                 {
-                    PathfindCostInfo costInfo = new PathfindCostInfo { m_Value = originalCost.Value };
-                    ecb.SetComponent(laneEntity, costInfo);
+                    bool shouldRestore = false;
+                    string reason = "";
 
-                    VehicleDebugLogger.LogOnce($"Restored lane {laneEntity.Index} to cost: {originalCost.Value}");
+                    // Check if blocking vehicle no longer exists
+                    if (deletedLookup.HasComponent(blockedBy.Vehicle))
+                    {
+                        shouldRestore = true;
+                        reason = "vehicle deleted";
+                    }
+                    // Check if blocking vehicle completed pathfinding
+                    else if (pathOwnerLookup.TryGetComponent(blockedBy.Vehicle, out var pathOwner))
+                    {
+                        if ((pathOwner.m_State & PathFlags.Pending) == 0)
+                        {
+                            shouldRestore = true;
+                            reason = "pathfinding completed";
+                        }
+                    }
+                    // Fallback: vehicle entity doesn't exist anymore
+                    else
+                    {
+                        shouldRestore = true;
+                        reason = "vehicle entity missing";
+                    }
 
-                    ecb.RemoveComponent<OriginalPathfindCost>(laneEntity);
+                    // Timeout safety: restore after max frames
+                    if (!shouldRestore && (currentFrame - blockedBy.FrameBlocked) > MAX_BLOCK_FRAMES)
+                    {
+                        shouldRestore = true;
+                        reason = $"timeout ({currentFrame - blockedBy.FrameBlocked} frames)";
+                    }
+
+                    if (shouldRestore && carLaneLookup.TryGetComponent(laneEntity, out var carLane))
+                    {
+                        carLane.m_Flags = (CarLaneFlags)originalFlags.Value;
+                        carLane.m_BlockageStart = 255;
+                        carLane.m_BlockageEnd = 0;
+
+                        ecb.SetComponent(laneEntity, carLane);
+                        ecb.RemoveComponent<OriginalCarLaneFlags>(laneEntity);
+                        ecb.RemoveComponent<LaneBlockedByVehicle>(laneEntity);
+
+                        VehicleDebugLogger.Log(blockedBy.Vehicle, $"Restored lane {laneEntity.Index} - {reason}");
+                    }
                 })
                 .WithoutBurst()
                 .Run();

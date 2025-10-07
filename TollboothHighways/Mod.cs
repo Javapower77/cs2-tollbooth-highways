@@ -81,7 +81,7 @@ namespace TollboothHighways
                 updateSystem.UpdateAt<TollboothVehicleRepathSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 5. Restore lane flags after repath effects; place after repath
-                updateSystem.UpdateAfter<RestoreOriginalLaneFlagsSystem, TollboothVehicleRepathSystem>(SystemUpdatePhase.GameSimulation);
+                //updateSystem.UpdateAfter<RestoreOriginalLaneFlagsSystem, TollboothVehicleRepathSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 6. StopVehiclesOnRoadSystem ordering:
                 // After core CarNavigationSystem (so navigation complete)
