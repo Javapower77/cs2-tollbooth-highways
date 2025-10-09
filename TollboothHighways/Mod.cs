@@ -77,13 +77,12 @@ namespace TollboothHighways
                 // 3. Selection system for toll booths
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 4. Toll path incompatibility repath system (generic simulation stage)
-                //updateSystem.UpdateAt<TollboothVehicleRepathSystem>(SystemUpdatePhase.GameSimulation);
+                // 4. Ensure vehicles repath to compatible tollbooth lanes
+                updateSystem.UpdateAt<TollboothVehicleRepathSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAfter<TollboothVehicleRepathSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollboothVehicleRepathSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 5. Monitor car navigation lanes for incompatible toll routes
-                updateSystem.UpdateAt<TollboothCarNavigationMonitorSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAfter<TollboothCarNavigationMonitorSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
-
+                
                 // 6. StopVehiclesOnRoadSystem ordering:
                 // After core CarNavigationSystem (so navigation complete)
                 updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);

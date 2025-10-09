@@ -133,7 +133,6 @@ namespace TollboothHighways.Systems
             Entities
                 .WithName("MonitorCarNavigationLanes")
                 .WithNone<Deleted, Unspawned>()
-                .WithNone<RepathCreated>()
                 .ForEach((Entity vehicle,
                           ref CarCurrentLane currentLane,
                           ref PathOwner pathOwner,
@@ -162,7 +161,7 @@ namespace TollboothHighways.Systems
                     var navigationLanes = carNavigationLaneLookup[vehicle];
                     if (!navigationLanes.IsCreated || navigationLanes.Length == 0)
                     {
-                        VehicleDebugLogger.Log(vehicle, "CarNavigationLane buffer is empty, cannot monitor");
+                        VehicleDebugLogger.Log(vehicle, "CarNavigationLane buffer is still empty, cannot monitor yet.");
                         return;
                     }
 
@@ -199,10 +198,10 @@ namespace TollboothHighways.Systems
 
                         if (VehiclesUtil.TollboothSupportsVehicleType(entityManager, laneOwner.m_Owner, vehicleType))
                         {
-                            VehicleDebugLogger.Log(vehicle, $"Tollbooth road of type [{VehiclesUtil.GetTollRoadType(vehicleType)}] matches vehicle type [{vehicleType}] at CarNavigationLane {i}");
+                            VehicleDebugLogger.Log(vehicle, $"Tollbooth road of type [{VehiclesUtil.GetTollRoadType(vehicleType)}] matches vehicle type [{vehicleType}] at CarNavigationLane Buffer Index: {i}");
                             continue;
                         }
-                        VehicleDebugLogger.Log(vehicle, $"Tollbooth Road Found at current CarNavigationLane: {VehiclesUtil.GetTollboothRoadType(entityManager, laneOwner.m_Owner)}, Tollbooth Road Expected: {VehiclesUtil.GetTollRoadType(vehicleType)} ");
+                        VehicleDebugLogger.Log(vehicle, $"Tollbooth Road Found at current CarNavigationLane Buffer Index [{i}]: {VehiclesUtil.GetTollboothRoadType(entityManager, laneOwner.m_Owner)}, Tollbooth Road Expected: {VehiclesUtil.GetTollRoadType(vehicleType)} ");
                         VehicleDebugLogger.Log(vehicle, $"CarNavigationLane [{i}] {laneEntity.Index} belongs to incompatible toll road {laneOwner.m_Owner.Index} for vehicle type {vehicleType}");
                         VehicleDebugLogger.Log(vehicle, $"Current CarNavigationLane Flags: {navLane.m_Flags}");
                         //TollboothLaneUtility.BlockTollRoadLanes(laneOwner.m_Owner, vehicleType, ecb, subLaneLookup, carLaneLookup, connectionLaneLookup, entityManager, vehicle, currentFrame);
@@ -293,11 +292,6 @@ namespace TollboothHighways.Systems
             currentLane.m_LaneFlags &= ~Game.Vehicles.CarLaneFlags.EndOfPath;
             currentLane.m_LaneFlags |= Game.Vehicles.CarLaneFlags.FixedLane;
             pathfindQueue.Enqueue(queueItem);
-
-            if (!EntityManager.HasComponent<RepathCreated>(vehicle))
-            {
-                //ecb.AddComponent<RepathCreated>(vehicle);
-            }
 
             VehicleDebugLogger.Log(vehicle, $"## RE-PATH ## Forced repath due to incompatible toll lane {laneEntity.Index} on toll road {tollRoad.Index}");
         }

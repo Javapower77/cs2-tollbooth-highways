@@ -10,14 +10,14 @@ namespace TollboothHighways.Utilities
     internal static class TollboothLaneUtility
     {
         public static void BlockTollRoadLanes(Entity roadEntity,
-                                              VehicleType vehicleType,
-                                              EntityCommandBuffer ecb,
-                                              BufferLookup<SubLane> subLaneLookup,
-                                              ComponentLookup<CarLane> carLaneLookup,
-                                              ComponentLookup<ConnectionLane> connectionLaneLookup,
-                                              EntityManager entityManager,
-                                              Entity blockingVehicle,
-                                              uint currentFrame)
+                                               VehicleType vehicleType,
+                                               EntityCommandBuffer ecb,
+                                               BufferLookup<Game.Net.SubLane> subLaneLookup,
+                                               ComponentLookup<Game.Net.CarLane> carLaneLookup,
+                                               ComponentLookup<Game.Net.ConnectionLane> connectionLaneLookup,
+                                               EntityManager entityManager,
+                                               Entity blockingVehicle,
+                                               uint currentFrame)
         {
             if (!subLaneLookup.TryGetBuffer(roadEntity, out var subLanes))
             {
@@ -78,7 +78,7 @@ namespace TollboothHighways.Utilities
 
                     ecb.SetComponent(subLaneEntity, carLane);
 
-                    VehicleDebugLogger.Log(blockingVehicle, $"Blocked toll lane {subLaneEntity.Index} with flags: {blockFlags} (attempt {blockedInfo.AttemptCount})");
+                    VehicleDebugLogger.Log(blockingVehicle, $"Blocked Tollbooth Road lane {subLaneEntity.Index} with flags: {blockFlags} (attempt {blockedInfo.AttemptCount})");
                 }
 
                 if (connectionLaneLookup.TryGetComponent(subLaneEntity, out var connectionLane))
@@ -130,12 +130,20 @@ namespace TollboothHighways.Utilities
 
         public static ConnectionLaneFlags GetConnectionBlockingFlags(VehicleType vehicleType)
         {
-            _ = vehicleType;
             return ConnectionLaneFlags.Disabled;
         }
 
         public static void RequestPathfindRebuild(Entity laneEntity, Entity ownerEntity, EntityCommandBuffer ecb, EntityManager entityManager)
         {
+            if (laneEntity == Entity.Null || !entityManager.Exists(laneEntity))
+            {
+                return;
+            }
+
+            // Intentionally left blank. The pathfinding queues triggered by the caller
+            // and the blocked lane flags are sufficient to notify the simulation.
+            // This helper exists to keep the call sites readable in case we need to
+            // integrate with future signalling components.
             _ = laneEntity;
             _ = ownerEntity;
             _ = ecb;

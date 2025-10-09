@@ -3,10 +3,6 @@ using Unity.Entities;
 
 namespace TollboothHighways.Domain.Components
 {
-    /// <summary>
-    /// Component attached to a lane that has been blocked because of an incompatible vehicle.
-    /// Tracks which vehicle caused the block and when.
-    /// </summary>
     public struct LaneBlockedByVehicle : IComponentData
     {
         public Entity Vehicle;
@@ -16,9 +12,11 @@ namespace TollboothHighways.Domain.Components
         public uint FrameBlocked;
     }
 
-    /// <summary>
-    /// Stores the original connection lane flags so they can be restored after temporary blocking.
-    /// </summary>
+    public struct OriginalCarLaneFlags : IComponentData
+    {
+        public uint Value;
+    }
+
     public struct OriginalConnectionLaneFlags : IComponentData
     {
         public uint Value;
