@@ -177,8 +177,8 @@
 
 	<!-- Automatically build the UI with the project. -->
 	<Target Name="BuildUI" AfterTargets="AfterBuild">
-		<Exec Command="npm run build" WorkingDirectory="$(ProjectDir)/UI" />
-		<!-- <Exec Command="npm run dev" WorkingDirectory="$(ProjectDir)/UI" /> -->
+		<!-- <Exec Command="npm run build" WorkingDirectory="$(ProjectDir)/UI" /> -->
+		<Exec Command="npm run dev" WorkingDirectory="$(ProjectDir)/UI" /> 
 	</Target>  
 	
 	<Target Name="GetAdditionalFiles" AfterTargets="DeployWIP">

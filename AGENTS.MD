@@ -16,7 +16,8 @@ Having specific type of Vehicles go through only a specific Tollbooth Road using
 
 ## Conditions
 
-- The system must run in main thread in order to enable debugging.
+- By default all system should be in Burst-compatible code to follow the ECS best practices.
+- The systems should run in main thread in order to enable debugging only if it is needed.
 - Use VehiclesUtil class to check vehicles entities with tollbooth roads entities.
 - Use VehicleDebugLogger to log what is the code doing for each vehicle.
 - Register the system in Mod.cs to proper update the phases using updateSystem
