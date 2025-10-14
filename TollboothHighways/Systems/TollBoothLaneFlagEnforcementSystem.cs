@@ -74,12 +74,12 @@ namespace TollboothHighways.Systems
 
             // Update all lookups and handles
             m_EntityTypeHandle.Update(this);
-            m_SubLaneData = GetBufferLookup<Game.Net.SubLane>(true);
-            m_CarLaneLookup = GetComponentLookup<Game.Net.CarLane>(false);
-            m_PrivateTransportLookup = GetComponentLookup<TollRoadPrivateTransportData>(true);
-            m_TruckLookup = GetComponentLookup<TollRoadTruckData>(true);
-            m_PublicTransportLookup = GetComponentLookup<TollRoadPublicTransportData>(true);
-            m_ServiceVehiclesLookup = GetComponentLookup<TollRoadServiceVehiclesData>(true);
+            m_SubLaneData.Update(this);
+            m_CarLaneLookup.Update(this);
+            m_PrivateTransportLookup.Update(this);
+            m_TruckLookup.Update(this);
+            m_PublicTransportLookup.Update(this);
+            m_ServiceVehiclesLookup.Update(this);
 
             // Create command buffer
             var ecb = m_CommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
@@ -119,7 +119,7 @@ namespace TollboothHighways.Systems
         {
             [ReadOnly] public EntityTypeHandle EntityTypeHandle;
             [ReadOnly] public BufferLookup<Game.Net.SubLane> SubLaneData;
-            public ComponentLookup<Game.Net.CarLane> CarLaneLookup;
+            [NativeDisableParallelForRestriction] public ComponentLookup<Game.Net.CarLane> CarLaneLookup;
             [ReadOnly] public ComponentLookup<TollRoadPrivateTransportData> PrivateTransportLookup;
             [ReadOnly] public ComponentLookup<TollRoadTruckData> TruckLookup;
             [ReadOnly] public ComponentLookup<TollRoadPublicTransportData> PublicTransportLookup;
@@ -134,7 +134,8 @@ namespace TollboothHighways.Systems
                 {
                     Entity roadEntity = entities[i];
                     CarLaneFlags flagsToApply;
-
+                    
+                    // Determine toll type and corresponding flags
                     if (PrivateTransportLookup.HasComponent(roadEntity))
                     {
                         flagsToApply = CarLaneFlags.ForbidHeavyTraffic;
@@ -178,12 +179,18 @@ namespace TollboothHighways.Systems
                             continue;
 
                         // Apply flags (using |= to preserve existing flags)
+                        var originalFlags = carLane.m_Flags;
                         carLane.m_Flags |= flagsToApply;
-                        CarLaneLookup[laneEntity] = carLane;
-                        appliedAnyFlags = true;
+                        
+                        // Only write if flags actually changed
+                        if (carLane.m_Flags != originalFlags)
+                        {
+                            CarLaneLookup[laneEntity] = carLane;
+                            appliedAnyFlags = true;
+                        }
                     }
 
-                    // Mark road as processed - CRITICAL: Use unfilteredChunkIndex as sort key
+                    // Mark road as processed using ECB
                     if (appliedAnyFlags)
                     {
                         ECB.AddComponent<TollRoadCarLaneApplied>(unfilteredChunkIndex, roadEntity);
