@@ -6,6 +6,7 @@ using Colossal.Logging;
 
 namespace TollboothHighways
 {
+    
     /// <summary>
     /// Utility routines for logging.
     /// </summary>
@@ -19,54 +20,60 @@ namespace TollboothHighways
         // Change this for debugging. Leave it false most of the time.
         private static readonly bool _printDebug = false;
 
+        private static readonly ModSettings _modsettings = Mod.Settings;
+
         public enum LogTarget
         {
             General = 0,
             Insights = 1
         }
 
+    public static void Debug(string message)
+    {
+        if (_modsettings?.EnableGeneralLogging == true)
+            Debug(message, LogTarget.General);
+    }
 
-        public static void Debug(string message)
-        {
-            Debug(message, LogTarget.General);            
+    /// <summary>
+    /// Log a debug message.
+    /// </summary>
+    public static void Debug(string message, LogTarget logTarget)
+    {
+        if (_modsettings?.EnableGeneralLogging == true)
+            {
+                if (logTarget == LogTarget.Insights)
+                {
+                    _logTollInsight.Debug(message);
+                }
+                else if (logTarget == LogTarget.General)
+                {
+                    _log.Debug(message);
+                }
+
+                if (_printDebug)
+                {
+                    // Info messages are not written to the BepInEx console by the Colossal logger, so write the message explicitly.
+                    // Include the mod assembly name and message level to make info messages appear similar to other messages.
+                    Console.WriteLine($"[Test-Highway-Tollbooth] [DEBUG]  {message}");
+                }
+            }
         }
 
-        /// <summary>
-        /// Log a debug message.
-        /// </summary>
-        public static void Debug(string message, LogTarget logTarget)
-        {
-            if (logTarget == LogTarget.Insights)
-            {
-                _logTollInsight.Debug(message);
-            }
-            else if (logTarget == LogTarget.General)
-            {
-                _log.Debug(message);
-            }
 
-            if (_printDebug)
-            {
-                // Info messages are not written to the BepInEx console by the Colossal logger, so write the message explicitly.
-                // Include the mod assembly name and message level to make info messages appear similar to other messages.
-                Console.WriteLine($"[Test-Highway-Tollbooth] [DEBUG]  {message}");
-            }
-        }
-
-
-        /// <summary>
-        /// Log an info message.
-        /// </summary>
-        public static void Info(string message)
-        {
+    /// <summary>
+    /// Log an info message.
+    /// </summary>
+    public static void Info(string message)
+    {
+        if (_modsettings?.EnableGeneralLogging == true)
             Info(message, LogTarget.General);
-        }
-
-
-        /// <summary>
-        /// Log an info message.
-        /// </summary>
-        public static void Info(string message, LogTarget logTarget)
+    }
+    /// <summary>
+    /// Log an info message.
+    /// </summary>
+    public static void Info(string message, LogTarget logTarget)
+    {
+        if (_modsettings?.EnableGeneralLogging == true)
         {
             if (logTarget == LogTarget.Insights)
             {
@@ -81,62 +88,69 @@ namespace TollboothHighways
             // Include the mod assembly name and message level to make info messages appear similar to other messages.
             // Console.WriteLine($"[Test-Highway-Tollbooth] [INFO]  {message}");
         }
+    }
 
-        /// <summary>
-        /// Log a warning message.
-        /// </summary>
-        public static void Warn(string message)
-        {
+    /// <summary>
+    /// Log a warning message.
+    /// </summary>
+    public static void Warn(string message)
+    {
+        if (_modsettings?.EnableGeneralLogging == true)
             _log.Warn(message);
-        }
+    }
 
-        /// <summary>
-        /// Log an error message.
-        /// </summary>
-        public static void Error(string message)
-        {
+    /// <summary>
+    /// Log an error message.
+    /// </summary>
+    public static void Error(string message)
+    {
+        if (_modsettings?.EnableGeneralLogging == true)
             _log.Error(message);
-        }
+    }
 
-        /// <summary>
-        /// Log a critical message.
-        /// </summary>
-        public static void Critical(string message)
-        {
+    /// <summary>
+    /// Log a critical message.
+    /// </summary>
+    public static void Critical(string message)
+    {
+        if (_modsettings?.EnableGeneralLogging == true)
             _log.Critical(message);
-        }
+    }
 
-        /// <summary>
-        /// Log an exception with stack trace.
-        /// </summary>
-        public static void Exception(Exception ex)
-        {
-            // Build stack trace from the frames.
-            // Start at index 1 to skip the call to LogUtil.Exception.
-            var stackTrace = new StringBuilder();
-            StackFrame[] stackFrames = new StackTrace().GetFrames();
-            for (int i = 1; i < stackFrames.Length; i++)
+    /// <summary>
+    /// Log an exception with stack trace.
+    /// </summary>
+    public static void Exception(Exception ex)
+    {
+        if (_modsettings?.EnableGeneralLogging == true)
             {
-                // Build a parameter list for the method.
-                var parameterList = new StringBuilder();
-                MethodBase stackFrameMethod = stackFrames[i].GetMethod();
-                ParameterInfo[] parameters = stackFrameMethod.GetParameters();
-                foreach (ParameterInfo param in parameters)
+                // Build stack trace from the frames.
+                // Start at index 1 to skip the call to LogUtil.Exception.
+                var stackTrace = new StringBuilder();
+                StackFrame[] stackFrames = new StackTrace().GetFrames();
+                for (int i = 1; i < stackFrames.Length; i++)
                 {
-                    parameterList.Append(
-                        (parameterList.Length == 0 ? "" : ", ") + param.ParameterType.GetTypeInfo().Name
+                    // Build a parameter list for the method.
+                    var parameterList = new StringBuilder();
+                    MethodBase stackFrameMethod = stackFrames[i].GetMethod();
+                    ParameterInfo[] parameters = stackFrameMethod.GetParameters();
+                    foreach (ParameterInfo param in parameters)
+                    {
+                        parameterList.Append(
+                            (parameterList.Length == 0 ? "" : ", ") + param.ParameterType.GetTypeInfo().Name
+                        );
+                    }
+
+                    // Append the method with its parameter list.
+                    stackTrace.Append(
+                        Environment.NewLine
+                        + $"  at {stackFrameMethod.ReflectedType}.{stackFrameMethod.Name}({parameterList})"
                     );
                 }
 
-                // Append the method with its parameter list.
-                stackTrace.Append(
-                    Environment.NewLine
-                    + $"  at {stackFrameMethod.ReflectedType}.{stackFrameMethod.Name}({parameterList})"
-                );
+                // Log the exception as critical.
+                _log.Critical(ex.GetType() + ": " + ex.Message + stackTrace);
             }
-
-            // Log the exception as critical.
-            _log.Critical(ex.GetType() + ": " + ex.Message + stackTrace);
         }
     }
 }

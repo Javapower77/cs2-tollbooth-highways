@@ -46,7 +46,14 @@ namespace TollboothHighways
         public bool ChargeServiceVehicles { get; set; }
 
         [SettingsUISection(GeneralTab, ChargeServicePublicSection)]
-        public bool ChargePublicVehicles { get; set; } 
+        public bool ChargePublicVehicles { get; set; }
+
+        internal const string LogSection = "Log Settings";
+        [SettingsUISection(GeneralTab, LogSection)]
+        public bool EnableGeneralLogging { get; set; } = false;
+
+        [SettingsUISection(GeneralTab, LogSection)]
+        public bool EnableVehicleLogging { get; set; } = false;
 
         [SettingsUIButton]
         [SettingsUIConfirmation]
@@ -358,9 +365,10 @@ namespace TollboothHighways
             PostVanPeakPrice = 200f;
             PrisonerTransportNonPeakPrice = 100f;
             PrisonerTransportPeakPrice = 200f;
-            ChargeServiceVehicles = true;
+            ChargeServiceVehicles = false;
             ChargePublicVehicles = true;
-
+            EnableGeneralLogging = false;
+            EnableVehicleLogging = false;
         }
     }
 }

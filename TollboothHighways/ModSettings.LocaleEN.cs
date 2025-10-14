@@ -51,6 +51,7 @@ namespace TollboothHighways
                     { _setting.GetOptionGroupLocaleID(ModSettings.AboutSection), "Mod Info" },
                     { _setting.GetOptionGroupLocaleID(ModSettings.CreditsSection), "Special Thanks" },
                     { _setting.GetOptionGroupLocaleID(ModSettings.ChargeServicePublicSection), "General Settings" },
+                    { _setting.GetOptionGroupLocaleID(ModSettings.LogSection), "Log Settings" },
                     { _setting.GetOptionGroupLocaleID(ModSettings.PrivateTransportNonPeakSection), "Private Transport" },
                     { _setting.GetOptionGroupLocaleID(ModSettings.PrivateTransportPeakSection), "Private Transport" },
                     { _setting.GetOptionGroupLocaleID(ModSettings.PublicTransportNonPeakSection), "Public Transport" },
@@ -156,7 +157,11 @@ namespace TollboothHighways
                     { _setting.GetOptionLabelLocaleID(nameof(ModSettings.ChargePublicVehicles)), "Do not charge tolls to public transport." },
                     { _setting.GetOptionDescLocaleID(nameof(ModSettings.ChargePublicVehicles)), "No fee will be apply to taxis and buses passing a tollbooth." },
                     { _setting.GetOptionLabelLocaleID(nameof(ModSettings.ChargeServiceVehicles)), "Do not charge tolls to services vehicles." },
-                    { _setting.GetOptionDescLocaleID(nameof(ModSettings.ChargeServiceVehicles)), "No fee will be apply to services vehicles passing a tollbooth." }
+                    { _setting.GetOptionDescLocaleID(nameof(ModSettings.ChargeServiceVehicles)), "No fee will be apply to services vehicles passing a tollbooth." },
+                    { _setting.GetOptionLabelLocaleID(nameof(ModSettings.EnableGeneralLogging)), "Enable General Logging" },
+                    { _setting.GetOptionDescLocaleID(nameof(ModSettings.EnableGeneralLogging)), "Enable general logging for the mod. Useful for debugging issues. Please take in consideration this option would make the game suffer degradation in the performance." },
+                    { _setting.GetOptionLabelLocaleID(nameof(ModSettings.EnableVehicleLogging)), "Enable Vehicle Logging" },
+                    { _setting.GetOptionDescLocaleID(nameof(ModSettings.EnableVehicleLogging)), "Enable detailed vehicle logging for the mod. Useful for debugging vehicle-related issues.  Please take in consideration this option would make the game suffer degradation in the performance." },
                 };
             }
 

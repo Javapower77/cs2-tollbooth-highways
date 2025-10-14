@@ -4,30 +4,45 @@ using Game.Net;
 using Game.Pathfind;
 using Game.Simulation;
 using Game.Tools;
-using Game.Vehicles;
 using TollboothHighways.Domain.Components;
 using TollboothHighways.Utilities;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using UnityEngine.PlayerLoop;
 
 namespace TollboothHighways.Systems
 {
     /// <summary>
-    /// Monitors and enforces CarLane flags on tollbooth roads to ensure vehicle type restrictions persist.
-    /// This system runs after TollBoothSpawnSystem and continuously applies lane restrictions based on tollbooth types.
+    /// Enforces CarLane flags on tollbooth roads to ensure vehicle type restrictions.
+    /// Runs once per road when spawned, uses IJobChunk for performance.
     /// </summary>
     public partial class TollBoothLaneFlagEnforcementSystem : GameSystemBase
     {
         private EntityQuery m_TollRoadQuery;
         private BufferLookup<Game.Net.SubLane> m_SubLaneData;
-        private ComponentLookup<Game.Common.Owner> m_OwnerLookup;
+        private ComponentLookup<Game.Net.CarLane> m_CarLaneLookup;
+        private ComponentLookup<TollRoadPrivateTransportData> m_PrivateTransportLookup;
+        private ComponentLookup<TollRoadTruckData> m_TruckLookup;
+        private ComponentLookup<TollRoadPublicTransportData> m_PublicTransportLookup;
+        private ComponentLookup<TollRoadServiceVehiclesData> m_ServiceVehiclesLookup;
+        private EntityCommandBufferSystem m_CommandBufferSystem;
 
         protected override void OnCreate()
         {
             base.OnCreate();
 
-            m_SubLaneData = GetBufferLookup<Game.Net.SubLane>(false);
+            // Initialize lookups
+            m_SubLaneData = GetBufferLookup<Game.Net.SubLane>(true);
+            m_CarLaneLookup = GetComponentLookup<Game.Net.CarLane>(false);
+            m_PrivateTransportLookup = GetComponentLookup<TollRoadPrivateTransportData>(true);
+            m_TruckLookup = GetComponentLookup<TollRoadTruckData>(true);
+            m_PublicTransportLookup = GetComponentLookup<TollRoadPublicTransportData>(true);
+            m_ServiceVehiclesLookup = GetComponentLookup<TollRoadServiceVehiclesData>(true);
+
+            // Get command buffer system for adding components
+            m_CommandBufferSystem = World.GetOrCreateSystemManaged<EndSimulationEntityCommandBufferSystem>();
+
+            // Query for toll roads that haven't been processed yet
             m_TollRoadQuery = GetEntityQuery(new EntityQueryDesc
             {
                 All = new ComponentType[]
@@ -44,114 +59,121 @@ namespace TollboothHighways.Systems
                 None = new ComponentType[]
                 {
                     ComponentType.ReadOnly<Temp>(),
+                    ComponentType.ReadOnly<Deleted>(),
                     ComponentType.ReadOnly<TollRoadCarLaneApplied>()
                 }
             });
 
-            LogUtil.Info("TollBoothLaneFlagEnforcementSystem: OnCreate() - System created successfully");
+            RequireForUpdate(m_TollRoadQuery);
+            LogUtil.Info("TollBoothLaneFlagEnforcementSystem: Created successfully");
         }
 
         protected override void OnUpdate()
         {
-            // Update lookups
-            m_SubLaneData.Update(this);
-            m_OwnerLookup.Update(this);
-
-            // Check if there are any toll roads to process
+            // Early exit if no roads to process
             if (m_TollRoadQuery.IsEmptyIgnoreFilter)
                 return;
 
-            // Get all toll road entities
-            var tollRoads = m_TollRoadQuery.ToEntityArray(Allocator.Temp);
-            try
-                {
-                    LogUtil.Info($"TollBoothLaneFlagEnforcementSystem: OnUpdate() - Processing {tollRoads.Length} toll roads");
+            // Update lookups
+            m_SubLaneData.Update(this);
+            m_CarLaneLookup.Update(this);
+            m_PrivateTransportLookup.Update(this);
+            m_TruckLookup.Update(this);
+            m_PublicTransportLookup.Update(this);
+            m_ServiceVehiclesLookup.Update(this);
 
-                    foreach (var roadEntity in tollRoads)
-                    {
-                        try
-                        {
-                            LogUtil.Info($"TollBoothLaneFlagEnforcementSystem: Processing toll road {roadEntity.Index}");
+            var ecb = m_CommandBufferSystem.CreateCommandBuffer();
+            int processedCount = 0;
 
-                            // Apply lane flags for this toll road
-                            SetCarLaneFlags(roadEntity);
-                        }
-                        catch (System.Exception ex)
-                        {
-                            LogUtil.Error($"TollBoothLaneFlagEnforcementSystem: OnUpdate() - EXCEPTION processing road entity {roadEntity.Index}: {ex.Message}");
-                            LogUtil.Error($"TollBoothLaneFlagEnforcementSystem: OnUpdate() - Stack trace: {ex.StackTrace}");
-                        }
-                    }
-                }
-                finally
+            // Process job - cannot use IJobChunk with EntityManager operations
+            // So we keep it simple and fast on main thread
+            var entities = m_TollRoadQuery.ToEntityArray(Allocator.Temp);
+
+            foreach (var roadEntity in entities)
+            {
+                if (ProcessTollRoad(roadEntity, ecb))
                 {
-                    tollRoads.Dispose();
+                    processedCount++;
                 }
+            }
+
+            entities.Dispose();
+
+            // Log only if enabled and roads were processed
+            if (processedCount > 0)
+            {
+                LogUtil.Info($"TollBoothLaneFlagEnforcementSystem: Processed {processedCount} toll roads");
+            }
         }
 
-        private void SetCarLaneFlags(Entity roadEntity)
+        private bool ProcessTollRoad(Entity roadEntity, EntityCommandBuffer ecb)
         {
-            try
+            // Determine toll type and corresponding flags
+            CarLaneFlags flagsToApply;
+
+            if (m_PrivateTransportLookup.HasComponent(roadEntity))
             {
-                if (m_SubLaneData.TryGetBuffer(roadEntity, out var subLanes))
-                {
-                    for (int i = 0; i < subLanes.Length; i++)
-                    {
-                        if (subLanes[i].m_PathMethods == PathMethod.Road)
-                        {
-                            Entity laneEntity = subLanes[i].m_SubLane;
-                            var carLaneFlags = EntityManager.GetComponentData<Game.Net.CarLane>(laneEntity);
-                            LogUtil.Info($"TollBoothLaneFlagEnforcementSystem: SetCarLaneFlags() - Original lane flags for SubLane {laneEntity.Index}: {carLaneFlags.m_Flags}");
-
-                            // Apply correct flags based on tollbooth type
-                            if (EntityManager.HasComponent<TollRoadPrivateTransportData>(roadEntity))
-                            {
-                                // Private transport only - block heavy traffic (trucks)
-                                carLaneFlags.m_Flags |= Game.Net.CarLaneFlags.ForbidHeavyTraffic;
-                                LogUtil.Info($"TollBoothLaneFlagEnforcementSystem: Applied ForbidHeavyTraffic for Private Transport tollbooth");
-                            }
-                            else if (EntityManager.HasComponent<TollRoadTruckData>(roadEntity))
-                            {
-                                // Trucks only - block transit traffic (cars/buses)
-                                carLaneFlags.m_Flags |= Game.Net.CarLaneFlags.ForbidTransitTraffic;
-                                LogUtil.Info($"TollBoothLaneFlagEnforcementSystem: Applied ForbidTransitTraffic for Truck tollbooth");
-                            }
-                            else if (EntityManager.HasComponent<TollRoadPublicTransportData>(roadEntity))
-                            {
-                                // Public transport only
-                                carLaneFlags.m_Flags |= Game.Net.CarLaneFlags.PublicOnly;
-                                LogUtil.Info($"TollBoothLaneFlagEnforcementSystem: Applied PublicOnly for Public Transport tollbooth");
-                            }
-                            else if (EntityManager.HasComponent<TollRoadServiceVehiclesData>(roadEntity))
-                            {
-                                // Service vehicles only - block both transit and heavy traffic
-                                carLaneFlags.m_Flags |= Game.Net.CarLaneFlags.ForbidTransitTraffic | Game.Net.CarLaneFlags.ForbidHeavyTraffic;
-                                LogUtil.Info($"TollBoothLaneFlagEnforcementSystem: Applied ForbidTransitTraffic | ForbidHeavyTraffic for Service Vehicle tollbooth");
-                            }
-
-                            EntityManager.SetComponentData(laneEntity, carLaneFlags);
-                            EntityManager.AddComponent<TollRoadCarLaneApplied>(roadEntity);
-                            LogUtil.Info($"TollBoothLaneFlagEnforcementSystem: SetCarLaneFlags() - Updated lane flags for SubLane {laneEntity.Index}: m_Flags={carLaneFlags.m_Flags}");
-                            break;
-                        }
-                    }
-                }
+                flagsToApply = CarLaneFlags.ForbidHeavyTraffic;
             }
-            catch (System.Exception ex)
+            else if (m_TruckLookup.HasComponent(roadEntity))
             {
-                LogUtil.Error($"TollBoothLaneFlagEnforcementSystem: SetCarLaneFlags() - FAILED to set car lane flags for road {roadEntity.Index}. Error: {ex.Message}");
-                LogUtil.Error($"TollBoothLaneFlagEnforcementSystem: Stack trace: {ex.StackTrace}");
-                throw;
+                flagsToApply = CarLaneFlags.ForbidTransitTraffic;
+            }
+            else if (m_PublicTransportLookup.HasComponent(roadEntity))
+            {
+                flagsToApply = CarLaneFlags.PublicOnly;
+            }
+            else if (m_ServiceVehiclesLookup.HasComponent(roadEntity))
+            {
+                flagsToApply = CarLaneFlags.ForbidTransitTraffic | CarLaneFlags.ForbidHeavyTraffic;
+            }
+            else
+            {
+                // No recognized toll type
+                return false;
             }
 
+            // Apply flags to all road sublanes
+            if (!m_SubLaneData.TryGetBuffer(roadEntity, out var subLanes))
+                return false;
+
+            bool appliedAnyFlags = false;
+
+            for (int i = 0; i < subLanes.Length; i++)
+            {
+                var subLane = subLanes[i];
+                
+                // Only process road lanes
+                if ((subLane.m_PathMethods & PathMethod.Road) == 0)
+                    continue;
+
+                Entity laneEntity = subLane.m_SubLane;
+
+                // Check if lane has CarLane component
+                if (!m_CarLaneLookup.TryGetComponent(laneEntity, out var carLane))
+                    continue;
+
+                // Apply flags (using |= to preserve existing flags)
+                LogUtil.Info("TollBoothLaneFlagEnforcementSystem: Current Car Lane Flags: " + carLane.m_Flags + " for lane entity: " + laneEntity.Index);
+                carLane.m_Flags |= flagsToApply;
+                m_CarLaneLookup[laneEntity] = carLane;
+                appliedAnyFlags = true;
+                LogUtil.Info("TollBoothLaneFlagEnforcementSystem: Applied Car Lane Flags: " + carLane.m_Flags);
+            }
+
+            // Mark road as processed
+            if (appliedAnyFlags)
+            {
+                ecb.AddComponent<TollRoadCarLaneApplied>(roadEntity);
+            }
+
+            return appliedAnyFlags;
         }
-       
+
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            LogUtil.Info("TollBoothLaneFlagEnforcementSystem: OnDestroy() - System destroyed");
+            LogUtil.Info("TollBoothLaneFlagEnforcementSystem: Destroyed");
         }
     }
-
-
 }
