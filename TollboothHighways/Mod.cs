@@ -74,26 +74,25 @@ namespace TollboothHighways
                 // 2. Spawn tollbooth / toll road entities (early in simulation)
                 updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 3. Selection system for toll booths
+                // 3. Enforce lane flags after tollbooth spawning
+                updateSystem.UpdateAfter<TollBoothLaneFlagEnforcementSystem, TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
+
+                // 4. Monitor vehicle paths for invalid tollbooth usage (NEW - runs after lane flag enforcement)
+                updateSystem.UpdateAfter<VehicleTollboothPathMonitoringSystem, TollBoothLaneFlagEnforcementSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<VehicleTollboothPathMonitoringSystem, Game.Simulation.PathfindSetupSystem>(SystemUpdatePhase.GameSimulation);
+
+                // 5. Selection system for toll booths
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 4. Ensure vehicles repath to compatible tollbooth lanes
-                updateSystem.UpdateAt<TollboothVehicleRepathSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAfter<TollboothVehicleRepathSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollboothVehicleRepathSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
-
-                
                 // 6. StopVehiclesOnRoadSystem ordering:
-                // After core CarNavigationSystem (so navigation complete)
                 updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
-                // Before CarMoveSystem (so movement uses zeroed speed)
                 updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 7. UI systems (separate phases)
                 updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
 
-                LogUtil.Info("All systems registered (including repath + lane restore).");
+                LogUtil.Info("All systems registered successfully (including VehicleTollboothPathMonitoringSystem).");
 
                 //Harmony
                 var harmony = new Harmony(harmonyID);

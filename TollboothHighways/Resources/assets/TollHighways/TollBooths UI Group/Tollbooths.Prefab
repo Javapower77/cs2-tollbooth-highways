@@ -15,7 +15,7 @@
                 "active": true,
                 "m_Group": null,
                 "m_Priority": 999999,
-                "m_Icon": "coui://javapower-tollbooth-highways/TollboothGroupMenu.png",
+                "m_Icon": "coui://javapower-tollbooth-highways/TollboothGroupMenu.svg",
                 "m_IsDebugObject": false
             }
         ]

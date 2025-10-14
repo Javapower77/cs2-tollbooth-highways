@@ -23,7 +23,6 @@
   "Assets.DESCRIPTION[Highway Oneway - 1 lane (Manual - Service Transport)]": "One lane one-way highway with manual tollbooth only for service transportation.",
   "Assets.NAME[Highway Oneway - 1 lane (Manual - Any Transport)]": "Highway Oneway - 1 lane (Manual - Any Transport)",
   "Assets.DESCRIPTION[Highway Oneway - 1 lane (Manual - Any Transport)]": "One lane one-way highway with manual tollbooth for any type of vehicles.",
-  "Assets.NAME[Tollbooths]": "Tollbooths",
-  "Assets.DESCRIPTION[Tollbooths]": "A collection of functional tollbooths for one lane one-way highways. There are tollbooths for specific transit flows and the payment can be automatic or manual.",
-  "Assets.TOOLTIP[Tollbooths]": "Open the Tollbooths category"
+  "Assets.SUB_SERVICE_DESCRIPTION[Tollbooths]": "A collection of functional tollbooths for one lane one-way highways. There are tollbooths for specific transit flows and the payment can be automatic or manual.",
+  "SubServices.NAME[Tollbooths]": "Tollbooths"
 }

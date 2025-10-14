@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 using Unity.Entities;
+using UnityEngine;
 
 namespace TollboothHighways.Utilities
 {
@@ -11,12 +12,13 @@ namespace TollboothHighways.Utilities
         private static string _root;
         private static bool _initTried;
 
-        public static void Init(string modPath)
+        public static void Init()
         {
             if (_initTried) return;
             _initTried = true;
             try
             {
+                var modPath = Application.persistentDataPath + "/Logs";
                 _root = Path.Combine(modPath ?? ".", "TollboothVehicleLogs");
                 Directory.CreateDirectory(_root);
             }

@@ -6,21 +6,18 @@ This project is a mod for Cities Skylines 2 in a context of a ECS environment wi
 
 ## Principal Objetive
 
-Having specific type of Vehicles go through only a specific Tollbooth Road using a mapping to related both of them.
+Having specific type of Vehicles go through only a specific Tollbooth Road using a mapping to get the relationship between both of them.
 
 ## It must meet the following conditions
 
-- Monitor every vehicle in the game that doesnt have Unspawned and Deleted component.
-- Check the CarLaneNavigation component that has 8 buffered entities representing the next 8 roads where the vehicle will go through.
-- If a tollbooth road is found in any of the array element validate if is a valid tollbooth road for the current vehicle. m_Lane property contains the road entity. Having this entity it must get the tollbooth road specified in the Game.Common.Owner. Then check for the component TollBoothPrefabData.
-- If it is valid, do nothing.
-- If it is not valid, must set the m_Flags property in IsBlocked.
-- Then get the sublanes of the tollbooth road to set the m_AccessRestriction property with the entity of the current car.
-- Finally force the repath using VehicleUtils.SetupPathfind.
+    - Monitor the component PathElements for all vehicles entities to detect new or deleted tollbooth roads.
+    - Set PathfindCosts to a higher value so vanilla PathfindJob avoid vehicles going through invalid type of tollbooth roads.
+    - Mark path as obsolete in the Vehicle CarCurrentLane to force trigger pathfinding using pathOwner.m_State |= PathFlags.Obsolete.
 
 ## Conditions
 
 - The system must run in main thread in order to enable debugging.
+- Use VehiclesUtil class to check vehicles entities with tollbooth roads entities.
 - Use VehicleDebugLogger to log what is the code doing for each vehicle.
 - Register the system in Mod.cs to proper update the phases using updateSystem
 

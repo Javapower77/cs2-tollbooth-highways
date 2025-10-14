@@ -1189,7 +1189,7 @@
                 "active": true,
                 "m_Group": $fstrref:"CID:88b04abef2163d27779488a29daef039",
                 "m_Priority": 999904,
-                "m_Icon": "coui://javapower-tollbooth-highways/TollboothGroupMenu.png",
+                "m_Icon": "coui://javapower-tollbooth-highways/Tollbooth-All-Automatic.png",
                 "m_IsDebugObject": false
             },
             {

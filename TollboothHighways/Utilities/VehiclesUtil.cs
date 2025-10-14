@@ -11,6 +11,7 @@ using TollboothHighways.Domain.Enums;
 using TollboothHighways.Domain.Components;
 using Unity.Entities;
 using Unity.Burst;
+using CarLaneFlags = Game.Net.CarLaneFlags;
 
 namespace TollboothHighways.Utilities
 {
@@ -332,6 +333,71 @@ namespace TollboothHighways.Utilities
         {
             VehiclesUtil util = new VehiclesUtil();
             return util.GetVehicleType(e, em);
+        }
+
+        public static CarLaneFlags GetBlockingFlagsForVehicleType(VehicleType vehicleType)
+        {
+            VehicleGroup vehicleGroup = VehiclesUtil.GetVehicleGroupBurstCompatible(vehicleType);
+
+            switch (vehicleGroup)
+            {
+                case VehicleGroup.PrivateTransport:
+                    return CarLaneFlags.ForbidHeavyTraffic;
+
+                case VehicleGroup.Trucks:
+                    return CarLaneFlags.ForbidTransitTraffic;
+
+                case VehicleGroup.PublicTransport:
+                    return CarLaneFlags.PublicOnly;
+
+                case VehicleGroup.ServiceVehicles:
+                    return CarLaneFlags.ForbidTransitTraffic | CarLaneFlags.ForbidHeavyTraffic;
+
+                default:
+                    return CarLaneFlags.Forbidden | CarLaneFlags.Unsafe;
+            }
+        }
+
+        /// <summary>
+        /// Checks if a vehicle type is allowed to use a specific toll road based on its tollbooth type.
+        /// </summary>
+        public static bool IsVehicleAllowedOnTollRoad(
+            VehicleType vehicleType,
+            Entity roadEntity,
+            ComponentLookup<TollRoadPrivateTransportData> privateTransportLookup,
+            ComponentLookup<TollRoadTruckData> truckLookup,
+            ComponentLookup<TollRoadPublicTransportData> publicTransportLookup,
+            ComponentLookup<TollRoadServiceVehiclesData> serviceVehiclesLookup,
+            EntityManager entityManager)
+        {
+            VehicleGroup vehicleGroup = GetVehicleGroupBurstCompatible(vehicleType);
+
+            // Private Transport Tollbooth - only private vehicles
+            if (privateTransportLookup.HasComponent(roadEntity))
+            {
+                return vehicleGroup == VehicleGroup.PrivateTransport;
+            }
+
+            // Truck Tollbooth - only trucks
+            if (truckLookup.HasComponent(roadEntity))
+            {
+                return vehicleGroup == VehicleGroup.Trucks;
+            }
+
+            // Public Transport Tollbooth - only public transport
+            if (publicTransportLookup.HasComponent(roadEntity))
+            {
+                return vehicleGroup == VehicleGroup.PublicTransport;
+            }
+
+            // Service Vehicles Tollbooth - only service vehicles
+            if (serviceVehiclesLookup.HasComponent(roadEntity))
+            {
+                return vehicleGroup == VehicleGroup.ServiceVehicles;
+            }
+
+            // Not a toll road, allow all vehicles
+            return true;
         }
     }
 }

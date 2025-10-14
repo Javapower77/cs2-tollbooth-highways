@@ -7,12 +7,14 @@ using Game.Pathfind;
 using Game.Prefabs;
 using Game.Simulation;
 using Game.UI;
+using Game.Vehicles;
 using System;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using TollboothHighways.Domain.Components;
 using TollboothHighways.Utilities;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Entities.UniversalDelegates;
 using Unity.Mathematics;
 using static Colossal.IO.AssetDatabase.AtlasFrame;
 using Random = System.Random;
@@ -28,6 +30,7 @@ namespace TollboothHighways.Systems
         private BufferLookup<Game.Objects.SubObject> SubObjectsObjectData;
         private ComponentLookup<Game.Net.Edge> m_EdgeObjectData;
         private ComponentLookup<Game.Net.EndNodeGeometry> m_EndNodeGeometryData;
+        private ComponentLookup<Game.Net.CarLane> m_CarLaneData;
 
         // Additional lookups for TrafficLights integration
         private ComponentLookup<TrafficLights> m_TrafficLightsData;
@@ -79,7 +82,7 @@ namespace TollboothHighways.Systems
                 m_PrefabSystem = World.GetOrCreateSystemManaged<PrefabSystem>();
                 m_Random = new Random((int)DateTime.Now.Ticks);
                 m_SimulationSystem = World.GetOrCreateSystemManaged<SimulationSystem>();
-                SubLaneObjectData = GetBufferLookup<Game.Net.SubLane>(true);
+                SubLaneObjectData = GetBufferLookup<Game.Net.SubLane>(false);
                 SubObjectsObjectData = GetBufferLookup<Game.Objects.SubObject>(false);
                 m_TrafficLightsData = GetComponentLookup<TrafficLights>(false);
                 m_LaneSignalData = GetComponentLookup<LaneSignal>(false);
@@ -89,6 +92,7 @@ namespace TollboothHighways.Systems
                 m_LaneData = GetComponentLookup<Lane>(true);
                 m_NodeData = GetComponentLookup<Node>(true);
                 m_TransformData = GetComponentLookup<Transform>(true);
+                m_CarLaneData = GetComponentLookup<Game.Net.CarLane>(false); 
                 m_UnprocessedTollBoothQuery = GetEntityQuery(
                     ComponentType.ReadWrite<TollBoothPrefabData>(),
                     ComponentType.ReadOnly<PrefabRef>(),
@@ -123,6 +127,7 @@ namespace TollboothHighways.Systems
                 m_TransformData.Update(this);
                 m_EdgeObjectData.Update(this);
                 m_EndNodeGeometryData.Update(this);
+                m_CarLaneData.Update(this);
 
                 int entityCount = m_UnprocessedTollBoothQuery.CalculateEntityCount();
                 var entities = m_UnprocessedTollBoothQuery.ToEntityArray(Allocator.TempJob);              
@@ -279,7 +284,6 @@ namespace TollboothHighways.Systems
 
                     LogUtil.Info($"TollBoothSpawnSystem: WriteOwnerEntityInfo() - Associating tollbooth {tollBoothEntity.Index} with road {ownerComponent.m_Owner.Index}");
                     AssociateTollboothWithRoad(tollBoothEntity, ownerComponent.m_Owner);
-                    
                 }
                 else
                 {
