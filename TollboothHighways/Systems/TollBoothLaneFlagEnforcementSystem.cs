@@ -16,7 +16,6 @@ namespace TollboothHighways.Systems
 {
     /// <summary>
     /// Enforces CarLane flags on tollbooth roads to ensure vehicle type restrictions.
-    /// Runs once per road when spawned, uses Burst-compiled jobs for performance.
     /// </summary>
     public partial class TollBoothLaneFlagEnforcementSystem : GameSystemBase
     {
