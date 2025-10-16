@@ -75,22 +75,22 @@ namespace TollboothHighways
                 updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 3. Enforce lane flags after tollbooth spawning
-                updateSystem.UpdateAfter<TollBoothLaneFlagEnforcementSystem, TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAt<TollBoothLaneFlagEnforcementSystem>(SystemUpdatePhase.Modification5);
 
                 // 4. Monitor vehicle paths for invalid tollbooth usage (NEW - runs after lane flag enforcement)
-                updateSystem.UpdateAfter<VehicleTollboothPathMonitoringSystem, TollBoothLaneFlagEnforcementSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<VehicleTollboothPathMonitoringSystem, Game.Simulation.PathfindSetupSystem>(SystemUpdatePhase.GameSimulation);
+                //updateSystem.UpdateAfter<VehicleTollboothPathMonitoringSystem, TollBoothLaneFlagEnforcementSystem>(SystemUpdatePhase.GameSimulation);
+                //updateSystem.UpdateBefore<VehicleTollboothPathMonitoringSystem, Game.Simulation.PathfindSetupSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 5. Selection system for toll booths
-                updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
+                //updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 6. StopVehiclesOnRoadSystem ordering:
-                updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
+                //updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
+                //updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 7. UI systems (separate phases)
-                updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
-                updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
+                //updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
+                //updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
 
                 LogUtil.Info("All systems registered successfully (including VehicleTollboothPathMonitoringSystem).");
 

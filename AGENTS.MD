@@ -18,6 +18,9 @@ Having specific type of Vehicles go through only a specific Tollbooth Road using
 
 - By default all system should be in Burst-compatible code to follow the ECS best practices.
 - The systems should run in main thread in order to enable debugging only if it is needed.
+- Always use SystemAPI when getting lookups or typehandles for a Jobs in Burst-compatible code.
+- Use BufferTypeHandle instead of BufferLookup for buffered entities lookups.
+- Use ComponentTypeHandle with chunk.Has() for component checks
 - Use VehiclesUtil class to check vehicles entities with tollbooth roads entities.
 - Use VehicleDebugLogger to log what is the code doing for each vehicle.
 - Register the system in Mod.cs to proper update the phases using updateSystem

@@ -15,20 +15,20 @@ namespace TollboothHighways.Utilities
     /// </summary>
     public struct JobLogger : IDisposable
     {
-        private NativeList<FixedString512Bytes> m_LogMessages;
+        private NativeList<FixedString4096Bytes> m_LogMessages;
 
         /// <summary>
         /// A thread-safe writer that adds log messages from a parallel job.
         /// </summary>
         public struct Writer
         {
-            internal NativeList<FixedString512Bytes>.ParallelWriter m_ParallelWriter;
+            internal NativeList<FixedString4096Bytes>.ParallelWriter m_ParallelWriter;
 
             /// <summary>
             /// Writes a log message, automatically prepending the current thread ID.
             /// </summary>
             /// <param name="message">The message to log.</param>
-            public void Log(in FixedString512Bytes message)
+            public void Log(in FixedString4096Bytes message)
             {
                 // Get the current worker thread index and prepend it to the message.
                 m_ParallelWriter.AddNoResize($"[Thread {JobsUtility.ThreadIndex}] {message}");
@@ -41,7 +41,7 @@ namespace TollboothHighways.Utilities
         /// <param name="allocator">The memory allocator to use.</param>
         public void Initialize(Allocator allocator)
         {
-            m_LogMessages = new NativeList<FixedString512Bytes>(allocator);
+            m_LogMessages = new NativeList<FixedString4096Bytes>(allocator);
         }
 
         /// <summary>
