@@ -12,7 +12,9 @@ Having specific type of Vehicles go through only a specific Tollbooth Road using
 
     - Monitor the component PathElements for all vehicles entities to detect new or deleted tollbooth roads.
     - Set PathfindCosts to a higher value so vanilla PathfindJob avoid vehicles going through invalid type of tollbooth roads.
-    - Mark path as obsolete in the Vehicle CarCurrentLane to force trigger pathfinding using pathOwner.m_State |= PathFlags.Obsolete.
+    - Have one system to enforce car lane flags of the spawned tollbooths roads to match the vehicle type with tollbooth road type.
+    - Have another system, that run after car lane enforcement, to mark the path of the vehicle as obsolete in CarCurrentLane and force trigger pathfinding using pathOwner.m_State |= PathFlags.Obsolete.
+    
 
 ## Conditions
 

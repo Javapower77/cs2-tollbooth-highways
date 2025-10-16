@@ -53,6 +53,9 @@ namespace TollboothHighways
         public bool EnableGeneralLogging { get; set; } = false;
 
         [SettingsUISection(GeneralTab, LogSection)]
+        public bool EnableJobsLogging { get; set; } = false;
+
+        [SettingsUISection(GeneralTab, LogSection)]
         public bool EnableVehicleLogging { get; set; } = false;
 
         [SettingsUIButton]
@@ -326,7 +329,6 @@ namespace TollboothHighways
         public ModSettings(IMod mod) : base(mod)
         {
             Instance = this;
-            SetDefaults();
         }
 
         public override void SetDefaults()
@@ -369,6 +371,7 @@ namespace TollboothHighways
             ChargePublicVehicles = true;
             EnableGeneralLogging = false;
             EnableVehicleLogging = false;
+            EnableJobsLogging = false;
         }
     }
 }

@@ -23,7 +23,7 @@ namespace TollboothHighways.Systems
     public partial class TollBoothLaneFlagEnforcementSystem : GameSystemBase
     {
         private EntityQuery m_TollRoadQuery;
-        private ModificationBarrier5 m_ModificationBarrier5;
+        private ModificationEndBarrier m_ModificationEndBarrier;
         private JobLogger m_JobLogger;
 
         protected override void OnCreate()
@@ -32,10 +32,11 @@ namespace TollboothHighways.Systems
 
             // Initialize the JobLogger with TempJob allocator
             // TempJob is appropriate for data that lives only during job execution
-            m_JobLogger.Initialize(Allocator.TempJob);
+            if (Mod.Settings?.EnableJobsLogging == true)
+                m_JobLogger.Initialize(Allocator.TempJob);
 
-            // Get barrier system for command buffer
-            m_ModificationBarrier5 = World.GetOrCreateSystemManaged<ModificationBarrier5>();
+            // Get barrier system for command buffer. ModificationEnd is appropriate for car lane modifications.
+            m_ModificationEndBarrier = World.GetOrCreateSystemManaged<ModificationEndBarrier>();
 
             // Query for toll roads that haven't been processed yet
             m_TollRoadQuery = GetEntityQuery(new EntityQueryDesc
@@ -66,11 +67,12 @@ namespace TollboothHighways.Systems
 
         protected override void OnUpdate()
         {
-            LogUtil.Info("TollBoothLaneFlagEnforcementSystem: OnUpdate started - m_TollRoadQuery is empty: " + m_TollRoadQuery.IsEmptyIgnoreFilter);
             // Early exit if no roads to process
             if (m_TollRoadQuery.IsEmptyIgnoreFilter)
                 return;
-
+ 
+           LogUtil.Info("TollBoothLaneFlagEnforcementSystem: OnUpdate started - m_TollRoadQuery is empty: " + m_TollRoadQuery.IsEmptyIgnoreFilter);
+ 
             // Create job using SystemAPI for all lookups and type handles
             var applyFlagsJob = new ApplyTollLaneFlagsJob
             {
@@ -88,24 +90,26 @@ namespace TollboothHighways.Systems
                 CarLaneLookup = SystemAPI.GetComponentLookup<Game.Net.CarLane>(false),
 
                 // Command buffer for adding marker component
-                ECB = m_ModificationBarrier5.CreateCommandBuffer().AsParallelWriter(),
+                ECB = m_ModificationEndBarrier.CreateCommandBuffer().AsParallelWriter(),
 
                 // Pass the JobLogger writer to the job
                 Logger = m_JobLogger.GetWriter()
             };
 
             // Schedule the Burst-compiled job
-            Dependency = applyFlagsJob.Schedule(m_TollRoadQuery, Dependency);
+            Dependency = applyFlagsJob.ScheduleParallel(m_TollRoadQuery, Dependency);
 
             // Register command buffer with barrier
-            m_ModificationBarrier5.AddJobHandleForProducer(Dependency);
+            m_ModificationEndBarrier.AddJobHandleForProducer(Dependency);
             
             // IMPORTANT: Complete the job before flushing logs
             // Flushing must happen on the main thread after job completion
-            Dependency.Complete();
+            if (Mod.Settings?.EnableJobsLogging == true)
+                Dependency.Complete();
 
             // Flush all collected log messages to LogUtil
-            m_JobLogger.Flush();
+            if (Mod.Settings?.EnableJobsLogging == true)
+               m_JobLogger.Flush();
         }
 
         protected override void OnDestroy()
@@ -136,7 +140,7 @@ namespace TollboothHighways.Systems
             public JobLogger.Writer Logger;
 
             // ComponentLookup for modifying lane data
-            [NativeDisableParallelForRestriction] public ComponentLookup<Game.Net.CarLane> CarLaneLookup;
+            public ComponentLookup<Game.Net.CarLane> CarLaneLookup;
 
             // Command buffer for adding components
             public EntityCommandBuffer.ParallelWriter ECB;
@@ -145,6 +149,8 @@ namespace TollboothHighways.Systems
             {
                 // Determine toll type for this chunk using chunk.Has()
                 bool hasValidTollType = false;
+                bool IsPublicTollRoad = false;
+                FixedString4096Bytes message = "";
                 CarLaneFlags flagsToApply;
 
                 if (chunk.Has(ref PrivateTransportTypeHandle))
@@ -163,6 +169,7 @@ namespace TollboothHighways.Systems
                 {
                     // Public Transport Only: Allow only public transport vehicles
                     flagsToApply = CarLaneFlags.PublicOnly;
+                    IsPublicTollRoad = true;
                     hasValidTollType = true;
                 }
                 else if (chunk.Has(ref ServiceVehiclesTypeHandle))
@@ -184,8 +191,11 @@ namespace TollboothHighways.Systems
                 var entities = chunk.GetNativeArray(EntityTypeHandle);
                 var subLaneAccessor = chunk.GetBufferAccessor(ref SubLaneBufferHandle);
 
-                FixedString4096Bytes message = $"Processing chunk {unfilteredChunkIndex} with {entities.Length} roads";
-                Logger.Log(message);
+                if (Mod.Settings?.EnableJobsLogging == true)
+                {
+                    message = $"Processing chunk {unfilteredChunkIndex} with {entities.Length} roads";
+                    Logger.Log(message);
+                }
                 for (int i = 0; i < entities.Length; i++)
                 {
                     Entity roadEntity = entities[i];
@@ -218,19 +228,27 @@ namespace TollboothHighways.Systems
                         if (carLane.m_Flags != originalFlags)
                         {
                             CarLaneLookup[laneEntity] = carLane;
-                            message = $"Road {roadEntity.Index} (Lane {laneEntity.Index}): \n\t\tflagsToApply={flagsToApply}. \n\t\toriginalFlags={originalFlags}, \n\t\tCarLaneLookup[laneEntity].m_Flags={CarLaneLookup[laneEntity].m_Flags}";
-                            Logger.Log(message);
+                            if (Mod.Settings?.EnableJobsLogging == true)
+                            {
+                                message = $"Road {roadEntity.Index} (Lane {laneEntity.Index}): Applied flags {flagsToApply}. OriginalFlags={originalFlags}, NewFlags={carLane.m_Flags}";
+                                Logger.Log(message);
+                            }
                             appliedAnyFlags = true;
                         }
                     }
 
                     // Mark road as processed to prevent reprocessing
-                    if (appliedAnyFlags)
+                    // If it is a public toll road, we add the component anyway to avoid reprocessing
+                    if (appliedAnyFlags || IsPublicTollRoad)
                     {
                         ECB.AddComponent<TollRoadCarLaneApplied>(unfilteredChunkIndex, roadEntity);
                     }
-                    message = $"Completed chunk {unfilteredChunkIndex}";
-                    Logger.Log(message);
+
+                    if (Mod.Settings?.EnableJobsLogging == true)
+                    {
+                        message = $"Completed chunk {unfilteredChunkIndex}";
+                        Logger.Log(message);
+                    }
                 }
             }
         }

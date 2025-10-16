@@ -162,6 +162,8 @@ namespace TollboothHighways
                     { _setting.GetOptionDescLocaleID(nameof(ModSettings.EnableGeneralLogging)), "Enable general logging for the mod. Useful for debugging issues. Please take in consideration this option would make the game suffer degradation in the performance." },
                     { _setting.GetOptionLabelLocaleID(nameof(ModSettings.EnableVehicleLogging)), "Enable Vehicle Logging" },
                     { _setting.GetOptionDescLocaleID(nameof(ModSettings.EnableVehicleLogging)), "Enable detailed vehicle logging for the mod. Useful for debugging vehicle-related issues.  Please take in consideration this option would make the game suffer degradation in the performance." },
+                    { _setting.GetOptionLabelLocaleID(nameof(ModSettings.EnableJobsLogging)), "Enable Jobs Logging" },
+                    { _setting.GetOptionDescLocaleID(nameof(ModSettings.EnableJobsLogging)), "Enable detailed IJob logging for the mod. Useful for debugging job-related issues that occurs in more than one thread of CPU.  Please take in consideration this option would make the game suffer degradation in the performance." },
                 };
             }
 

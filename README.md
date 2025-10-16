@@ -4,8 +4,14 @@ This project is part of my journey of learning to make mods in this amazing game
 Is based on Unity ECS and DOTS.
 The construction of this mod is, of course, thanks to the amazing collobartion of some many people on CS2 Mod Discord server who are very nice, patiente and with high of human quality.
 To all of them, I am eternaly gratful to be patience with me and help in every question I had mad.
-This mod of course will evolute meanwhile I keep learning new stuf in this type of developming.
+This mod of course will evolute meanwhile I keep learning new stuf in this type of developing.
 
+## Explore the Documentation
+
+* [CS:2 System Order Phases/Systems](/TollboothHighways/Docs/SystemOrder.md)
+* [How manual tolbooth works](/TollboothHighways/Docs/StopVehiclesOnRoadSystem.md)
+* [Diagram for the manual tollbooth road](/TollboothHighways/Docs/Tollbooth-Barrier-Flow.md)
+* [Images previews from the mod](/TollboothHighways/Docs/ModsPreviews.md)
 ## Objetive
 
 * Have a manual tollbooth with barrier that makes vehicle stop and emulate the behaivor of a real word manual payment.
@@ -30,6 +36,7 @@ Well, that is the goal of this mod and that is what I am going to try to achieve
 * klyte45
 * StarQ / Qoushik
 * yenyang
+* Nullpinter
 * Konsi (Mimonsi)
 
 ## A very super hyper Alpha version 😆
