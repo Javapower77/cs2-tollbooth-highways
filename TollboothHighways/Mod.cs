@@ -78,8 +78,8 @@ namespace TollboothHighways
                 updateSystem.UpdateAfter<TollBoothLaneFlagEnforcementSystem>(SystemUpdatePhase.ModificationEnd);
 
                 // 4. Monitor vehicle paths for invalid tollbooth usage (NEW - runs after lane flag enforcement)
-                updateSystem.UpdateAfter<VehicleTollboothPathMonitoringSystem, TollBoothLaneFlagEnforcementSystem>(SystemUpdatePhase.ModificationEnd);
-                updateSystem.UpdateBefore<VehicleTollboothPathMonitoringSystem, Game.Simulation.PathfindSetupSystem>(SystemUpdatePhase.ModificationEnd);
+                updateSystem.UpdateAfter<VehicleTollboothPathMonitoringSystem, TollBoothLaneFlagEnforcementSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<VehicleTollboothPathMonitoringSystem, Game.Simulation.PathfindSetupSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 5. Selection system for toll booths
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);

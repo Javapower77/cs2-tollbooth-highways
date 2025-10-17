@@ -2,6 +2,7 @@ using System.Reflection;
 using Game;
 using Game.Common;
 using Game.Net;
+using Game.Objects;
 using Game.Pathfind;
 using Game.Prefabs;
 using Game.Simulation;
@@ -87,7 +88,8 @@ namespace TollboothHighways.Systems
                 None = new ComponentType[]
                 {
                     ComponentType.ReadOnly<Deleted>(),
-                    ComponentType.ReadOnly<Temp>()
+                    ComponentType.ReadOnly<Temp>(),
+                    ComponentType.ReadOnly<Unspawned>()
                 }
             });
 
@@ -213,10 +215,14 @@ namespace TollboothHighways.Systems
                 var pathElement = pathElements[i];
                 Entity laneEntity = pathElement.m_Target;
 
+                if (m_OwnerLookup.TryGetComponent(laneEntity, out var owner))
+                {
+                    continue;
+                }
+
                 // Check if this lane belongs to a tollbooth road
-                Entity roadEntity = GetRoadEntityFromLane(laneEntity);
-                
-                if (roadEntity == Entity.Null)
+                Entity roadEntity = owner.m_Owner;
+                if (!m_TollRoadPrefabDataLookup.HasComponent(roadEntity))
                 {
                     continue;
                 }

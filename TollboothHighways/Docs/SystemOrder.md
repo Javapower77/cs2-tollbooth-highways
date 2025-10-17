@@ -44,6 +44,23 @@ The phases follow a logical progression through the frame: `MainLoop` handles in
 
 The massive registration list demonstrates how complex modern game simulations are. By centralizing all scheduling here, developers can see the complete execution order at a glance. When debugging performance issues or unexpected behavior, you can trace exactly when each system runs relative to others. The `RegisterGPUSystem<WaterSystem>()` call at the start shows that some systems run on the GPU entirely separately from the CPU-based ECS loop, highlighting how the engine partitions work across different hardware.
 
+## Notes from yenyang on Discord Server
+
+Tools run during `ToolUpdate`.
+
+ToolUpdate runs when cursor moves or a mouse button is clicked.  `Game.Common.Updated` component is critical since that is added during the frame that something changed.
+
+If vanilla tool interacts (delete, select, move) with something that exists on the map, or is creating something new, during ToolUpdate, the tool will decide to `CreateDefinitions` or `UpdateDefinitions` which create or modify `CreationDefinition` entities. They will also have other components to define what is being `Created` or `Modified` such as `ObjectDefinition`, `Game.Net.Curve`, `OwnerDefinition`, `Game.Areas.Node`. Primary Objects, Primary Networks, Subnetworks, and Subareas get their own `CreationDefinition entity`.
+
+During `Modification1` and `Modification2` , The `GenerateXSystems` run which begin the process for creating `Temp` entities from `CreationDefinition` entities. Some `Temp` entities are copies of the original, and may contain modifications. Some `Temp` entities represent something being newly created. It depends on what `CreationDefinition` tells it to do.
+
+Later `ModificationX` systems will includes some aspects such as (re)generating/relocating subelements, overriding handling, validation.
+
+When user presses Apply button then if there are no errors the tool will enter `ApplyMode` which makes the `ApplyXSystems` run on `SystemUpdatePhase.ApplyTool`. This is when Temp entities are used to create real versions or modifications that were on the `Temp` entities are applied to the originals. Also handles things like adding `Updated` to all the real networks around the ones that had modifications so that all the lanes are properly updated.
+There is also a `ClearMode` for removing `CreationDefinition` entities and therefore `Temp` entities.
+
+Eventually you get to cleanup which does things like removing `Updated`, removing `Deleted` entities.
+
 ## Cities: Skylines 2 System Execution Order by Phase
 
 ## **MainLoop** (Phase 0)
