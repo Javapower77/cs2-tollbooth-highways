@@ -61,6 +61,26 @@ There is also a `ClearMode` for removing `CreationDefinition` entities and there
 
 Eventually you get to cleanup which does things like removing `Updated`, removing `Deleted` entities.
 
+## Notes from krzychu124 on Discord Server
+
+````none
+(MainLoop):
+- ToolSystem: 
+  (PreTool)
+  (Before<ToolUpdate>): Enable ToolOutputBarrier - allows for using its ECB
+    (ToolUpdate): active tool system and other registered systems
+  (After<ToolUpdate>): 
+    - ToolOutputSystem: 
+      (ToolApply) or (ToolCancel)
+    - ToolOutputBarrier: calls Complete() on ECB
+  (Before<PostTool>) Enable ToolReadyBarrier ECB
+    (PostTool)
+  (After<PostTool>) ToolReadyBarrier calls Complete() on ECB
+- ModificationSystem:
+  (Modification1-5)
+  (ModificationEnd)
+````
+
 ## Cities: Skylines 2 System Execution Order by Phase
 
 ## **MainLoop** (Phase 0)

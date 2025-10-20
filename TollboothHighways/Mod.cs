@@ -72,10 +72,13 @@ namespace TollboothHighways
                 updateSystem.UpdateAt<TollRoadPrefabUpdateSystem>(SystemUpdatePhase.PrefabUpdate);
 
                 // 2. Spawn tollbooth / toll road entities (early in simulation)
-                updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 3. Enforce car lane flags of the spawned tollbooths roads. - Runs after ModificationEndBarrier where CarLaneSystem is Updated.
-                updateSystem.UpdateAfter<TollBoothLaneFlagEnforcementSystem>(SystemUpdatePhase.ModificationEnd);
+                // 3. Enforce car lane flags of the spawned tollbooths roads. - Runs after Modification5 where CarLaneSystem is Updated.
+                // This is BEFORE restricted barrier phases, so ECB creation is allowed
+                //updateSystem.UpdateBefore<TollBoothLaneFlagEnforcementSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAt<TollBoothLaneFlagEnforcementSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollBoothLaneFlagEnforcementSystem, Game.Common.ModificationBarrier5>(SystemUpdatePhase.GameSimulation);
 
                 // 4. Monitor vehicle paths for invalid tollbooth usage (NEW - runs after lane flag enforcement)
                 updateSystem.UpdateAfter<VehicleTollboothPathMonitoringSystem, TollBoothLaneFlagEnforcementSystem>(SystemUpdatePhase.GameSimulation);

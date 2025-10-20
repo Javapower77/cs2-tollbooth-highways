@@ -113,6 +113,8 @@ namespace TollboothHighways.Systems
             // Update all lookups
             UpdateLookups();
 
+            LogUtil.Info("VehicleTollboothPathMonitoringSystem: OnUpdate() - m_VehicleQuery.IsEmptyIgnoreFilter = " + m_VehicleQuery.IsEmptyIgnoreFilter);
+
             if (m_VehicleQuery.IsEmptyIgnoreFilter)
             {
                 return;

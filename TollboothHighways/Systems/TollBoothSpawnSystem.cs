@@ -96,7 +96,9 @@ namespace TollboothHighways.Systems
                 m_UnprocessedTollBoothQuery = GetEntityQuery(
                     ComponentType.ReadWrite<TollBoothPrefabData>(),
                     ComponentType.ReadOnly<PrefabRef>(),
-                    ComponentType.Exclude<TollBoothSpawned>()
+                    ComponentType.Exclude<TollBoothSpawned>(),
+                    ComponentType.Exclude<Deleted>(),
+                    ComponentType.Exclude<Game.Tools.Temp>()
                 );
                 LogUtil.Info("TollBoothSpawnSystem: OnCreate() - System created and initialized successfully");
             }
@@ -144,23 +146,23 @@ namespace TollboothHighways.Systems
                         {
                             if (tollBoothData.BelongsToHighwayTollbooth == Entity.Null)
                             {
-                                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Writing owner entity info for {entity.Index}");
+                                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - [STEP 1] - Writing owner entity info for {entity.Index}");
                                 WriteOwnerEntityInfo(entity, ref tollBoothData);
 
-                                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Assigning random name for {entity.Index}");
+                                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - [STEP 2] - Assigning random name for {entity.Index}");
                                 AssignRandomName(entity, ref tollBoothData);
 
-                                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Initializing TollBoothInsight for {entity.Index}");
+                                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - [STEP 3] - Initializing TollBoothInsight for {entity.Index}");
                                 InitializeTollBoothInsight(entity);
 
                                 // If this is a manual tollbooth, set up barrier control to start closed
                                 if (EntityManager.HasComponent<TollBoothManualData>(entity))
                                 {
-                                    LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Initializing traffic light in Red for manual tollbooth {entity.Index}");
+                                    LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - [STEP 4] - Initializing traffic light in Red for manual tollbooth {entity.Index}");
                                     InitializeTollRoadTrafficLight(entity);
                                 }
 
-                                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - Adding TollBoothSpawned component to {entity.Index}");
+                                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - [STEP 5] - Adding TollBoothSpawned component to {entity.Index}");
                                 EntityManager.AddComponent<TollBoothSpawned>(entity);
                             }
                             else
@@ -191,7 +193,7 @@ namespace TollboothHighways.Systems
 
         private void InitializeTollBoothInsight(Entity tollBoothEntity)
         {
-            LogUtil.Info($"TollBoothSpawnSystem: InitializeTollBoothInsight() - Starting initialization for entity {tollBoothEntity.Index}");
+            LogUtil.Info($"TollBoothSpawnSystem: \tInitializeTollBoothInsight() - Starting initialization for entity {tollBoothEntity.Index}");
             
             try
             {
@@ -210,12 +212,12 @@ namespace TollboothHighways.Systems
                 }
                 else
                 {
-                    LogUtil.Warn($"TollBoothSpawnSystem: InitializeTollBoothInsight() - SimulationSystem is null for entity {tollBoothEntity.Index}, using frame 0");
+                    LogUtil.Warn($"TollBoothSpawnSystem: \tInitializeTollBoothInsight() - SimulationSystem is null for entity {tollBoothEntity.Index}, using frame 0");
                 }
 
                 if (EntityManager.HasComponent<TollBoothInsight>(tollBoothEntity))
                 {
-                    LogUtil.Info($"TollBoothSpawnSystem: InitializeTollBoothInsight() - Entity {tollBoothEntity.Index} already has TollBoothInsight, skipping initialization");
+                    LogUtil.Info($"TollBoothSpawnSystem: \tInitializeTollBoothInsight() - Entity {tollBoothEntity.Index} already has TollBoothInsight, skipping initialization");
                     return;
                 }
 
@@ -225,8 +227,8 @@ namespace TollboothHighways.Systems
             }
             catch (System.Exception ex)
             {
-                LogUtil.Error($"TollBoothSpawnSystem: InitializeTollBoothInsight() - FAILED to initialize TollBoothInsight for entity {tollBoothEntity.Index}. Error: {ex.Message}");
-                LogUtil.Error($"TollBoothSpawnSystem: InitializeTollBoothInsight() - Stack trace for entity {tollBoothEntity.Index}: {ex.StackTrace}");
+                LogUtil.Error($"TollBoothSpawnSystem: \tInitializeTollBoothInsight() - FAILED to initialize TollBoothInsight for entity {tollBoothEntity.Index}. Error: {ex.Message}");
+                LogUtil.Error($"TollBoothSpawnSystem: \tInitializeTollBoothInsight() - Stack trace for entity {tollBoothEntity.Index}: {ex.StackTrace}");
             }
         }
 
@@ -255,12 +257,12 @@ namespace TollboothHighways.Systems
                     baseName = $"{baseName}-{suffix}";
                 }
 
-                LogUtil.Info($"TollBoothSpawnSystem: GenerateRandomTollBoothNameAdvanced() - Final generated name: '{baseName}'");
+                LogUtil.Info($"TollBoothSpawnSystem: \tGenerateRandomTollBoothNameAdvanced() - Final generated name: '{baseName}'");
                 return baseName;
             }
             catch (System.Exception ex)
             {
-                LogUtil.Error($"TollBoothSpawnSystem: GenerateRandomTollBoothNameAdvanced() - ERROR generating name: {ex.Message}");
+                LogUtil.Error($"TollBoothSpawnSystem: \tGenerateRandomTollBoothNameAdvanced() - ERROR generating name: {ex.Message}");
                 return "Default Toll Plaza";
             }
         }
@@ -278,22 +280,22 @@ namespace TollboothHighways.Systems
                     }
                     catch (System.Exception ex)
                     {
-                        LogUtil.Error($"TollBoothSpawnSystem: WriteOwnerEntityInfo() - FAILED to set component data for entity {tollBoothEntity.Index}: {ex.Message}");
+                        LogUtil.Error($"TollBoothSpawnSystem: \tWriteOwnerEntityInfo() - FAILED to set component data for entity {tollBoothEntity.Index}: {ex.Message}");
                         throw;
                     }
 
-                    LogUtil.Info($"TollBoothSpawnSystem: WriteOwnerEntityInfo() - Associating tollbooth {tollBoothEntity.Index} with road {ownerComponent.m_Owner.Index}");
+                    LogUtil.Info($"TollBoothSpawnSystem: \tWriteOwnerEntityInfo() - Associating tollbooth {tollBoothEntity.Index} with road {ownerComponent.m_Owner.Index}");
                     AssociateTollboothWithRoad(tollBoothEntity, ownerComponent.m_Owner);
                 }
                 else
                 {
-                    LogUtil.Warn($"TollBoothSpawnSystem: WriteOwnerEntityInfo() - Entity {tollBoothEntity.Index} does not have an Owner component");
+                    LogUtil.Warn($"TollBoothSpawnSystem: \tWriteOwnerEntityInfo() - Entity {tollBoothEntity.Index} does not have an Owner component");
                 }
             }
             catch (System.Exception ex)
             {
-                LogUtil.Error($"TollBoothSpawnSystem: WriteOwnerEntityInfo() - EXCEPTION processing entity {tollBoothEntity.Index}: {ex.Message}");
-                LogUtil.Error($"TollBoothSpawnSystem: WriteOwnerEntityInfo() - Stack trace: {ex.StackTrace}");
+                LogUtil.Error($"TollBoothSpawnSystem: \tWriteOwnerEntityInfo() - EXCEPTION processing entity {tollBoothEntity.Index}: {ex.Message}");
+                LogUtil.Error($"TollBoothSpawnSystem: \tWriteOwnerEntityInfo() - Stack trace: {ex.StackTrace}");
                 throw;
             }
         }
@@ -309,16 +311,16 @@ namespace TollboothHighways.Systems
                         var tollRoadData = EntityManager.GetComponentData<TollRoadPrefabData>(roadEntity);
                         if (tollRoadData.HasActiveTollbooth && tollRoadData.AssociatedTollbooth != tollBoothEntity)
                         {
-                            LogUtil.Warn($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Road {roadEntity.Index} already has tollbooth {tollRoadData.AssociatedTollbooth.Index} associated. Replacing with new tollbooth {tollBoothEntity.Index}");
+                            LogUtil.Warn($"TollBoothSpawnSystem: \tAssociateTollboothWithRoad() - Road {roadEntity.Index} already has tollbooth {tollRoadData.AssociatedTollbooth.Index} associated. Replacing with new tollbooth {tollBoothEntity.Index}");
                         }
                         tollRoadData.AssociatedTollbooth = tollBoothEntity;
                         tollRoadData.HasActiveTollbooth = true;
                         EntityManager.SetComponentData(roadEntity, tollRoadData);
-                        LogUtil.Info($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Successfully updated association - tollbooth {tollBoothEntity.Index} with toll road {roadEntity.Index}");
+                        LogUtil.Info($"TollBoothSpawnSystem: \tAssociateTollboothWithRoad() - Successfully updated association - tollbooth {tollBoothEntity.Index} with toll road {roadEntity.Index}");
                     }
                     catch (System.Exception ex)
                     {
-                        LogUtil.Error($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - FAILED to update existing TollRoadPrefabData for road {roadEntity.Index}: {ex.Message}");
+                        LogUtil.Error($"TollBoothSpawnSystem: \tAssociateTollboothWithRoad() - FAILED to update existing TollRoadPrefabData for road {roadEntity.Index}: {ex.Message}");
                         throw;
                     }
                 }
@@ -332,19 +334,19 @@ namespace TollboothHighways.Systems
                             HasActiveTollbooth = true
                         };
                         EntityManager.AddComponentData(roadEntity, newTollRoadData);
-                        LogUtil.Info($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Created new TollRoadPrefabData and associated tollbooth {tollBoothEntity.Index} with road {roadEntity.Index}");
+                        LogUtil.Info($"TollBoothSpawnSystem: \tAssociateTollboothWithRoad() - Created new TollRoadPrefabData and associated tollbooth {tollBoothEntity.Index} with road {roadEntity.Index}");
                     }
                     catch (System.Exception ex)
                     {
-                        LogUtil.Error($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - FAILED to create new TollRoadPrefabData for road {roadEntity.Index}: {ex.Message}");
+                        LogUtil.Error($"TollBoothSpawnSystem: \tAssociateTollboothWithRoad() - FAILED to create new TollRoadPrefabData for road {roadEntity.Index}: {ex.Message}");
                         throw;
                     }
                 }
             }
             catch (System.Exception ex)
             {
-                LogUtil.Error($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - FAILED to associate tollbooth {tollBoothEntity.Index} with road {roadEntity.Index}. Error: {ex.Message}");
-                LogUtil.Error($"TollBoothSpawnSystem: AssociateTollboothWithRoad() - Stack trace: {ex.StackTrace}");
+                LogUtil.Error($"TollBoothSpawnSystem: \tAssociateTollboothWithRoad() - FAILED to associate tollbooth {tollBoothEntity.Index} with road {roadEntity.Index}. Error: {ex.Message}");
+                LogUtil.Error($"TollBoothSpawnSystem: \tAssociateTollboothWithRoad() - Stack trace: {ex.StackTrace}");
                 throw;
             }
         }
@@ -374,12 +376,12 @@ namespace TollboothHighways.Systems
                             trafficLight.m_GroupMask0 = 1;
                             trafficLight.m_GroupMask1 = 0;
                             EntityManager.SetComponentData(subObject, trafficLight);
-                            LogUtil.Info($"TollBoothSpawnSystem: InitializeTollRoadTrafficLight() - Set existing traffic light to Red for road {roadEntity.Index}");
+                            LogUtil.Info($"TollBoothSpawnSystem: \tInitializeTollRoadTrafficLight() - Set existing traffic light to Red for road {roadEntity.Index}");
                             return;
                         }
                         else
                         {
-                            LogUtil.Info($"TollBoothSpawnSystem: InitializeTollRoadTrafficLight() - No subobject with Traffic Lights was found");
+                            LogUtil.Info($"TollBoothSpawnSystem: \tInitializeTollRoadTrafficLight() - No subobject with Traffic Lights was found");
                             return;
                         }
                     }
@@ -387,8 +389,8 @@ namespace TollboothHighways.Systems
             }
             catch (System.Exception ex)
             {
-                LogUtil.Error($"TollBoothSpawnSystem: InitializeTollRoadTrafficLight() - FAILED for tollbooth {tollBoothEntity.Index}. Error: {ex.Message}");
-                LogUtil.Error($"TollBoothSpawnSystem: InitializeTollRoadTrafficLight() - Stack trace: {ex.StackTrace}");
+                LogUtil.Error($"TollBoothSpawnSystem: \tInitializeTollRoadTrafficLight() - FAILED for tollbooth {tollBoothEntity.Index}. Error: {ex.Message}");
+                LogUtil.Error($"TollBoothSpawnSystem: \tInitializeTollRoadTrafficLight() - Stack trace: {ex.StackTrace}");
             }
         }
 
@@ -409,7 +411,7 @@ namespace TollboothHighways.Systems
             var nameSystem = World.GetOrCreateSystemManaged<Game.UI.NameSystem>();
             nameSystem.SetCustomName(entity, randomName);
 
-            LogUtil.Info($"TollBoothSpawnSystem: Assigned random name '{randomName}' to toll booth entity {entity.Index}");
+            LogUtil.Info($"TollBoothSpawnSystem: \tAssigned random name '{randomName}' to toll booth entity {entity.Index}");
         }
 
         protected override void OnDestroy()
