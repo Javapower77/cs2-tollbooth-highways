@@ -22,6 +22,7 @@ Having specific type of Vehicles go through only a specific Tollbooth Road using
 - The systems should run in parallel threads in order to improve at best the performance.
 - Always use SystemAPI when getting lookups or typehandles for a Jobs in Burst-compatible code.
 - Use BufferTypeHandle instead of BufferLookup for buffered entities lookups.
+- Use ComponentTypeHandle insted ComponentLookup for not buffered component lookups.
 - "Update(this)" should be not necessary for lookups as it is handled internaly.
 - Use ComponentTypeHandle with chunk.Has() for component checks.
 - Use VehiclesUtil class to check vehicles entities with tollbooth roads entities.

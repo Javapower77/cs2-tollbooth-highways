@@ -47,7 +47,6 @@ namespace TollboothHighways
 
                 GameManager.instance.localizationManager.AddSource("en-US", new LocaleEN(Settings));
                 AssetDatabase.global.LoadSettings(nameof(TollboothHighways), Settings, new ModSettings(this));
-                Settings.ApplyAndSave();
 
                 if (GameManager.instance.modManager.TryGetExecutableAsset(this, out var asset))
                 {
@@ -74,24 +73,18 @@ namespace TollboothHighways
                 // 2. Spawn tollbooth / toll road entities (early in simulation)
                 updateSystem.UpdateBefore<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 3. Enforce car lane flags of the spawned tollbooths roads. - Runs after Modification5 where CarLaneSystem is Updated.
-                // This is BEFORE restricted barrier phases, so ECB creation is allowed
-                //updateSystem.UpdateBefore<TollBoothLaneFlagEnforcementSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAt<TollBoothLaneFlagEnforcementSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollBoothLaneFlagEnforcementSystem, Game.Common.ModificationBarrier5>(SystemUpdatePhase.GameSimulation);
-
-                // 4. Monitor vehicle paths for invalid tollbooth usage (NEW - runs after lane flag enforcement)
-                updateSystem.UpdateAfter<VehicleTollboothPathMonitoringSystem, TollBoothLaneFlagEnforcementSystem>(SystemUpdatePhase.GameSimulation);
+                // 3. Monitor vehicle paths for invalid tollbooth usage (NEW - runs after lane flag enforcement)
+                updateSystem.UpdateAfter<VehicleTollboothPathMonitoringSystem, TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
                 updateSystem.UpdateBefore<VehicleTollboothPathMonitoringSystem, Game.Simulation.PathfindSetupSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 5. Selection system for toll booths
+                // 4. Selection system for toll booths
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 6. StopVehiclesOnRoadSystem ordering:
+                // 5. StopVehiclesOnRoadSystem ordering:
                 updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
                 updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 7. UI systems (separate phases)
+                // 6. UI systems (separate phases)
                 updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
 

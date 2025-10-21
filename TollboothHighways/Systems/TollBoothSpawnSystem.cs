@@ -6,6 +6,7 @@ using Game.Objects;
 using Game.Pathfind;
 using Game.Prefabs;
 using Game.Simulation;
+using Game.Tools;
 using Game.UI;
 using Game.Vehicles;
 using System;
@@ -17,6 +18,7 @@ using Unity.Entities;
 using Unity.Entities.UniversalDelegates;
 using Unity.Mathematics;
 using static Colossal.IO.AssetDatabase.AtlasFrame;
+using CarLaneFlags = Game.Net.CarLaneFlags;
 using Random = System.Random;
 
 namespace TollboothHighways.Systems
@@ -82,6 +84,7 @@ namespace TollboothHighways.Systems
                 m_PrefabSystem = World.GetOrCreateSystemManaged<PrefabSystem>();
                 m_Random = new Random((int)DateTime.Now.Ticks);
                 m_SimulationSystem = World.GetOrCreateSystemManaged<SimulationSystem>();
+
                 SubLaneObjectData = GetBufferLookup<Game.Net.SubLane>(false);
                 SubObjectsObjectData = GetBufferLookup<Game.Objects.SubObject>(false);
                 m_TrafficLightsData = GetComponentLookup<TrafficLights>(false);
@@ -92,14 +95,25 @@ namespace TollboothHighways.Systems
                 m_LaneData = GetComponentLookup<Lane>(true);
                 m_NodeData = GetComponentLookup<Node>(true);
                 m_TransformData = GetComponentLookup<Transform>(true);
-                m_CarLaneData = GetComponentLookup<Game.Net.CarLane>(false); 
-                m_UnprocessedTollBoothQuery = GetEntityQuery(
-                    ComponentType.ReadWrite<TollBoothPrefabData>(),
-                    ComponentType.ReadOnly<PrefabRef>(),
-                    ComponentType.Exclude<TollBoothSpawned>(),
-                    ComponentType.Exclude<Deleted>(),
-                    ComponentType.Exclude<Game.Tools.Temp>()
-                );
+                m_CarLaneData = GetComponentLookup<Game.Net.CarLane>(false);
+                
+                m_UnprocessedTollBoothQuery = GetEntityQuery(new EntityQueryDesc
+                {
+                    All = new ComponentType[]
+                    {
+                        ComponentType.ReadWrite<TollBoothPrefabData>(),
+                        ComponentType.ReadOnly<PrefabRef>()
+                    },
+                    None = new ComponentType[]
+                    {
+                        ComponentType.ReadOnly<Temp>(),
+                        ComponentType.ReadOnly<Deleted>(),
+                        ComponentType.ReadOnly<TollBoothSpawned>()
+                    }
+                });
+
+                RequireForUpdate(m_UnprocessedTollBoothQuery);
+
                 LogUtil.Info("TollBoothSpawnSystem: OnCreate() - System created and initialized successfully");
             }
             catch (System.Exception ex)
@@ -146,8 +160,8 @@ namespace TollboothHighways.Systems
                         {
                             if (tollBoothData.BelongsToHighwayTollbooth == Entity.Null)
                             {
-                                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - [STEP 1] - Writing owner entity info for {entity.Index}");
-                                WriteOwnerEntityInfo(entity, ref tollBoothData);
+                                LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - [STEP 1] - Configure custom components for entity{entity.Index}");
+                                SetTollboothComponents(entity, ref tollBoothData);
 
                                 LogUtil.Info($"TollBoothSpawnSystem: OnUpdate() - [STEP 2] - Assigning random name for {entity.Index}");
                                 AssignRandomName(entity, ref tollBoothData);
@@ -267,7 +281,7 @@ namespace TollboothHighways.Systems
             }
         }
 
-        private void WriteOwnerEntityInfo(Entity tollBoothEntity, ref TollBoothPrefabData tollBoothData)
+        private void SetTollboothComponents(Entity tollBoothEntity, ref TollBoothPrefabData tollBoothData)
         {
             try
             {
@@ -280,23 +294,123 @@ namespace TollboothHighways.Systems
                     }
                     catch (System.Exception ex)
                     {
-                        LogUtil.Error($"TollBoothSpawnSystem: \tWriteOwnerEntityInfo() - FAILED to set component data for entity {tollBoothEntity.Index}: {ex.Message}");
+                        LogUtil.Error($"TollBoothSpawnSystem: \tSetTollboothComponents() - FAILED to set component data for entity {tollBoothEntity.Index}: {ex.Message}");
                         throw;
                     }
 
-                    LogUtil.Info($"TollBoothSpawnSystem: \tWriteOwnerEntityInfo() - Associating tollbooth {tollBoothEntity.Index} with road {ownerComponent.m_Owner.Index}");
+                    LogUtil.Info($"TollBoothSpawnSystem: \t\tSetTollboothComponents() - [STEP 1a] - Associating tollbooth {tollBoothEntity.Index} with road {ownerComponent.m_Owner.Index}");
                     AssociateTollboothWithRoad(tollBoothEntity, ownerComponent.m_Owner);
+
+                    LogUtil.Info($"TollBoothSpawnSystem: \t\tSetTollboothComponents() - [STEP 1b] - Assigning car lane flags to tollbooth road {ownerComponent.m_Owner.Index}");
+                    AssignCarLaneFlagsToTollboothRoad(ownerComponent.m_Owner);
                 }
                 else
                 {
-                    LogUtil.Warn($"TollBoothSpawnSystem: \tWriteOwnerEntityInfo() - Entity {tollBoothEntity.Index} does not have an Owner component");
+                    LogUtil.Warn($"TollBoothSpawnSystem: \tSetTollboothComponents() - Entity {tollBoothEntity.Index} does not have an Owner component");
                 }
             }
             catch (System.Exception ex)
             {
-                LogUtil.Error($"TollBoothSpawnSystem: \tWriteOwnerEntityInfo() - EXCEPTION processing entity {tollBoothEntity.Index}: {ex.Message}");
-                LogUtil.Error($"TollBoothSpawnSystem: \tWriteOwnerEntityInfo() - Stack trace: {ex.StackTrace}");
+                LogUtil.Error($"TollBoothSpawnSystem: \tSetTollboothComponents() - EXCEPTION processing entity {tollBoothEntity.Index}: {ex.Message}");
+                LogUtil.Error($"TollBoothSpawnSystem: \tSetTollboothComponents() - Stack trace: {ex.StackTrace}");
                 throw;
+            }
+        }
+
+        private void AssignCarLaneFlagsToTollboothRoad(Entity roadEntity)
+        {
+            try
+            {
+                // Determine toll type for this chunk using chunk.Has()
+                bool hasValidTollType = false;
+                bool IsPublicTollRoad = false;
+                CarLaneFlags flagsToApply;
+
+                if (EntityManager.HasComponent<TollRoadPrivateTransportData>(roadEntity))
+                {
+                    // Private Transport: Block heavy vehicles (trucks)
+                    flagsToApply = CarLaneFlags.ForbidHeavyTraffic;
+                    hasValidTollType = true;
+                }
+                else if (EntityManager.HasComponent<TollRoadTruckData>(roadEntity))
+                {
+                    // Trucks Only: Block transit traffic (private cars, buses)
+                    flagsToApply = CarLaneFlags.ForbidTransitTraffic;
+                    hasValidTollType = true;
+                }
+                else if (EntityManager.HasComponent<TollRoadPublicTransportData>(roadEntity))
+                {
+                    // Public Transport Only: Allow only public transport vehicles
+                    flagsToApply = CarLaneFlags.PublicOnly;
+                    IsPublicTollRoad = true;
+                    hasValidTollType = true;
+                }
+                else if (EntityManager.HasComponent<TollRoadServiceVehiclesData>(roadEntity))
+                {
+                    // Service Vehicles Only: Block both transit and heavy traffic
+                    flagsToApply = CarLaneFlags.ForbidTransitTraffic | CarLaneFlags.ForbidHeavyTraffic;
+                    hasValidTollType = true;
+                }
+                else
+                {
+                    LogUtil.Warn($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - No valid toll type component found for road {roadEntity.Index}");
+                    hasValidTollType = false;
+                    return;
+                }
+
+                if (!hasValidTollType)
+                    return;
+                    
+                if (SubLaneObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Net.SubLane> subLanesBuffer))
+                {
+                    for (int i = 0; i < subLanesBuffer.Length; i++)
+                    {
+                        var subLane = subLanesBuffer[i];
+                        bool appliedAnyFlags = false;
+
+                        // Only process road lanes (skip pedestrian, track, etc.)
+                        if ((subLane.m_PathMethods & PathMethod.Road) == 0)
+                            continue;
+
+                        Entity laneEntity = subLane.m_SubLane;
+
+                        // Check if lane has CarLane component
+                        if (!m_CarLaneData.TryGetComponent(laneEntity, out var carLane))
+                            continue;
+
+                        // Store original flags for comparison
+                        var originalFlags = carLane.m_Flags;
+
+                        // Apply restriction flags (preserve existing flags using |=)
+                        carLane.m_Flags |= flagsToApply;
+
+                        // Only write if flags actually changed
+                        if (carLane.m_Flags != originalFlags)
+                        {
+                            m_CarLaneData[laneEntity] = carLane;
+                            LogUtil.Info($"TollBoothSpawnSystem: \\t\tAssignCarLaneFlagsToTollboothRoad() - Current CarLane flags: {originalFlags}, CarLane flags to apply: {flagsToApply}");
+                            LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Applied flags {m_CarLaneData[laneEntity].m_Flags} to lane {laneEntity.Index} on road {roadEntity.Index}");
+                            appliedAnyFlags = true;
+                        }
+
+                        // Mark road as processed to prevent reprocessing
+                        // If it is a public toll road, we add the component anyway to avoid reprocessing
+                        if (appliedAnyFlags || IsPublicTollRoad)
+                        {
+                            if (!EntityManager.HasComponent<TollRoadCarLaneApplied>(roadEntity))
+                                EntityManager.AddComponent<TollRoadCarLaneApplied>(roadEntity);
+                        }
+                    }
+                }
+                else
+                {
+                    LogUtil.Warn($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - No SubLanes found for road {roadEntity.Index}");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                LogUtil.Error($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - FAILED to assign CarLane flags for road {roadEntity.Index}. Error: {ex.Message}");
+                LogUtil.Error($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Stack trace: {ex.StackTrace}");
             }
         }
 
@@ -311,16 +425,16 @@ namespace TollboothHighways.Systems
                         var tollRoadData = EntityManager.GetComponentData<TollRoadPrefabData>(roadEntity);
                         if (tollRoadData.HasActiveTollbooth && tollRoadData.AssociatedTollbooth != tollBoothEntity)
                         {
-                            LogUtil.Warn($"TollBoothSpawnSystem: \tAssociateTollboothWithRoad() - Road {roadEntity.Index} already has tollbooth {tollRoadData.AssociatedTollbooth.Index} associated. Replacing with new tollbooth {tollBoothEntity.Index}");
+                            LogUtil.Warn($"TollBoothSpawnSystem: \t\t\tAssociateTollboothWithRoad() - Road {roadEntity.Index} already has tollbooth {tollRoadData.AssociatedTollbooth.Index} associated. Replacing with new tollbooth {tollBoothEntity.Index}");
                         }
                         tollRoadData.AssociatedTollbooth = tollBoothEntity;
                         tollRoadData.HasActiveTollbooth = true;
                         EntityManager.SetComponentData(roadEntity, tollRoadData);
-                        LogUtil.Info($"TollBoothSpawnSystem: \tAssociateTollboothWithRoad() - Successfully updated association - tollbooth {tollBoothEntity.Index} with toll road {roadEntity.Index}");
+                        LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssociateTollboothWithRoad() - Successfully updated association - tollbooth {tollBoothEntity.Index} with toll road {roadEntity.Index}");
                     }
                     catch (System.Exception ex)
                     {
-                        LogUtil.Error($"TollBoothSpawnSystem: \tAssociateTollboothWithRoad() - FAILED to update existing TollRoadPrefabData for road {roadEntity.Index}: {ex.Message}");
+                        LogUtil.Error($"TollBoothSpawnSystem: \t\t\tAssociateTollboothWithRoad() - FAILED to update existing TollRoadPrefabData for road {roadEntity.Index}: {ex.Message}");
                         throw;
                     }
                 }
@@ -334,19 +448,19 @@ namespace TollboothHighways.Systems
                             HasActiveTollbooth = true
                         };
                         EntityManager.AddComponentData(roadEntity, newTollRoadData);
-                        LogUtil.Info($"TollBoothSpawnSystem: \tAssociateTollboothWithRoad() - Created new TollRoadPrefabData and associated tollbooth {tollBoothEntity.Index} with road {roadEntity.Index}");
+                        LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssociateTollboothWithRoad() - Created new TollRoadPrefabData and associated tollbooth {tollBoothEntity.Index} with road {roadEntity.Index}");
                     }
                     catch (System.Exception ex)
                     {
-                        LogUtil.Error($"TollBoothSpawnSystem: \tAssociateTollboothWithRoad() - FAILED to create new TollRoadPrefabData for road {roadEntity.Index}: {ex.Message}");
+                        LogUtil.Error($"TollBoothSpawnSystem: \t\t\tAssociateTollboothWithRoad() - FAILED to create new TollRoadPrefabData for road {roadEntity.Index}: {ex.Message}");
                         throw;
                     }
                 }
             }
             catch (System.Exception ex)
             {
-                LogUtil.Error($"TollBoothSpawnSystem: \tAssociateTollboothWithRoad() - FAILED to associate tollbooth {tollBoothEntity.Index} with road {roadEntity.Index}. Error: {ex.Message}");
-                LogUtil.Error($"TollBoothSpawnSystem: \tAssociateTollboothWithRoad() - Stack trace: {ex.StackTrace}");
+                LogUtil.Error($"TollBoothSpawnSystem: \t\t\tAssociateTollboothWithRoad() - FAILED to associate tollbooth {tollBoothEntity.Index} with road {roadEntity.Index}. Error: {ex.Message}");
+                LogUtil.Error($"TollBoothSpawnSystem: \t\t\tAssociateTollboothWithRoad() - Stack trace: {ex.StackTrace}");
                 throw;
             }
         }
