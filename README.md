@@ -29,6 +29,12 @@ This mod of course will evolute meanwhile I keep learning new stuf in this type 
 
 Well, that is the goal of this mod and that is what I am going to try to achieve. Is most likely that CO realease some Toll DLC sooner, but that will not stop me to continue on this mod, because as I had metinoned, it is all about learning. 🇦🇷 💻 🤟
 
+## Important
+
+First you must create the road highways and the add the tollbooth roads because
+the other way it will remove the CarLaneFlags to indicate what type of vehicles
+could passthrough the tollbooth lane. I did'nt found any method to avoid this.
+
 ## Thanks
 
 * krzychu124

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using TollboothHighways.Domain.Enums;
 using TollboothHighways.Domain.Components;
 using Unity.Entities;

@@ -73,9 +73,8 @@ namespace TollboothHighways
                 // 2. Spawn tollbooth / toll road entities (early in simulation)
                 updateSystem.UpdateBefore<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 3. Monitor vehicle paths for invalid tollbooth usage (NEW - runs after lane flag enforcement)
-                updateSystem.UpdateAfter<VehicleTollboothPathMonitoringSystem, TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<VehicleTollboothPathMonitoringSystem, Game.Simulation.PathfindSetupSystem>(SystemUpdatePhase.GameSimulation);
+                // 3. Vehicle path monitoring system
+                updateSystem.UpdateAt<TollboothPathMonitoringSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 4. Selection system for toll booths
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
@@ -92,7 +91,7 @@ namespace TollboothHighways
 
                 //Harmony
                 var harmony = new Harmony(harmonyID);
-                //Harmony.DEBUG = true;
+                Harmony.DEBUG = true;
                 harmony.PatchAll(typeof(Mod).Assembly);
                 var patchedMethods = harmony.GetPatchedMethods().ToArray();
                 LogUtil.Info($"Plugin {harmonyID} made patches! Patched methods: " + patchedMethods);

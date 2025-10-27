@@ -108,7 +108,8 @@ namespace TollboothHighways.Systems
                     {
                         ComponentType.ReadOnly<Temp>(),
                         ComponentType.ReadOnly<Deleted>(),
-                        ComponentType.ReadOnly<TollBoothSpawned>()
+                        ComponentType.ReadOnly<TollBoothSpawned>(),
+                        ComponentType.ReadOnly<TollRoadCarLaneApplied>()
                     }
                 });
 
@@ -388,7 +389,7 @@ namespace TollboothHighways.Systems
                         if (carLane.m_Flags != originalFlags)
                         {
                             m_CarLaneData[laneEntity] = carLane;
-                            LogUtil.Info($"TollBoothSpawnSystem: \\t\tAssignCarLaneFlagsToTollboothRoad() - Current CarLane flags: {originalFlags}, CarLane flags to apply: {flagsToApply}");
+                            LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Current CarLane flags: {originalFlags}, CarLane flags to apply: {flagsToApply}");
                             LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Applied flags {m_CarLaneData[laneEntity].m_Flags} to lane {laneEntity.Index} on road {roadEntity.Index}");
                             appliedAnyFlags = true;
                         }
