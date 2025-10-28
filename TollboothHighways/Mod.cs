@@ -88,6 +88,7 @@ namespace TollboothHighways
 
                 // 7. UI systems (separate phases)
                 updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
+                updateSystem.UpdateAt<TollSettingsUISystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
                 
                 // Add the toll economy UI system
