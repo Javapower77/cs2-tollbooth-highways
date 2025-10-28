@@ -12,6 +12,7 @@ This mod of course will evolute meanwhile I keep learning new stuf in this type 
 * [How manual tolbooth works](/TollboothHighways/Docs/StopVehiclesOnRoadSystem.md)
 * [Diagram for the manual tollbooth road](/TollboothHighways/Docs/Tollbooth-Barrier-Flow.md)
 * [Images previews from the mod](/TollboothHighways/Docs/ModsPreviews.md)
+
 ## Objetive
 
 * Have a manual tollbooth with barrier that makes vehicle stop and emulate the behaivor of a real word manual payment.
@@ -34,6 +35,10 @@ Well, that is the goal of this mod and that is what I am going to try to achieve
 First you must create the road highways and the add the tollbooth roads because
 the other way it will remove the CarLaneFlags to indicate what type of vehicles
 could passthrough the tollbooth lane. I did'nt found any method to avoid this.
+
+## Note
+
+As CS:2 doesn't have any exposed method to control what vehicle go through a lane of a road, this mod just try to do the best and sometimes cars will not respect excluise tollbooth road. In a future, is CO add flags for restrict type of vehicles I will modify this mod to use as much vanilla methods as possible.
 
 ## Thanks
 

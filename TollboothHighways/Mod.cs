@@ -75,17 +75,26 @@ namespace TollboothHighways
 
                 // 3. Vehicle path monitoring system
                 updateSystem.UpdateAt<TollboothPathMonitoringSystem>(SystemUpdatePhase.GameSimulation);
+                
+                // 4. Toll collection system (NEW - runs on main thread for debugging)
+                updateSystem.UpdateAt<TollCollectionSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 4. Selection system for toll booths
+                // 5. Selection system for toll booths
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 5. StopVehiclesOnRoadSystem ordering:
+                // 6. StopVehiclesOnRoadSystem ordering:
                 updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
                 updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 6. UI systems (separate phases)
+                // 7. UI systems (separate phases)
                 updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
+                
+                // Add the toll economy UI system
+                updateSystem.UpdateAt<TollEconomyUISystem>(SystemUpdatePhase.UIUpdate);
+                
+                // Make sure TollCollectionSystem updates before TollEconomyUISystem
+                updateSystem.UpdateBefore<TollCollectionSystem, TollEconomyUISystem>(SystemUpdatePhase.GameSimulation);
 
                 LogUtil.Info("All systems registered successfully (including VehicleTollboothPathMonitoringSystem).");
 

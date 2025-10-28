@@ -1,6 +1,6 @@
-## Analysis: Adding Custom CarLaneFlags for Tollbooth Restrictions
+# Analysis: Adding Custom CarLaneFlags for Tollbooth Restrictions
 
-### Short Answer: ❌ No, Not Possible
+## Short Answer: ❌ No, Not Possible
 
 You **cannot add** custom CarLaneFlags values that vanilla pathfinding will recognize. Here's why:
 
@@ -11,7 +11,7 @@ You **cannot add** custom CarLaneFlags values that vanilla pathfinding will reco
 3. **No Extension Point**s: The game doesn't provide hooks or interfaces to inject custom flag interpretations
 4. **Burst Compilation**: Pathfinding jobs are Burst-compiled with fixed logic - no runtime modification possible
 
-### What the Vanilla Pathfinding Checks
+## What the Vanilla Pathfinding Checks
 
 The game's pathfinding only understands these vehicle-related flags:
 
@@ -46,14 +46,14 @@ Your tollbooth needs fine-grained control that vanilla flags don't support:
 
 The solution I provided earlier is the only viable approach for your requirements:
 
-### Why Path Monitoring Works
+## Why Path Monitoring Works
 
 1. **Post-Pathfinding Validation**: Checks paths AFTER vanilla pathfinding creates them
 2. **Custom Logic**: You control exactly which vehicle types are allowed
 3. **Graceful Fallback**: Limits repath attempts to prevent infinite loops
 4. **No Vanilla Modification**: Works entirely through ECS components
 
-### Architecture Overview
+## Architecture Overview
 
 ````architecture
 ┌─────────────────────────────────────────────────────┐
@@ -77,9 +77,8 @@ The solution I provided earlier is the only viable approach for your requirement
 │ Detects obsolete flag and recalculates path         │
 └─────────────────────────────────────────────────────┘
 ````
----
 
-### Alternative Approaches (All Have Major Drawbacks)
+## Alternative Approaches (All Have Major Drawbacks)
 
 ❌ Option 1: Harmony Patch Pathfinding Cost Calculator
 
@@ -114,9 +113,9 @@ The solution I provided earlier is the only viable approach for your requirement
 * Doesn't solve the "wrong flag" problem (flags still too broad)
 * Could affect other vehicles' paths unintentionally
 
-### Confirmation: Your Current Approach is Optimal
+## Confirmation: The Current Approach is the most posible optimal
 
-Based on AGENTS.MD requirements and CS2 modding limitations, **the path monitoring solution I provided earlier is the correct and only practical approach.**
+Based on CS2 modding limitations, **the path monitoring solution explained earlier is the correct and only practical approach.**
 
 ✅ It Meets All Your Requirements
 
@@ -132,7 +131,7 @@ Based on AGENTS.MD requirements and CS2 modding limitations, **the path monitori
 
 📊 Expected Performance
 
-With the provided solution:
+With the current solution:
 
 * **Initial pathfinding**: ~0.1ms per vehicle (vanilla cost)
 * **Path validation**: ~0.01ms per vehicle (minimal overhead)
@@ -141,7 +140,7 @@ With the provided solution:
   
 🎯 Final Recommendation
 
-**Use the complete optimized solution I provided in my previous message. It's:**
+**The current solution is:**
 
 * ✅ The most reliable approach
 * ✅ The most maintainable approach
