@@ -5,6 +5,7 @@ using Game.City;
 using Game.Simulation;
 using TollboothHighways.Domain.Components;
 using TollboothHighways.Utilities;
+using TollboothHighways.Extensions;
 using Game;
 using Unity.Collections;
 
@@ -20,14 +21,14 @@ namespace TollboothHighways.Systems
         private EntityQuery m_CityQuery;
         private Entity m_TollStatisticsEntity = Entity.Null;
         
-        // UI Bindings
-        private ValueBinding<float> m_TollIncomeDaily;
-        private ValueBinding<float> m_TollIncomeWeekly;
-        private ValueBinding<float> m_TollIncomeMonthly;
-        private ValueBinding<float> m_TollIncomeTotal;
-        private ValueBinding<int> m_TollVehiclesDaily;
-        private ValueBinding<int> m_TollVehiclesTotal;
-        private ValueBinding<bool> m_HasTollIncome;
+        // UI Bindings using ValueBindingHelper
+        private ValueBindingHelper<float> m_TollIncomeDaily;
+        private ValueBindingHelper<float> m_TollIncomeWeekly;
+        private ValueBindingHelper<float> m_TollIncomeMonthly;
+        private ValueBindingHelper<float> m_TollIncomeTotal;
+        private ValueBindingHelper<int> m_TollVehiclesDaily;
+        private ValueBindingHelper<int> m_TollVehiclesTotal;
+        private ValueBindingHelper<bool> m_HasTollIncome;
         
         // Frame tracking
         private const uint FRAMES_PER_DAY = 25920;
@@ -42,7 +43,6 @@ namespace TollboothHighways.Systems
             m_CityStatisticsSystem = World.GetOrCreateSystemManaged<CityStatisticsSystem>();
             
             // Create city query - look for the city entity with PlayerMoney component
-            // CityStatistic is a buffer, not a component
             m_CityQuery = GetEntityQuery(new EntityQueryDesc
             {
                 All = new[]
@@ -52,25 +52,45 @@ namespace TollboothHighways.Systems
                 }
             });
             
-            // Create UI bindings for toll income data
-            m_TollIncomeDaily = new ValueBinding<float>(Mod.Id, "tollIncomeDaily", 0f);
-            m_TollIncomeWeekly = new ValueBinding<float>(Mod.Id, "tollIncomeWeekly", 0f);
-            m_TollIncomeMonthly = new ValueBinding<float>(Mod.Id, "tollIncomeMonthly", 0f);
-            m_TollIncomeTotal = new ValueBinding<float>(Mod.Id, "tollIncomeTotal", 0f);
-            m_TollVehiclesDaily = new ValueBinding<int>(Mod.Id, "tollVehiclesDaily", 0);
-            m_TollVehiclesTotal = new ValueBinding<int>(Mod.Id, "tollVehiclesTotal", 0);
-            m_HasTollIncome = new ValueBinding<bool>(Mod.Id, "hasTollIncome", false);
+            // Create UI bindings using ValueBindingHelper for cleaner API
+            m_TollIncomeDaily = new ValueBindingHelper<float>(
+                new ValueBinding<float>(Mod.Id, "tollIncomeDaily", 0f)
+            );
             
-            // Register bindings
-            AddBinding(m_TollIncomeDaily);
-            AddBinding(m_TollIncomeWeekly);
-            AddBinding(m_TollIncomeMonthly);
-            AddBinding(m_TollIncomeTotal);
-            AddBinding(m_TollVehiclesDaily);
-            AddBinding(m_TollVehiclesTotal);
-            AddBinding(m_HasTollIncome);
+            m_TollIncomeWeekly = new ValueBindingHelper<float>(
+                new ValueBinding<float>(Mod.Id, "tollIncomeWeekly", 0f)
+            );
             
-            LogUtil.Info("TollEconomyUISystem: Created with toll income bindings");
+            m_TollIncomeMonthly = new ValueBindingHelper<float>(
+                new ValueBinding<float>(Mod.Id, "tollIncomeMonthly", 0f)
+            );
+            
+            m_TollIncomeTotal = new ValueBindingHelper<float>(
+                new ValueBinding<float>(Mod.Id, "tollIncomeTotal", 0f)
+            );
+            
+            m_TollVehiclesDaily = new ValueBindingHelper<int>(
+                new ValueBinding<int>(Mod.Id, "tollVehiclesDaily", 0)
+            );
+            
+            m_TollVehiclesTotal = new ValueBindingHelper<int>(
+                new ValueBinding<int>(Mod.Id, "tollVehiclesTotal", 0)
+            );
+            
+            m_HasTollIncome = new ValueBindingHelper<bool>(
+                new ValueBinding<bool>(Mod.Id, "hasTollIncome", false)
+            );
+            
+            // Register bindings - access the underlying ValueBinding through the Binding property
+            AddBinding(m_TollIncomeDaily.Binding);
+            AddBinding(m_TollIncomeWeekly.Binding);
+            AddBinding(m_TollIncomeMonthly.Binding);
+            AddBinding(m_TollIncomeTotal.Binding);
+            AddBinding(m_TollVehiclesDaily.Binding);
+            AddBinding(m_TollVehiclesTotal.Binding);
+            AddBinding(m_HasTollIncome.Binding);
+            
+            LogUtil.Info("TollEconomyUISystem: Created with toll income bindings using ValueBindingHelper");
         }
 
         protected override void OnUpdate()
@@ -90,14 +110,14 @@ namespace TollboothHighways.Systems
             // Update period-based statistics
             UpdatePeriodStatistics(ref tollStats, currentFrame);
             
-            // Update UI bindings
-            m_TollIncomeDaily.Update(tollStats.DailyIncome);
-            m_TollIncomeWeekly.Update(tollStats.WeeklyIncome);
-            m_TollIncomeMonthly.Update(tollStats.MonthlyIncome);
-            m_TollIncomeTotal.Update(tollStats.TotalIncome);
-            m_TollVehiclesDaily.Update(tollStats.DailyVehicleCount);
-            m_TollVehiclesTotal.Update(tollStats.TotalVehicleCount);
-            m_HasTollIncome.Update(tollStats.TotalIncome > 0);
+            // Update UI bindings using ValueBindingHelper's Value property
+            m_TollIncomeDaily.Value = tollStats.DailyIncome;
+            m_TollIncomeWeekly.Value = tollStats.WeeklyIncome;
+            m_TollIncomeMonthly.Value = tollStats.MonthlyIncome;
+            m_TollIncomeTotal.Value = tollStats.TotalIncome;
+            m_TollVehiclesDaily.Value = tollStats.DailyVehicleCount;
+            m_TollVehiclesTotal.Value = tollStats.TotalVehicleCount;
+            m_HasTollIncome.Value = tollStats.TotalIncome > 0;
             
             // Save updated statistics
             EntityManager.SetComponentData(tollStatsEntity, tollStats);

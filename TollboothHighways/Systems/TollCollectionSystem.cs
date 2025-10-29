@@ -61,30 +61,32 @@ namespace TollboothHighways.Systems
         // Add reference to the toll economy UI system
         private TollEconomyUISystem m_TollEconomyUISystem;
         
+        private bool m_LogInitialized = false;
+
         protected override void OnCreate()
         {
             base.OnCreate();
-            
+
             m_SimulationSystem = World.GetOrCreateSystemManaged<SimulationSystem>();
             m_CityStatisticsSystem = World.GetOrCreateSystemManaged<CityStatisticsSystem>();
-            
+
             m_VehiclesUtil = new VehiclesUtil();
             m_ProcessedVehicles = new HashSet<Entity>();
             m_VehicleLastProcessedFrame = new Dictionary<Entity, uint>();
-            
+
             m_DailyTollIncome = 0f;
             m_LastDayFrame = 0;
-            
+
             // Create city query - properly for the city entity
             m_CityQuery = GetEntityQuery(new EntityQueryDesc
             {
                 All = new[]
                 {
-                    ComponentType.ReadWrite<PlayerMoney>(),
+                    //ComponentType.ReadWrite<PlayerMoney>(),
                     ComponentType.ReadWrite<CityStatistic>()
                 }
             });
-            
+
             // Create queries
             m_TollRoadQuery = GetEntityQuery(new EntityQueryDesc
             {
@@ -99,7 +101,7 @@ namespace TollboothHighways.Systems
                     ComponentType.ReadOnly<Temp>()
                 }
             });
-            
+
             m_VehicleQuery = GetEntityQuery(new EntityQueryDesc
             {
                 All = new[]
@@ -114,13 +116,13 @@ namespace TollboothHighways.Systems
                     ComponentType.ReadOnly<Unspawned>()
                 }
             });
-            
+
             RequireForUpdate(m_TollRoadQuery);
             RequireForUpdate(m_VehicleQuery);
-            
+
             // Get the toll economy UI system
             m_TollEconomyUISystem = World.GetOrCreateSystemManaged<TollEconomyUISystem>();
-            
+
             LogUtil.Info("TollCollectionSystem: Created - monitors vehicles at road exits per AGENTS.MD");
         }
 
@@ -413,7 +415,7 @@ namespace TollboothHighways.Systems
         {
             // Remove vehicles that have been in the dictionary for more than cooldown period
             var vehiclesToRemove = new List<Entity>();
-            
+
             foreach (var kvp in m_VehicleLastProcessedFrame)
             {
                 if (currentFrame - kvp.Value > COOLDOWN_FRAMES * 2 || !EntityManager.Exists(kvp.Key))
@@ -421,11 +423,31 @@ namespace TollboothHighways.Systems
                     vehiclesToRemove.Add(kvp.Key);
                 }
             }
-            
+
             foreach (var vehicle in vehiclesToRemove)
             {
                 m_VehicleLastProcessedFrame.Remove(vehicle);
             }
+        }
+        
+        private void EnsureLogger()
+        {
+            if (m_LogInitialized)
+            {
+                return;
+            }
+
+            try
+            {
+                VehicleDebugLogger.Init();
+                VehicleDebugLogger.LogOnce("=== TollboothPathMonitoringSystem logging started ===");
+            }
+            catch
+            {
+                // best-effort logging initialization
+            }
+
+            m_LogInitialized = true;
         }
     }
 }

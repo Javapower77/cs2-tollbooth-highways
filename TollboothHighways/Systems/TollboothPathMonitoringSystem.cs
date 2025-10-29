@@ -170,14 +170,23 @@ namespace TollboothHighways.Systems
                         // Only stop trying when max attempts reached
                         if (attempts.HasReachedMaxAttempts)
                         {
-                           // VehicleDebugLogger.Log(entity,
-                           //     $"TollboothPathMonitoring: Max 10 attempts reached. Allowing current path.");
-                            
+                            VehicleDebugLogger.Log(entity,
+                                $"TollboothPathMonitoring: Max {attempts.AttemptCount} attempts reached. Allowing current path.");
+
                             // Reset counter so vehicle can pathfind normally going forward
                             attempts.AttemptCount = 0;
                             attempts.LastValidatedElementCount = 0;
                             repathAttempts[i] = attempts;
                             continue;
+                        }
+                        
+                        // Skip re-validation if this exact path was already checked
+                        if (attempts.LastValidatedElementCount == pathElements.Length && attempts.AttemptCount > 0)
+                        {
+                            //VehicleDebugLogger.Log(entity,
+                            //    $"TollboothPathMonitoring: Already validated this path (length {pathElements.Length}). " +
+                            //    $"Current attempts: {attempts.AttemptCount}/10");
+                            //continue;
                         }
                     }
 

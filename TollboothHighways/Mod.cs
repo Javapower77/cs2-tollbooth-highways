@@ -77,7 +77,7 @@ namespace TollboothHighways
                 updateSystem.UpdateAt<TollboothPathMonitoringSystem>(SystemUpdatePhase.GameSimulation);
                 
                 // 4. Toll collection system (NEW - runs on main thread for debugging)
-                updateSystem.UpdateAt<TollCollectionSystem>(SystemUpdatePhase.GameSimulation);
+                //updateSystem.UpdateAt<TollCollectionSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 5. Selection system for toll booths
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
@@ -88,12 +88,13 @@ namespace TollboothHighways
 
                 // 7. UI systems (separate phases)
                 updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
-                updateSystem.UpdateAt<TollSettingsUISystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
-                
+
+                updateSystem.UpdateAt<TollSettingsUISystem>(SystemUpdatePhase.UIUpdate);
+
                 // Add the toll economy UI system
                 updateSystem.UpdateAt<TollEconomyUISystem>(SystemUpdatePhase.UIUpdate);
-                
+
                 // Make sure TollCollectionSystem updates before TollEconomyUISystem
                 updateSystem.UpdateBefore<TollCollectionSystem, TollEconomyUISystem>(SystemUpdatePhase.GameSimulation);
 
@@ -110,9 +111,9 @@ namespace TollboothHighways
                     LogUtil.Info($"Patched: {patchedMethod.DeclaringType?.FullName}.{patchedMethod.Name}");
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
-                LogUtil.Exception(ex);
+                LogUtil.Error($"Error loading the system phases - Stack trace: {ex.StackTrace}");
             }
         }
 
