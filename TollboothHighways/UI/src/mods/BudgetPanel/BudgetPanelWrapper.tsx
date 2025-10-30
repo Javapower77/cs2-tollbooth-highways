@@ -1,31 +1,31 @@
 import React from 'react';
 import { TollIncomeSection } from '../TollEconomyPanel/TollIncomeSection';
 
-interface BudgetPanelWrapperProps {
-    originalPanel: React.ComponentType<any>;
+interface BudgetPageWrapperProps {
+    originalPage: React.ComponentType<any>;
     [key: string]: any; // Allow any additional props
 }
 
 /**
- * Wrapper component that injects the TollIncomeSection into the Budget Panel
+ * Wrapper component that injects the TollIncomeSection into the Budget Page
  */
-export const BudgetPanelWrapper: React.FC<BudgetPanelWrapperProps> = ({ originalPanel: OriginalPanel, ...props }) => {
+export const BudgetPageWrapper: React.FC<BudgetPageWrapperProps> = ({ originalPage: OriginalPage, ...props }) => {
     return (
         <>
-            {/* Add toll income section at the top of the budget panel */}
+            {/* Add toll income section at the top of the budget page */}
             <TollIncomeSection />
             
-            {/* Render the original budget panel below */}
-            <OriginalPanel {...props} />
+            {/* Render the original budget page below */}
+            <OriginalPage {...props} />
         </>
     );
 };
 
 /**
- * Higher-order component that wraps the budget panel
+ * Higher-order component that wraps the budget page
  */
-export const createBudgetPanelWrapper = (BudgetPanel: React.ComponentType<any>) => {
+export const createBudgetPageWrapper = (BudgetPage: React.ComponentType<any>) => {
     return (props: any) => {
-        return <BudgetPanelWrapper originalPanel={BudgetPanel} {...props} />;
+        return <BudgetPageWrapper originalPage={BudgetPage} {...props} />;
     };
 };

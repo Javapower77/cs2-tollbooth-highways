@@ -23,7 +23,7 @@ export const TollIncomeSection: React.FC = () => {
 
     // Only show if there's toll income
     if (!hasTollIncome) {
-        return null;
+        //return null;
     }
 
     return (

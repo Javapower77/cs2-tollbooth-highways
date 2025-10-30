@@ -12,7 +12,7 @@ namespace TollboothHighways.Domain.Components
         /// Maximum number of repath attempts before allowing the vehicle through.
         /// After 10 attempts, we assume there's no alternative path available.
         /// </summary>
-        public const int MaxAttempts = 40;
+        public const int MaxAttempts = 400;
 
         /// <summary>
         /// Number of times this vehicle has attempted to repath around tollbooth restrictions.

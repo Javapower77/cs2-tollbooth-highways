@@ -3,13 +3,13 @@ import { MousePositionPanel } from "mods/mouse-position-panel";
 import { CS2VanillaUIResolver } from "mods/CS2VanillaUIResolver";
 import { TollboothSelectedInfoPanelComponent } from "mods/TollboothSelectedInfoPanel/TollBoothFields";
 import { TollIncomeSection } from "mods/TollEconomyPanel/TollIncomeSection";
-import { createBudgetPanelWrapper } from "mods/BudgetPanel/BudgetPanelWrapper";
+import { createBudgetPageWrapper } from "mods/BudgetPanel/BudgetPanelWrapper";
 
 const register: ModRegistrar = (moduleRegistry) => {
 
     CS2VanillaUIResolver.setRegistry(moduleRegistry);
 
-   // moduleRegistry.append('Game', MousePositionPanel);  
+    // moduleRegistry.append('Game', MousePositionPanel);  
     
     // Register tollbooth info panel
     moduleRegistry.extend(
@@ -18,11 +18,11 @@ const register: ModRegistrar = (moduleRegistry) => {
         TollboothSelectedInfoPanelComponent
     );
 
-    // Register toll income in economy panel - inject into the budget tab
+    // Register toll income in economy panel - inject into the budget page
     moduleRegistry.extend(
-        "game-ui/game/components/economy-panel/budget-panel/budget-panel.tsx", 
-        'BudgetPanel', 
-        createBudgetPanelWrapper
+        "game-ui/game/components/economy-panel/budget-page/budget-page.tsx", 
+        'BudgetPage', 
+        createBudgetPageWrapper
     );    
 }
 

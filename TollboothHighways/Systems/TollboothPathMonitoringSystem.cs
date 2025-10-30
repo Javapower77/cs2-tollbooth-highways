@@ -176,7 +176,7 @@ namespace TollboothHighways.Systems
                             // Reset counter so vehicle can pathfind normally going forward
                             attempts.AttemptCount = 0;
                             attempts.LastValidatedElementCount = 0;
-                            repathAttempts[i] = attempts;
+                            repathAttempts[i] = attempts;                         
                             continue;
                         }
                         
@@ -186,7 +186,7 @@ namespace TollboothHighways.Systems
                             //VehicleDebugLogger.Log(entity,
                             //    $"TollboothPathMonitoring: Already validated this path (length {pathElements.Length}). " +
                             //    $"Current attempts: {attempts.AttemptCount}/10");
-                            //continue;
+                            continue;
                         }
                     }
 
@@ -230,9 +230,9 @@ namespace TollboothHighways.Systems
                             violationLaneEntity = laneEntity;
                             violationRoadEntity = roadEntity;
 
-                            //VehicleDebugLogger.Log(entity,
-                            //    $"TollboothPathMonitoring: VIOLATION - {vehicleGroup} not allowed on lane {laneEntity.Index} " +
-                            //    $"(road {roadEntity.Index}, flags: {carLane.m_Flags})");
+                            VehicleDebugLogger.Log(entity,
+                                $"TollboothPathMonitoring: VIOLATION - {vehicleGroup} not allowed on lane {laneEntity.Index} " +
+                                $"(road {roadEntity.Index}, flags: {carLane.m_Flags})");
                             break;
                         }
                     }
@@ -243,10 +243,10 @@ namespace TollboothHighways.Systems
                         attempts.AttemptCount++;
                         attempts.LastValidatedElementCount = pathElements.Length;
 
-                        //VehicleDebugLogger.Log(entity,
-                        //    $"TollboothPathMonitoring: INVALIDATING path (attempt {attempts.AttemptCount}/10 per AGENTS.MD). " +
-                        //    $"Violation: lane {violationLaneEntity.Index}, road {violationRoadEntity.Index}. " +
-                        //    $"Vehicle type: {vehicleGroup}");
+                        VehicleDebugLogger.Log(entity,
+                            $"TollboothPathMonitoring: INVALIDATING path (attempt {attempts.AttemptCount}/10 per AGENTS.MD). " +
+                            $"Violation: lane {violationLaneEntity.Index}, road {violationRoadEntity.Index}. " +
+                            $"Vehicle type: {vehicleGroup}");
 
                         // Mark path obsolete to trigger repath
                         pathOwner.m_State |= PathFlags.Obsolete;
@@ -266,9 +266,9 @@ namespace TollboothHighways.Systems
                     {
                         // Only reset if vehicle found VALID path through tollbooth
                         // This means they successfully found a compatible tollbooth
-                        //VehicleDebugLogger.Log(entity,
-                        //    $"TollboothPathMonitoring: SUCCESS - Valid compatible tollbooth path found after {attempts.AttemptCount} attempts. " +
-                        //    $"Vehicle type: {vehicleGroup}. Resetting counter.");
+                        VehicleDebugLogger.Log(entity,
+                            $"TollboothPathMonitoring: SUCCESS - Valid compatible tollbooth path found after {attempts.AttemptCount} attempts. " +
+                            $"Vehicle type: {vehicleGroup}. Resetting counter.");
                         
                         attempts.AttemptCount = 0;
                         attempts.LastValidatedElementCount = 0;
@@ -277,10 +277,10 @@ namespace TollboothHighways.Systems
                     else if (!hasTollboothInPath && hasRepathAttempts && attempts.AttemptCount > 0)
                     {
                         // Path doesn't go through any tollbooth - also reset counter
-                        //VehicleDebugLogger.Log(entity,
-                        //    $"TollboothPathMonitoring: Path avoids all tollbooths after {attempts.AttemptCount} attempts. " +
-                        //    $"Vehicle type: {vehicleGroup}. Resetting counter.");
-                        
+                        VehicleDebugLogger.Log(entity,
+                            $"TollboothPathMonitoring: Path avoids all tollbooths after {attempts.AttemptCount} attempts. " +
+                            $"Vehicle type: {vehicleGroup}. Resetting counter.");
+
                         attempts.AttemptCount = 0;
                         attempts.LastValidatedElementCount = 0;
                         repathAttempts[i] = attempts;
