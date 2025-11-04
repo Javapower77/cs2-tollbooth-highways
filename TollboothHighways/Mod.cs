@@ -72,17 +72,18 @@ namespace TollboothHighways
 
                 // 2. Spawn tollbooth / toll road entities (early in simulation)
                 updateSystem.UpdateBefore<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
+      
+                // 3. Toll collection system (NEW - runs on main thread for debugging)
+                updateSystem.UpdateAt<TollCollectionSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 3. Lane restriction system
-                updateSystem.UpdateAt<TollboothPathfindCostSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAt<TollboothVehicleRestrictionSystem>(SystemUpdatePhase.GameSimulation);
-                        
-                // 4. Toll collection system (NEW - runs on main thread for debugging)
-                //updateSystem.UpdateAt<TollCollectionSystem>(SystemUpdatePhase.GameSimulation);
-
-                // 5. Selection system for toll booths
+                // 4. Selection system for toll booths
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
 
+                // 5. Register the dynamic lane blocking system
+                // MUST run before PathfindSetupSystem
+                updateSystem.UpdateAt<TollboothDynamicLaneBlockingSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateBefore<TollboothDynamicLaneBlockingSystem, Game.Simulation.PathfindSetupSystem>(SystemUpdatePhase.GameSimulation);
+                
                 // 6. StopVehiclesOnRoadSystem ordering:
                 updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
                 updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);
