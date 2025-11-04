@@ -33,6 +33,7 @@ namespace TollboothHighways.Systems
         private ComponentLookup<Game.Net.Edge> m_EdgeObjectData;
         private ComponentLookup<Game.Net.EndNodeGeometry> m_EndNodeGeometryData;
         private ComponentLookup<Game.Net.CarLane> m_CarLaneData;
+        private bool m_LogInitialized = false;
 
         // Additional lookups for TrafficLights integration
         private ComponentLookup<TrafficLights> m_TrafficLightsData;
@@ -361,7 +362,47 @@ namespace TollboothHighways.Systems
 
                 if (!hasValidTollType)
                     return;
-                    
+
+                if (m_EdgeObjectData.TryGetComponent(roadEntity, out var edgeData))
+                {
+                    if (SubLaneObjectData.TryGetBuffer(edgeData.m_Start, out DynamicBuffer<Game.Net.SubLane> subLanesBufferEdgeStart))
+                    {
+                        for (int i = 0; i < subLanesBufferEdgeStart.Length; i++)
+                        {
+                            var subLane = subLanesBufferEdgeStart[i];
+
+                            // Only process road lanes (skip pedestrian, track, etc.)
+                            if ((subLane.m_PathMethods & PathMethod.Road) == 0)
+                                continue;
+
+                            Entity laneEntity = subLane.m_SubLane;
+
+                            // Check if lane has CarLane component
+                            if (!m_CarLaneData.TryGetComponent(laneEntity, out var carLane))
+                                continue;
+
+                            // Store original flags for comparison
+                            var originalFlags = carLane.m_Flags;
+
+                            // Apply restriction flags (preserve existing flags using |=)
+                            carLane.m_Flags |= flagsToApply;
+
+                            // Only write if flags actually changed
+                            if (carLane.m_Flags != originalFlags)
+                            {
+                                m_CarLaneData[laneEntity] = carLane;
+                                LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Current CarLane flags: {originalFlags}, CarLane flags to apply: {flagsToApply}");
+                                LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Applied flags {m_CarLaneData[laneEntity].m_Flags} to EDGE START lane {laneEntity.Index} on tollbooth road {roadEntity.Index}");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        LogUtil.Warn($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - No SubLanes found for road {roadEntity.Index}");
+                    }
+                }
+
+
                 if (SubLaneObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Net.SubLane> subLanesBuffer))
                 {
                     for (int i = 0; i < subLanesBuffer.Length; i++)
@@ -390,7 +431,7 @@ namespace TollboothHighways.Systems
                         {
                             m_CarLaneData[laneEntity] = carLane;
                             LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Current CarLane flags: {originalFlags}, CarLane flags to apply: {flagsToApply}");
-                            LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Applied flags {m_CarLaneData[laneEntity].m_Flags} to lane {laneEntity.Index} on road {roadEntity.Index}");
+                            LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Applied flags {m_CarLaneData[laneEntity].m_Flags} to lane {laneEntity.Index} on tollbooth road {roadEntity.Index}");
                             appliedAnyFlags = true;
                         }
 
@@ -656,6 +697,26 @@ namespace TollboothHighways.Systems
             {
                 LogUtil.Error($"TollBoothSpawnSystem: Failed to reset statistics for tollbooth {tollBoothEntity.Index}. Error: {ex.Message}");
             }
+        }
+
+        private void EnsureLogger()
+        {
+            if (m_LogInitialized)
+            {
+                return;
+            }
+
+            try
+            {
+                VehicleDebugLogger.Init();
+                VehicleDebugLogger.LogOnce("=== TollboothPathMonitoringSystem logging started ===");
+            }
+            catch
+            {
+                // best-effort logging initialization
+            }
+
+            m_LogInitialized = true;
         }
     }
 }

@@ -400,5 +400,10 @@ namespace TollboothHighways.Utilities
             // Not a toll road, allow all vehicles
             return true;
         }
+
+        internal static bool IsVehicleAllowedOnTollRoad(Entity vehicleEntity, Entity roadEntity, ComponentLookup<TollRoadPrivateTransportData> tollRoadPrivateLookup, ComponentLookup<TollRoadTruckData> tollRoadTruckLookup, ComponentLookup<TollRoadPublicTransportData> tollRoadPublicLookup, ComponentLookup<TollRoadServiceVehiclesData> tollRoadServiceLookup, ComponentLookup<PersonalCar> personalCarLookup, ComponentLookup<DeliveryTruck> deliveryTruckLookup, ComponentLookup<PublicTransport> publicTransportLookup, ComponentLookup<Taxi> taxiLookup)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

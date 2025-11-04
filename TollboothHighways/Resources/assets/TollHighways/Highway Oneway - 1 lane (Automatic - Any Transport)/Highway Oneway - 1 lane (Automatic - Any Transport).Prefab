@@ -1612,7 +1612,7 @@
     "m_AggregateType": $fstrref:"UnityGUID:29d6188a9f3a1a142947c2c5e647f8ff",
     "m_StyleType": null,
     "m_InvertMode": 0,
-    "m_RoadType": 1,
+    "m_RoadType": 0,
     "m_SpeedLimit": 60,
     "m_ZoneBlock": null,
     "m_TrafficLights": false,

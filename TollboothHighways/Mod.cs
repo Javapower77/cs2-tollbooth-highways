@@ -73,9 +73,10 @@ namespace TollboothHighways
                 // 2. Spawn tollbooth / toll road entities (early in simulation)
                 updateSystem.UpdateBefore<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 3. Vehicle path monitoring system
-                updateSystem.UpdateAt<TollboothPathMonitoringSystem>(SystemUpdatePhase.GameSimulation);
-                
+                // 3. Lane restriction system
+                updateSystem.UpdateAt<TollboothPathfindCostSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAt<TollboothVehicleRestrictionSystem>(SystemUpdatePhase.GameSimulation);
+                        
                 // 4. Toll collection system (NEW - runs on main thread for debugging)
                 //updateSystem.UpdateAt<TollCollectionSystem>(SystemUpdatePhase.GameSimulation);
 
