@@ -49,7 +49,9 @@ namespace TollboothHighways.Systems
             AddBinding(m_IsPeakHoursBinding.Binding);
             AddBinding(m_CurrentHourBinding.Binding);
 
-            LogUtil.Info("TollSettingsUISystem: Created with toll settings bindings");
+            LogUtil.Info("TollSettingsUISystem: OnCreate() - Created with toll settings bindings");
+            LogUtil.Info($"TollSettingsUISystem: OnCreate() - isPeakHours: {m_IsPeakHoursBinding.Value}, currentHour: {m_CurrentHourBinding.Value}");
+            LogUtil.Info($"TollSettingsUISystem: OnCreate() - m_ModSettingsBinding: {m_ModSettingsBinding.Value}");            
         }
 
         protected override void OnUpdate()
@@ -61,9 +63,12 @@ namespace TollboothHighways.Systems
             // Update bindings using ValueBindingHelper
             m_IsPeakHoursBinding.Value = isPeakHours;
             m_CurrentHourBinding.Value = currentHour;
-            
+
             // Update mod settings data
             m_ModSettingsBinding.Value = GetModSettingsData();
+
+            //LogUtil.Info($"TollSettingsUISystem: OnUpdate() - isPeakHours: {isPeakHours}, currentHour: {currentHour}");
+            //LogUtil.Info($"TollSettingsUISystem: OnUpdate() - m_ModSettingsBinding: {m_ModSettingsBinding.Value}");
         }
         
         private TollSettingsData GetModSettingsData()
@@ -71,7 +76,7 @@ namespace TollboothHighways.Systems
             var settings = Mod.Settings;
             if (settings == null) 
             {
-                LogUtil.Warn("TollSettingsUISystem: ModSettings is null, returning default values");
+                LogUtil.Info("TollSettingsUISystem: GetModSettingsData() - ModSettings is null, returning default values");
                 return new TollSettingsData();
             }
             
@@ -142,7 +147,7 @@ namespace TollboothHighways.Systems
         protected override void OnDestroy()
         {
             base.OnDestroy();
-            LogUtil.Info("TollSettingsUISystem: Destroyed");
+            LogUtil.Info("TollSettingsUISystem: OnDestroy() - Destroyed");
         }
     }
     

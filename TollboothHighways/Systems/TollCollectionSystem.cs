@@ -20,8 +20,6 @@ namespace TollboothHighways.Systems
 {
     /// <summary>
     /// Monitors vehicles exiting toll roads (at Edge.m_End) and collects tolls.
-    /// Runs on main thread for debugging and logging capabilities.
-    /// Per AGENTS.MD: Updates TollBoothInsight and adds money to game economy.
     /// </summary>
     public partial class TollCollectionSystem : GameSystemBase
     {
@@ -123,7 +121,7 @@ namespace TollboothHighways.Systems
             // Get the toll economy UI system
             m_TollEconomyUISystem = World.GetOrCreateSystemManaged<TollEconomyUISystem>();
 
-            LogUtil.Info("TollCollectionSystem: Created - monitors vehicles at road exits per AGENTS.MD");
+            LogUtil.Info("TollCollectionSystem: OnCreate() - Monitors vehicles at road exits per AGENTS.MD");
         }
 
         protected override void OnUpdate()
@@ -157,6 +155,7 @@ namespace TollboothHighways.Systems
             // Process each toll road
             foreach (var roadEntity in tollRoads)
             {
+                LogUtil.Debug($"TollCollectionSystem: OnUpdate() - Processing toll road entity {roadEntity.Index} on frame: {currentFrame}");
                 ProcessTollRoad(roadEntity, currentFrame);
             }
             
@@ -170,11 +169,12 @@ namespace TollboothHighways.Systems
                 
             if (!tollRoadData.HasActiveTollbooth || tollRoadData.AssociatedTollbooth == Entity.Null)
                 return;
-                
+
             if (!m_EdgeLookup.TryGetComponent(roadEntity, out var edge))
                 return;
             
             // Monitor vehicles at the m_End of the road (per requirement)
+            LogUtil.Debug($"TollCollectionSystem: ProcessTollRoad() - Monitoring vehicles at end node {edge.m_End.Index} of road {roadEntity.Index} on frame: {currentFrame}");
             MonitorVehiclesAtEndNode(roadEntity, edge.m_End, tollRoadData.AssociatedTollbooth, currentFrame);
         }
 
@@ -182,7 +182,13 @@ namespace TollboothHighways.Systems
         {
             // Get lanes connected to the end node
             if (!m_SubLaneLookup.TryGetBuffer(endNode, out var subLanes))
+            {
+                LogUtil.Debug($"TollCollectionSystem: MonitorVehiclesAtEndNode() - No sublanes found for end node {endNode.Index}");
                 return;
+            }
+            
+            int vehiclesFoundThisFrame = 0;
+            int vehiclesProcessedThisFrame = 0;
             
             // Check each lane for vehicles
             for (int i = 0; i < subLanes.Length; i++)
@@ -199,19 +205,51 @@ namespace TollboothHighways.Systems
                     
                     if (EntityManager.HasComponent<Vehicle>(vehicleEntity))
                     {
+                        vehiclesFoundThisFrame++;
+                        LogUtil.Info($"TollCollectionSystem: MonitorVehiclesAtEndNode() - Vehicle #{vehiclesFoundThisFrame} entity {vehicleEntity.Index} detected at end node {endNode.Index} on frame {currentFrame}");
+                        
+                        // Track if this vehicle gets processed
+                        bool wasInDictionary = m_VehicleLastProcessedFrame.ContainsKey(vehicleEntity);
+                        uint lastProcessedFrame = wasInDictionary ? m_VehicleLastProcessedFrame[vehicleEntity] : 0;
+                        
+                        LogUtil.Info($"TollCollectionSystem: MonitorVehiclesAtEndNode() - Vehicle {vehicleEntity.Index} was in dictionary: {wasInDictionary}, last processed: {lastProcessedFrame}");
+                        
                         ProcessVehicleForToll(vehicleEntity, roadEntity, tollboothEntity, currentFrame);
+                        vehiclesProcessedThisFrame++;
                     }
                 }
+            }
+            
+            if (vehiclesFoundThisFrame > 0)
+            {
+                LogUtil.Info($"TollCollectionSystem: MonitorVehiclesAtEndNode() - Frame {currentFrame} summary: Found {vehiclesFoundThisFrame} vehicles, processed {vehiclesProcessedThisFrame}");
+                LogUtil.Info($"TollCollectionSystem: MonitorVehiclesAtEndNode() - Dictionary size after processing: {m_VehicleLastProcessedFrame.Count}");
             }
         }
 
         private void ProcessVehicleForToll(Entity vehicleEntity, Entity roadEntity, Entity tollboothEntity, uint currentFrame)
         {
+            LogUtil.Info($"TollCollectionSystem: ProcessVehicleForToll() - START processing vehicle {vehicleEntity.Index} on frame {currentFrame}");
+            
             // Check if vehicle was recently processed (cooldown)
             if (m_VehicleLastProcessedFrame.TryGetValue(vehicleEntity, out uint lastFrame))
             {
-                if (currentFrame - lastFrame < COOLDOWN_FRAMES)
+                uint frameDiff = currentFrame - lastFrame;
+                LogUtil.Info($"TollCollectionSystem: ProcessVehicleForToll() - Vehicle {vehicleEntity.Index} found in dictionary. Last frame: {lastFrame}, Current frame: {currentFrame}, Difference: {frameDiff}, Cooldown: {COOLDOWN_FRAMES}");
+                
+                if (frameDiff < COOLDOWN_FRAMES)
+                {
+                    LogUtil.Info($"TollCollectionSystem: ProcessVehicleForToll() - Vehicle {vehicleEntity.Index} SKIPPED due to cooldown");
                     return;
+                }
+                else
+                {
+                    LogUtil.Info($"TollCollectionSystem: ProcessVehicleForToll() - Vehicle {vehicleEntity.Index} cooldown expired, proceeding");
+                }
+            }
+            else
+            {
+                LogUtil.Info($"TollCollectionSystem: ProcessVehicleForToll() - Vehicle {vehicleEntity.Index} NOT in dictionary, first time processing");
             }
             
             // Get vehicle type
@@ -219,34 +257,37 @@ namespace TollboothHighways.Systems
             
             if (vehicleType == VehicleType.None)
             {
-                if (ModSettings.Instance?.EnableVehicleLogging == true)
-                    VehicleDebugLogger.Log(vehicleEntity, $"TollCollection: Unable to determine vehicle type");
+                LogUtil.Info($"TollCollectionSystem: ProcessVehicleForToll() - Unable to determine vehicle type for vehicle {vehicleEntity.Index}");
                 return;
             }
+            
+            LogUtil.Info($"TollCollectionSystem: ProcessVehicleForToll() - Vehicle {vehicleEntity.Index} identified as {vehicleType}");
             
             // Check if this vehicle type should be charged
             if (!ShouldChargeVehicle(vehicleType))
             {
-                if (ModSettings.Instance?.EnableVehicleLogging == true)
-                    VehicleDebugLogger.Log(vehicleEntity, $"TollCollection: {vehicleType} exempt from toll charges");
+                LogUtil.Info($"TollCollectionSystem: ProcessVehicleForToll() - {vehicleType} {vehicleEntity.Index} exempt from toll charges");
                 return;
             }
-            
+
             // Calculate toll amount based on settings and time
             float tollAmount = CalculateTollAmount(vehicleType, currentFrame);
+            LogUtil.Info($"TollCollectionSystem: ProcessVehicleForToll() - Calculated toll amount for {vehicleType} {vehicleEntity.Index} is ${tollAmount} on frame {currentFrame}");
             
             if (tollAmount <= 0)
             {
-                if (ModSettings.Instance?.EnableVehicleLogging == true)
-                    VehicleDebugLogger.Log(vehicleEntity, $"TollCollection: {vehicleType} toll amount is 0");
+                LogUtil.Info($"TollCollectionSystem: ProcessVehicleForToll() - {vehicleType} {vehicleEntity.Index} toll amount is 0");
                 return;
             }
             
             // Collect the toll
+            LogUtil.Info($"TollCollectionSystem: ProcessVehicleForToll() - COLLECTING toll for vehicle {vehicleEntity.Index}");
             CollectToll(vehicleEntity, tollboothEntity, vehicleType, tollAmount, currentFrame);
             
             // Update last processed frame
             m_VehicleLastProcessedFrame[vehicleEntity] = currentFrame;
+            LogUtil.Info($"TollCollectionSystem: ProcessVehicleForToll() - Vehicle {vehicleEntity.Index} added to dictionary with frame {currentFrame}");
+            LogUtil.Info($"TollCollectionSystem: ProcessVehicleForToll() - END processing vehicle {vehicleEntity.Index}");
         }
 
         private bool ShouldChargeVehicle(VehicleType vehicleType)
@@ -326,19 +367,18 @@ namespace TollboothHighways.Systems
                 
                 if (ModSettings.Instance?.EnableGeneralLogging == true)
                 {
-                    LogUtil.Info($"TollCollection: Collected ${tollAmount:F2} from {vehicleType} at tollbooth {tollboothEntity.Index}");
-                    LogUtil.Info($"TollCollection: Total revenue: ${insight.TotalRevenue:F2}, Total vehicles: {insight.TotalVehiclesPassed}");
+                    LogUtil.Info($"TollCollectionSystem: CollectToll() - Collected ${tollAmount:F2} from {vehicleType} at tollbooth {tollboothEntity.Index}");
+                    LogUtil.Info($"TollCollectionSystem: CollectToll() - Total revenue: ${insight.TotalRevenue:F2}, Total vehicles: {insight.TotalVehiclesPassed}");
                 }
                 
                 if (ModSettings.Instance?.EnableVehicleLogging == true)
                 {
-                    VehicleDebugLogger.Log(vehicleEntity, 
-                        $"TollCollection: Paid ${tollAmount:F2} toll as {vehicleType} at tollbooth {tollboothEntity.Index}");
+                    LogUtil.Info($"TollCollectionSystem: CollectToll() - Paid ${tollAmount:F2} toll as {vehicleType} at tollbooth {tollboothEntity.Index}");
                 }
             }
             else
             {
-                LogUtil.Warn($"TollCollection: TollBoothInsight component not found for tollbooth {tollboothEntity.Index}");
+                LogUtil.Info($"TollCollectionSystem: CollectToll() - TollBoothInsight component not found for tollbooth {tollboothEntity.Index}");
             }
         }
         
@@ -348,7 +388,7 @@ namespace TollboothHighways.Systems
             var cityEntities = m_CityQuery.ToEntityArray(Allocator.Temp);
             if (cityEntities.Length == 0)
             {
-                LogUtil.Warn("TollCollection: Unable to find city entity for adding money");
+                LogUtil.Info("TollCollectionSystem: AddMoneyToCity() - Unable to find city entity for adding money");
                 cityEntities.Dispose();
                 return;
             }
@@ -370,7 +410,7 @@ namespace TollboothHighways.Systems
                     // We need to find the income statistic index (typically index 12 for income)
                     // This corresponds to StatisticType.Income in the game's enum
                     const int INCOME_STAT_INDEX = 12;
-                    
+
                     if (cityStatsBuffer.Length > INCOME_STAT_INDEX)
                     {
                         var incomeStat = cityStatsBuffer[INCOME_STAT_INDEX];
@@ -378,11 +418,12 @@ namespace TollboothHighways.Systems
                         incomeStat.m_TotalValue += moneyAmount;
                         cityStatsBuffer[INCOME_STAT_INDEX] = incomeStat;
                     }
+                    LogUtil.Info($"TollCollectionSystem: AddMoneyToCity() - Updated city income statistic: {cityStatsBuffer[INCOME_STAT_INDEX]}");
                 }
                 
                 if (ModSettings.Instance?.EnableGeneralLogging == true)
                 {
-                    LogUtil.Info($"TollCollection: Added ${moneyAmount} to city treasury (Total: ${playerMoney.money})");
+                    LogUtil.Info($"TollCollectionSystem: AddMoneyToCity() - Added ${moneyAmount} to city treasury (Total: ${playerMoney.money})");
                 }
             }
         }
@@ -399,7 +440,7 @@ namespace TollboothHighways.Systems
                 // Report daily income to statistics
                 if (m_DailyTollIncome > 0)
                 {
-                    LogUtil.Info($"TollCollection: Daily toll income: ${m_DailyTollIncome:F2}");
+                    LogUtil.Info($"TollCollectionSystem: UpdateDailyStatistics()Daily toll income: ${m_DailyTollIncome:F2}");
                     
                     // You can add custom statistics tracking here if needed
                     // For now, the income is already added to the city's general income
@@ -428,6 +469,7 @@ namespace TollboothHighways.Systems
             {
                 m_VehicleLastProcessedFrame.Remove(vehicle);
             }
+            //LogUtil.Info("TollCollectionSystem: CleanupProcessedVehicles() - Cleaned up processed vehicles, current count: " + m_VehicleLastProcessedFrame.Count);
         }
         
         private void EnsureLogger()

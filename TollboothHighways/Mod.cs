@@ -78,12 +78,7 @@ namespace TollboothHighways
 
                 // 4. Selection system for toll booths
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
-
-                // 5. Register the dynamic lane blocking system
-                // MUST run before PathfindSetupSystem
-                updateSystem.UpdateAt<TollboothDynamicLaneBlockingSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateBefore<TollboothDynamicLaneBlockingSystem, Game.Simulation.PathfindSetupSystem>(SystemUpdatePhase.GameSimulation);
-                
+                 
                 // 6. StopVehiclesOnRoadSystem ordering:
                 updateSystem.UpdateAfter<StopVehiclesOnRoadSystem, Game.Simulation.CarNavigationSystem>(SystemUpdatePhase.GameSimulation);
                 updateSystem.UpdateBefore<StopVehiclesOnRoadSystem, Game.Simulation.CarMoveSystem>(SystemUpdatePhase.GameSimulation);

@@ -331,6 +331,16 @@ namespace TollboothHighways
             Instance = this;
         }
 
+        // Add this method to handle when settings are applied
+        public override void Apply()
+        {
+            base.Apply();
+            
+            // Force update the instance reference
+            Instance = this;
+        }
+
+        // Also override the OnSetDefaults to ensure Instance is updated
         public override void SetDefaults()
         {
             MotorcycleNonPeakPrice = 70f;
@@ -372,6 +382,9 @@ namespace TollboothHighways
             EnableGeneralLogging = false;
             EnableVehicleLogging = false;
             EnableJobsLogging = false;
+            
+            // Update instance after setting defaults
+            Instance = this;
         }
     }
 }

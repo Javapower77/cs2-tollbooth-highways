@@ -167,7 +167,7 @@ namespace TollboothHighways.Utilities
                 return VehicleType.PostVan;
             }
             // At the end check for the Passenger component, which indicates the vehicle type is a personal car or a motorcycle.            
-            else if (entityManager.HasComponent<MotorbikePrefabInfo>(vehicleEntity))
+            else if (entityManager.HasComponent<MotorbikePrefabData>(vehicleEntity))
             {
                 return VehicleType.Motorcycle;
             }

@@ -221,7 +221,7 @@ namespace TollboothHighways.Systems
                     {
                         currentFrame = m_SimulationSystem.frameIndex;
                     }
-                    catch (System.Exception ex) 
+                    catch 
                     {
                         currentFrame = 0;
                     }
@@ -520,27 +520,32 @@ namespace TollboothHighways.Systems
                 Entity roadEntity = ownerComponent.m_Owner;
 
                 // Try to find an existing TrafficLight sub-object and set its state to Red
-                if (SubObjectsObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Objects.SubObject> subObjectsBuffer))
+                if (!SubObjectsObjectData.TryGetBuffer(roadEntity, out DynamicBuffer<Game.Objects.SubObject> subObjectsBuffer))
                 {
-                    for (int i = 0; i < subObjectsBuffer.Length; i++)
+                    LogUtil.Info($"TollBoothSpawnSystem: \tInitializeTollRoadTrafficLight() - No SubObjects buffer found for road {roadEntity.Index}");
+                    return;
+                }
+
+                bool trafficLightFound = false;
+                for (int i = 0; i < subObjectsBuffer.Length; i++)
+                {
+                    Entity subObject = subObjectsBuffer[i].m_SubObject;
+                    if (EntityManager.HasComponent<Game.Objects.TrafficLight>(subObject))
                     {
-                        Entity subObject = subObjectsBuffer[i].m_SubObject;
-                        if (EntityManager.HasComponent<Game.Objects.TrafficLight>(subObject))
-                        {
-                            var trafficLight = EntityManager.GetComponentData<Game.Objects.TrafficLight>(subObject);
-                            trafficLight.m_State = Game.Objects.TrafficLightState.Red;
-                            trafficLight.m_GroupMask0 = 1;
-                            trafficLight.m_GroupMask1 = 0;
-                            EntityManager.SetComponentData(subObject, trafficLight);
-                            LogUtil.Info($"TollBoothSpawnSystem: \tInitializeTollRoadTrafficLight() - Set existing traffic light to Red for road {roadEntity.Index}");
-                            return;
-                        }
-                        else
-                        {
-                            LogUtil.Info($"TollBoothSpawnSystem: \tInitializeTollRoadTrafficLight() - No subobject with Traffic Lights was found");
-                            return;
-                        }
+                        var trafficLight = EntityManager.GetComponentData<Game.Objects.TrafficLight>(subObject);
+                        trafficLight.m_State = Game.Objects.TrafficLightState.Red;
+                        trafficLight.m_GroupMask0 = 1;
+                        trafficLight.m_GroupMask1 = 0;
+                        EntityManager.SetComponentData(subObject, trafficLight);
+                        LogUtil.Info($"TollBoothSpawnSystem: \tInitializeTollRoadTrafficLight() - Set existing traffic light to Red for road {roadEntity.Index}");
+                        trafficLightFound = true;
+                        break; // Exit loop after finding and processing the first traffic light
                     }
+                }
+                
+                if (!trafficLightFound)
+                {
+                    LogUtil.Info($"TollBoothSpawnSystem: \tInitializeTollRoadTrafficLight() - No subobject with Traffic Lights was found");
                 }
             }
             catch (System.Exception ex)
