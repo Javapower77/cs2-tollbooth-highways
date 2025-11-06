@@ -19,18 +19,23 @@ namespace TollboothHighways.Domain.Components
         /// </summary>
         public bool HasActiveTollbooth;
 
+        public int TollboothType;
+
         public void Deserialize<TReader>(TReader reader) where TReader : IReader
         {
             reader.Read(out Entity tollboothEntity);
             AssociatedTollbooth = tollboothEntity;
             reader.Read(out bool hasActiveTollbooth);
             HasActiveTollbooth = hasActiveTollbooth;    
+            reader.Read(out int tollboothType);
+            TollboothType = tollboothType;
         }
 
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
             writer.Write(AssociatedTollbooth);
             writer.Write(HasActiveTollbooth);
+            writer.Write(TollboothType);
         }
     }
 

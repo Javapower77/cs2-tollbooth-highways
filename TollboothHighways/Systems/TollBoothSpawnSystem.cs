@@ -12,6 +12,7 @@ using Game.Vehicles;
 using System;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using TollboothHighways.Domain.Components;
+using TollboothHighways.Domain.Enums;
 using TollboothHighways.Utilities;
 using Unity.Collections;
 using Unity.Entities;
@@ -471,6 +472,15 @@ namespace TollboothHighways.Systems
                         }
                         tollRoadData.AssociatedTollbooth = tollBoothEntity;
                         tollRoadData.HasActiveTollbooth = true;
+                        if (EntityManager.HasComponent<TollBoothManualData>(roadEntity))
+                        {
+                            tollRoadData.TollboothType = (int)TollboothType.Manual;
+                        }
+                        else
+                        {
+                            tollRoadData.TollboothType = (int)TollboothType.Automatic;  
+                        }
+
                         EntityManager.SetComponentData(roadEntity, tollRoadData);
                         LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssociateTollboothWithRoad() - Successfully updated association - tollbooth {tollBoothEntity.Index} with toll road {roadEntity.Index}");
                     }
@@ -484,10 +494,20 @@ namespace TollboothHighways.Systems
                 {
                     try
                     {
+                        var m_tollboothType = 0;
+                        if (EntityManager.HasComponent<TollBoothManualData>(roadEntity))
+                        {
+                            m_tollboothType = (int)TollboothType.Manual;
+                        }
+                        else
+                        {
+                            m_tollboothType = (int)TollboothType.Automatic;  
+                        }
                         var newTollRoadData = new TollRoadPrefabData
                         {
                             AssociatedTollbooth = tollBoothEntity,
-                            HasActiveTollbooth = true
+                            HasActiveTollbooth = true,
+                            TollboothType = m_tollboothType
                         };
                         EntityManager.AddComponentData(roadEntity, newTollRoadData);
                         LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssociateTollboothWithRoad() - Created new TollRoadPrefabData and associated tollbooth {tollBoothEntity.Index} with road {roadEntity.Index}");
