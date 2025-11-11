@@ -73,8 +73,12 @@ namespace TollboothHighways
                 // 2. Spawn tollbooth / toll road entities (early in simulation)
                 updateSystem.UpdateBefore<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                updateSystem.UpdateAt<TollboothPathfindBiasSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAfter<TollBoothSpawnSystem, TollboothPathfindBiasSystem>(SystemUpdatePhase.GameSimulation);
+                // TollboothPathfindBiasSystem should run BEFORE pathfinding setup
+                // This ensures penalties are in place before any vehicle calculates its path
+                // NOTE: I leave this here for reference, but not solution was found to make it work as intended.
+                //updateSystem.UpdateAt<TollboothPathfindBiasSystem>(SystemUpdatePhase.GameSimulation);
+                //updateSystem.UpdateBefore<TollboothPathfindBiasSystem, Game.Simulation.PathfindSetupSystem>(SystemUpdatePhase.GameSimulation);
+                //updateSystem.UpdateAfter<TollBoothSpawnSystem, TollboothPathfindBiasSystem>(SystemUpdatePhase.GameSimulation);
      
                 // 3. Toll collection system (NEW - runs on main thread for debugging)
                 updateSystem.UpdateAt<TollCollectionSystem>(SystemUpdatePhase.GameSimulation);

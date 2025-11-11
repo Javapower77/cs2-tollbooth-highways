@@ -153,7 +153,7 @@ namespace TollboothHighways.Systems
                 newTooltipGroup.children.Add(panelViewTollbooth);
 
                 AddGroup(newTooltipGroup);
-                LogUtil.Info($"TollBoothTooltipUISystem: Adding new tooltip group {tooltipPath} at position {tooltipPosition}");
+                //LogUtil.Info($"TollBoothTooltipUISystem: Adding new tooltip group {tooltipPath} at position {tooltipPosition}");
             }
         }
 

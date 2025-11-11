@@ -107,8 +107,9 @@ namespace TollboothHighways.Systems
         
         public override int GetUpdateInterval(SystemUpdatePhase phase)
         {
-            // Update every ~8 seconds (same as reference system)
-            return 262144 / 32;
+            // Update more frequently to ensure penalties are consistently applied
+            // Every ~2 seconds instead of ~8 seconds
+            return 262144 / 128;
         }
         
         // ----------------------- Update ------------------------
@@ -172,59 +173,133 @@ namespace TollboothHighways.Systems
             jobHandle.Complete();
             
             // Apply penalties to pathfinding data (main thread)
-            ApplyPenaltiesToPathfinding(tollPenaltyResults, config.EnableDebugLogging);
+            // IMPORTANT: Force refresh even if values haven't changed
+            ApplyPenaltiesToPathfinding(tollPenaltyResults, config.EnableDebugLogging, isPeakHours);
             
             // Dispose temp collections
             tollPenaltyResults.Dispose();
         }
         
-        private void ApplyPenaltiesToPathfinding(NativeList<TollPenaltyResult> results, bool enableLogging)
+        private void ApplyPenaltiesToPathfinding(NativeList<TollPenaltyResult> results, bool enableLogging, bool isPeakHours)
         {
             var pathfindQueue = World.GetOrCreateSystemManaged<PathfindQueueSystem>();
             var pathfindData = pathfindQueue.GetDataContainer(out var dependency);
             dependency.Complete();
             
             int appliedCount = 0;
+            int refreshedCount = 0;
+            
+            // IMPORTANT: We need to reapply ALL penalties, not just deltas
+            // This ensures they persist between our update intervals
             
             for (int i = 0; i < results.Length; i++)
             {
                 var result = results[i];
                 if (!TryGetEdge(pathfindData, result.LaneEntity, out var edgeId)) 
                     continue;
+
+                // Get current costs to preserve other channels
+                ref var costs = ref pathfindData.SetCosts(edgeId);
+                LogUtil.Info($"TollboothPathfindBiasSystem: Applying penalties to lane {result.LaneEntity} - CurrentCostY: {costs.m_Value.y}, NewPenaltySec: {result.PenaltySec}, DensityAdd: {result.DensityAdd}");
                 
-                // Apply behavior-time penalty (delta-based to prevent stacking)
-                float previousPenalty = m_PreviousTollPenaltySec.TryGetValue(result.LaneEntity, out var p) ? p : 0f;
-                float deltaPenalty = result.PenaltySec - previousPenalty;
-                
-                if (math.abs(deltaPenalty) > 0.01f)
+                // Store the base cost if this is our first time seeing this lane
+                if (!m_PreviousTollPenaltySec.ContainsKey(result.LaneEntity))
                 {
-                    ref var costs = ref pathfindData.SetCosts(edgeId);
-                    costs.m_Value.y += deltaPenalty; // y = behavior-time channel
+                    // Store the original y value before we modify it
+                    m_PreviousTollPenaltySec[result.LaneEntity] = 0f;
+                }
+
+                // Apply the FULL penalty value, not delta
+                // This ensures the penalty persists even between our updates
+                float currentPenalty = m_PreviousTollPenaltySec[result.LaneEntity];
+                LogUtil.Info($"TollboothPathfindBiasSystem: CurrentPenalty for lane {result.LaneEntity} is {currentPenalty} sec.");
+                
+                // Only update if the penalty has changed
+                if (math.abs(result.PenaltySec - currentPenalty) > 0.01f)
+                {
+                    // Remove old penalty and add new one
+                    costs.m_Value.y = costs.m_Value.y - currentPenalty + result.PenaltySec;
                     m_PreviousTollPenaltySec[result.LaneEntity] = result.PenaltySec;
                     appliedCount++;
+                    LogUtil.Info($"TollboothPathfindBiasSystem: Updated penalty for lane {result.LaneEntity} to {result.PenaltySec} sec.");
                 }
-                
-                // Apply density modifier (makes road appear congested)
-                float previousDensity = m_PreviousDensityAdd.TryGetValue(result.LaneEntity, out var d) ? d : 0f;
-                float deltaDensity = result.DensityAdd - previousDensity;
-                
-                if (math.abs(deltaDensity) > 0.001f)
+                else
                 {
-                    ref float density = ref pathfindData.SetDensity(edgeId);
-                    density += deltaDensity;
+                    // Even if penalty hasn't changed, we need to ensure it's still applied
+                    // (in case the pathfinding system reset the costs)
+                    costs.m_Value.y = math.max(costs.m_Value.y, result.PenaltySec);
+                    refreshedCount++;
+                    LogUtil.Info($"TollboothPathfindBiasSystem: Refreshed penalty for lane {result.LaneEntity} to ensure it remains at {result.PenaltySec} sec.");
+                }
+                
+                // Apply density modifier
+                if (!m_PreviousDensityAdd.ContainsKey(result.LaneEntity))
+                {
+                    m_PreviousDensityAdd[result.LaneEntity] = 0f;
+                }
+                
+                float currentDensity = m_PreviousDensityAdd[result.LaneEntity];
+                ref float density = ref pathfindData.SetDensity(edgeId);
+                LogUtil.Info($"TollboothPathfindBiasSystem: CurrentDensity for lane {result.LaneEntity} is {currentDensity}.");
+
+                if (math.abs(result.DensityAdd - currentDensity) > 0.001f)
+                {
+                    // Update density
+                    density = density - currentDensity + result.DensityAdd;
                     m_PreviousDensityAdd[result.LaneEntity] = result.DensityAdd;
+                    LogUtil.Info($"TollboothPathfindBiasSystem: Updated density for lane {result.LaneEntity} to {result.DensityAdd}.");
+                }
+                else
+                {
+                    // Ensure density is maintained
+                    density = math.max(density, result.DensityAdd);
+                    LogUtil.Info($"TollboothPathfindBiasSystem: Refreshed density for lane {result.LaneEntity} to ensure it remains at {result.DensityAdd}.");
                 }
             }
             
-            if (appliedCount > 0 && enableLogging)
+            // Clean up stale entries from cache (toll roads that no longer exist)
+            CleanupStaleEntries(results);
+            
+            if (enableLogging && (appliedCount > 0 || refreshedCount > 0))
             {
-                LogUtil.Info($"TollboothPathfindBiasSystem: Applied penalties to {appliedCount} toll lanes");
+                LogUtil.Info($"TollboothPathfindBiasSystem: Applied {appliedCount} new penalties, refreshed {refreshedCount} existing penalties (Peak hours: {isPeakHours})");
             }
             
-            // Notify pathfinding system of changes
+            // CRITICAL: Always notify pathfinding system to ensure our changes are picked up
             pathfindQueue.AddDataReader(default);
         }
         
+        private void CleanupStaleEntries(NativeList<TollPenaltyResult> currentResults)
+        {
+            LogUtil.Info("TollboothPathfindBiasSystem: Cleaning up stale entries from penalty cache.");
+            // Build a set of current lane entities
+            var currentLanes = new NativeHashSet<Entity>(currentResults.Length, Allocator.Temp);
+            for (int i = 0; i < currentResults.Length; i++)
+            {
+                currentLanes.Add(currentResults[i].LaneEntity);
+            }
+            
+            // Remove entries from cache that are no longer toll lanes
+            var keysToRemove = new NativeList<Entity>(Allocator.Temp);
+            
+            foreach (var kvp in m_PreviousTollPenaltySec)
+            {
+                if (!currentLanes.Contains(kvp.Key))
+                {
+                    keysToRemove.Add(kvp.Key);
+                }
+            }
+            
+            for (int i = 0; i < keysToRemove.Length; i++)
+            {
+                m_PreviousTollPenaltySec.Remove(keysToRemove[i]);
+                m_PreviousDensityAdd.Remove(keysToRemove[i]);
+            }
+            
+            currentLanes.Dispose();
+            keysToRemove.Dispose();
+        }
+
         private static bool TryGetEdge(NativePathfindData data, Entity owner, out EdgeID edgeId)
         {
             if (data.GetEdge(owner, out edgeId)) return true;
@@ -294,6 +369,7 @@ namespace TollboothHighways.Systems
                         penaltySec += IncompatiblePenaltySec * 0.5f; // Partial penalty for mixed lanes
                     }
                     densityAdd += PeakHourDensityAdd; // Add peak hour congestion
+                    LogUtil.Info($"TollboothPathfindBiasSystem: Private transport toll - applied penalties on lane {laneEntity}");
                 }
                 else if (TruckLookup.HasComponent(roadEntity))
                 {
@@ -302,12 +378,14 @@ namespace TollboothHighways.Systems
                     {
                         penaltySec += IncompatiblePenaltySec;
                         densityAdd += IncompatibleDensityAdd;
+                        LogUtil.Info($"TollboothPathfindBiasSystem: Truck-only toll - applied penalties on lane {laneEntity}");
                     }
                     else
                     {
                         // Correct vehicle type, add peak hour bias
                         penaltySec += PeakHourBiasSec;
                         densityAdd += PeakHourDensityAdd;
+                        LogUtil.Info($"TollboothPathfindBiasSystem: Truck-only toll - applied peak hour bias on lane {laneEntity}");
                     }
                 }
                 else if (PublicTransportLookup.HasComponent(roadEntity))
@@ -317,11 +395,13 @@ namespace TollboothHighways.Systems
                     {
                         penaltySec += IncompatiblePenaltySec;
                         densityAdd += IncompatibleDensityAdd;
+                        LogUtil.Info($"TollboothPathfindBiasSystem: Public transport toll - applied penalties on lane {laneEntity}");
                     }
                     else
                     {
                         // Public vehicles get slight bonus
                         penaltySec += ExpressLaneBonusSec;
+                        LogUtil.Info($"TollboothPathfindBiasSystem: Public transport toll - applied express lane bonus on lane {laneEntity}");
                     }
                 }
                 else if (ServiceVehiclesLookup.HasComponent(roadEntity))
@@ -329,6 +409,7 @@ namespace TollboothHighways.Systems
                     // Service vehicles - apply moderate penalty to non-service
                     penaltySec += PeakHourBiasSec * 2f; // Double peak bias for non-service
                     densityAdd += PeakHourDensityAdd;
+                    LogUtil.Info($"TollboothPathfindBiasSystem: Service vehicles toll - applied penalties on lane {laneEntity}");
                 }
                 
                 // Check tollbooth type for additional modifiers
@@ -336,12 +417,14 @@ namespace TollboothHighways.Systems
                 {
                     // Express lanes get speed bonus
                     penaltySec += ExpressLaneBonusSec;
+                    LogUtil.Info($"TollboothPathfindBiasSystem: Automatic tollbooth - applied express lane bonus on lane {laneEntity}");
                 }
                 else if (tollRoadData.TollboothType == (int)TollboothType.Manual)
                 {
                     // Manual tollbooths add delay
                     penaltySec += 10f; // 10 second delay for manual processing
                     densityAdd += 0.5f; // Appears more congested
+                    LogUtil.Info($"TollboothPathfindBiasSystem: Manual tollbooth - applied delay on lane {laneEntity}");
                 }
                 
                 // Only write results if there are penalties to apply
@@ -353,6 +436,7 @@ namespace TollboothHighways.Systems
                         PenaltySec = penaltySec,
                         DensityAdd = densityAdd
                     });
+                    LogUtil.Info($"TollboothPathfindBiasSystem: Calculated penalties for lane {laneEntity} - PenaltySec: {penaltySec}, DensityAdd: {densityAdd}");
                 }
             }
         }
