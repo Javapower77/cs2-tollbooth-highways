@@ -13,11 +13,7 @@ Having specific type of Vehicles go through only a specific Tollbooth Road using
 ## Tollbooth road exclusive for specific vechile type
 
 - For the logic of having specific vehicle type with a specific tollbooth road type take this in consideration
-  - Set `CarLaneFlags` in the tollbooth road lane acording the following
-    - `CarLaneFlags.ForbidHeavyTraffic` -> Private Transport: Block heavy vehicles (trucks) for allowing only PersonalCar vehicles.
-    - `CarLaneFlags.ForbidTransitTraffic` -> Trucks Only: Block transit traffic (private cars, buses) for allowing only DeliveryTruck vehicles.
-    - `CarLaneFlags.PublicOnly` -> Public Transport Only: Allow only public transport vehicles for allowing only Buses and Taxis vehicles.
-- `TollBoothSpawnSystem` handles setting the appropriate `CarLaneFlags` for toll roads based on their vehicle type restrictions when a new type of toll is spawned in the game.
+  
 
 ## Payment and Economy
 

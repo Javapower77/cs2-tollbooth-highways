@@ -336,6 +336,7 @@ namespace TollboothHighways.Utilities
             return util.GetVehicleType(e, em);
         }
 
+/*
         public static CarLaneFlags GetBlockingFlagsForVehicleType(VehicleType vehicleType)
         {
             VehicleGroup vehicleGroup = VehiclesUtil.GetVehicleGroupBurstCompatible(vehicleType);
@@ -358,7 +359,7 @@ namespace TollboothHighways.Utilities
                     return CarLaneFlags.Forbidden | CarLaneFlags.Unsafe;
             }
         }
-
+*/
         /// <summary>
         /// Checks if a vehicle type is allowed to use a specific toll road based on its tollbooth type.
         /// </summary>

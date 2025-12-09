@@ -5,7 +5,7 @@ VisualStudioVersion = 17.14.36310.24
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TollboothHighways", "TollboothHighways\TollboothHighways.csproj", "{6370C6CE-8572-4BCA-800A-944923E57DA5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game", "..\..\ModsOtherAuthors\Base Game-1.3.6f1\Game.csproj", "{851493F4-5E90-6E4D-3E81-3706CC3442C4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game", "..\..\ModsOtherAuthors\Base Game-1.5.2f1\Game.csproj", "{851493F4-5E90-6E4D-3E81-3706CC3442C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

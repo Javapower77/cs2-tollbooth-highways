@@ -283,7 +283,7 @@ namespace TollboothHighways.Systems
                 return "Default Toll Plaza";
             }
         }
-
+        
         private void SetTollboothComponents(Entity tollBoothEntity, ref TollBoothPrefabData tollBoothData)
         {
             try
@@ -304,8 +304,8 @@ namespace TollboothHighways.Systems
                     LogUtil.Info($"TollBoothSpawnSystem: \t\tSetTollboothComponents() - [STEP 1a] - Associating tollbooth {tollBoothEntity.Index} with road {ownerComponent.m_Owner.Index}");
                     AssociateTollboothWithRoad(tollBoothEntity, ownerComponent.m_Owner);
 
-                    LogUtil.Info($"TollBoothSpawnSystem: \t\tSetTollboothComponents() - [STEP 1b] - Assigning car lane flags to tollbooth road {ownerComponent.m_Owner.Index}");
-                    AssignCarLaneFlagsToTollboothRoad(ownerComponent.m_Owner);
+                    //LogUtil.Info($"TollBoothSpawnSystem: \t\tSetTollboothComponents() - [STEP 1b] - Assigning car lane flags to tollbooth road {ownerComponent.m_Owner.Index}");
+                    //AssignCarLaneFlagsToTollboothRoad(ownerComponent.m_Owner);
                 }
                 else
                 {
@@ -319,7 +319,8 @@ namespace TollboothHighways.Systems
                 throw;
             }
         }
-
+        
+        /*
         private void AssignCarLaneFlagsToTollboothRoad(Entity roadEntity)
         {
             try
@@ -456,7 +457,8 @@ namespace TollboothHighways.Systems
                 LogUtil.Error($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Stack trace: {ex.StackTrace}");
             }
         }
-
+        */
+        
         private void AssociateTollboothWithRoad(Entity tollBoothEntity, Entity roadEntity)
         {
             try

@@ -79,7 +79,9 @@ namespace TollboothHighways
                 //updateSystem.UpdateAt<TollboothPathfindBiasSystem>(SystemUpdatePhase.GameSimulation);
                 //updateSystem.UpdateBefore<TollboothPathfindBiasSystem, Game.Simulation.PathfindSetupSystem>(SystemUpdatePhase.GameSimulation);
                 //updateSystem.UpdateAfter<TollBoothSpawnSystem, TollboothPathfindBiasSystem>(SystemUpdatePhase.GameSimulation);
-     
+                updateSystem.UpdateAt<TollboothPathValidationSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAfter<TollboothPathValidationSystem, Game.Simulation.PathfindSetupSystem>(SystemUpdatePhase.GameSimulation);
+  
                 // 3. Toll collection system (NEW - runs on main thread for debugging)
                 updateSystem.UpdateAt<TollCollectionSystem>(SystemUpdatePhase.GameSimulation);
 
