@@ -50,13 +50,13 @@ namespace TollboothHighways
 
         internal const string LogSection = "Log Settings";
         [SettingsUISection(GeneralTab, LogSection)]
-        public bool EnableGeneralLogging { get; set; } = false;
+        public bool EnableGeneralLogging { get; set; }
 
         [SettingsUISection(GeneralTab, LogSection)]
-        public bool EnableJobsLogging { get; set; } = false;
+        public bool EnableJobsLogging { get; set; }
 
         [SettingsUISection(GeneralTab, LogSection)]
-        public bool EnableVehicleLogging { get; set; } = false;
+        public bool EnableVehicleLogging { get; set; }
 
         [SettingsUIButton]
         [SettingsUIConfirmation]
@@ -74,86 +74,86 @@ namespace TollboothHighways
         internal const string PrivateTransportPeakSection = "PrivateTransport";
         [SettingsUISection(PeakTab, PrivateTransportPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
-        public float MotorcyclePeakPrice { get; set; } = 100f;
+        public float MotorcyclePeakPrice { get; set; }
 
         [SettingsUISection(PeakTab, PrivateTransportPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
-        public float PrivateCarPeakPrice { get; set; } = 200f;
+        public float PrivateCarPeakPrice { get; set; }
 
         [SettingsUISection(PeakTab, PrivateTransportPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
-        public float PrivateCarWithTrailerPeakPrice { get; set; } = 250f;
+        public float PrivateCarWithTrailerPeakPrice { get; set; }
 
         internal const string TruckPeakSection = "TruckPeakSection";
         [SettingsUISection(PeakTab, TruckPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
-        public float TruckPeakPrice { get; set; } = 500f;
+        public float TruckPeakPrice { get; set; }
 
         [SettingsUISection(PeakTab, TruckPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
-        public float TruckWithTrailerPeakPrice { get; set; } = 700f;
+        public float TruckWithTrailerPeakPrice { get; set; }
 
         internal const string PublicTransportPeakSection = "PublicTransportPeakSection";
         [SettingsUISection(PeakTab, PublicTransportPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargePublicVehicles))]
-        public float BusPeakPrice { get; set; } = 150f;
+        public float BusPeakPrice { get; set; }
 
         [SettingsUISection(PeakTab, PublicTransportPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargePublicVehicles))]
-        public float TaxiPeakPrice { get; set; } = 110f;
+        public float TaxiPeakPrice { get; set; }
 
         internal const string ServiceVehiclesPeakSection = "ServiceVehiclesPeakSection";
         [SettingsUISection(PeakTab, ServiceVehiclesPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float ParkMaintenancePeakPrice { get; set; } = 200f;
+        public float ParkMaintenancePeakPrice { get; set; }
 
         [SettingsUISection(PeakTab, ServiceVehiclesPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float RoadMaintenancePeakPrice { get; set; } = 200f;
+        public float RoadMaintenancePeakPrice { get; set; }
 
         [SettingsUISection(PeakTab, ServiceVehiclesPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float AmbulancePeakPrice { get; set; } = 200f;
+        public float AmbulancePeakPrice { get; set; }
 
         [SettingsUISection(PeakTab, ServiceVehiclesPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float EvacuatingTransportPeakPrice { get; set; } = 200f;
+        public float EvacuatingTransportPeakPrice { get; set; }
 
         [SettingsUISection(PeakTab, ServiceVehiclesPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float FireEnginePeakPrice { get; set; } = 200f;
+        public float FireEnginePeakPrice { get; set; }
         
         [SettingsUISection(PeakTab, ServiceVehiclesPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float GarbageTruckPeakPrice { get; set; } = 200f;
+        public float GarbageTruckPeakPrice { get; set; }
 
         [SettingsUISection(PeakTab, ServiceVehiclesPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float HearsePeakPrice { get; set; } = 200f;
+        public float HearsePeakPrice { get; set; }
 
         [SettingsUISection(PeakTab, ServiceVehiclesPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float PoliceCarPeakPrice { get; set; } = 200f;
+        public float PoliceCarPeakPrice { get; set; }
 
         [SettingsUISection(PeakTab, ServiceVehiclesPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float PostVanPeakPrice { get; set; } = 200f;
+        public float PostVanPeakPrice { get; set; }
 
         [SettingsUISection(PeakTab, ServiceVehiclesPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float PrisonerTransportPeakPrice { get; set; } = 200f;
+        public float PrisonerTransportPeakPrice { get; set; }
         
 
 
@@ -162,89 +162,85 @@ namespace TollboothHighways
         internal const string PrivateTransportNonPeakSection = "PrivateTransportNonPeakSection";
         [SettingsUISection(NonPeakTab, PrivateTransportNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
-        public float MotorcycleNonPeakPrice { get; set; } = 70f;
+        public float MotorcycleNonPeakPrice { get; set; }
 
         [SettingsUISection(NonPeakTab, PrivateTransportNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
-        public float PrivateCarNonPeakPrice { get; set; } = 140f;
-
+        public float PrivateCarNonPeakPrice { get; set; }
         [SettingsUISection(NonPeakTab, PrivateTransportNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
-        public float PrivateCarWithTrailerNonPeakPrice { get; set; } = 190f;
+        public float PrivateCarWithTrailerNonPeakPrice { get; set; }
 
         internal const string TruckNonPeakSection = "TruckNonPeakSection";
         [SettingsUISection(NonPeakTab, TruckNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
-        public float TruckNonPeakPrice { get; set; } = 400f;
+        public float TruckNonPeakPrice { get; set; }
 
         [SettingsUISection(NonPeakTab, TruckNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
-        public float TruckWithTrailerNonPeakPrice { get; set; } = 500f;
+        public float TruckWithTrailerNonPeakPrice { get; set; }
 
         internal const string PublicTransportNonPeakSection = "PublicTransportNonPeakSection";
         [SettingsUISection(NonPeakTab, PublicTransportNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargePublicVehicles))]
-        public float BusNonPeakPrice { get; set; } = 100f;
+        public float BusNonPeakPrice { get; set; }
 
         [SettingsUISection(NonPeakTab, PublicTransportNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargePublicVehicles))]
-        public float TaxiNonPeakPrice { get; set; } = 50f;
+        public float TaxiNonPeakPrice { get; set; }
 
         internal const string ServiceVehicleNonPeakSection = "ServiceVehicleNonPeakSection";
         [SettingsUISection(NonPeakTab, ServiceVehicleNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float ParkMaintenanceNonPeakPrice { get; set; } = 100f;
+        public float ParkMaintenanceNonPeakPrice { get; set; }
 
         [SettingsUISection(NonPeakTab, ServiceVehicleNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float RoadMaintenanceNonPeakPrice { get; set; } = 100f;
+        public float RoadMaintenanceNonPeakPrice { get; set; }
 
         [SettingsUISection(NonPeakTab, ServiceVehicleNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float AmbulanceNonPeakPrice { get; set; } = 100f;
+        public float AmbulanceNonPeakPrice { get; set; }
 
         [SettingsUISection(NonPeakTab, ServiceVehicleNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float EvacuatingTransportNonPeakPrice { get; set; } = 100f;
+        public float EvacuatingTransportNonPeakPrice { get; set; }
 
         [SettingsUISection(NonPeakTab, ServiceVehicleNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float FireEngineNonPeakPrice { get; set; } = 100f;
+        public float FireEngineNonPeakPrice { get; set; }
 
         [SettingsUISection(NonPeakTab, ServiceVehicleNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float GarbageTruckNonPeakPrice { get; set; } = 100f;
+        public float GarbageTruckNonPeakPrice { get; set; }
 
         [SettingsUISection(NonPeakTab, ServiceVehicleNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float HearseNonPeakPrice { get; set; } = 100f;
+        public float HearseNonPeakPrice { get; set; }
 
         [SettingsUISection(NonPeakTab, ServiceVehicleNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float PoliceCarNonPeakPrice { get; set; } =  100f;
+        public float PoliceCarNonPeakPrice { get; set; }
 
         [SettingsUISection(NonPeakTab, ServiceVehicleNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float PostVanNonPeakPrice { get; set; } = 100f;
+        public float PostVanNonPeakPrice { get; set; }
 
         [SettingsUISection(NonPeakTab, ServiceVehicleNonPeakSection)]
         [SettingsUISlider(min = 0, max = 1000, step = 10, unit = Unit.kMoney)]
         [SettingsUIDisableByCondition(typeof(ModSettings), nameof(ChargeServiceVehicles))]
-        public float PrisonerTransportNonPeakPrice { get; set; } = 100f;
-
-
-
+        public float PrisonerTransportNonPeakPrice { get; set; }
 
         // Sections from the Settings UI
         internal const string AboutSection = "About";

@@ -307,111 +307,111 @@ export const TollboothMainPanelComponent = () => {
             'PersonalCar': {
                 name: 'Personal Car',
                 icon: Car01Src,
-                tollPrice: isPeakHours ? modSettings.privateCarPeakPrice : modSettings.privateCarNonPeakPrice
+                tollPrice: isPeakHours ? modSettings.PrivateCarPeakPrice : modSettings.PrivateCarNonPeakPrice
             },
             'PersonalCarWithTrailer': {
                 name: 'Car with Trailer',
                 icon: CarTrailer01Src,
-                tollPrice: isPeakHours ? modSettings.privateCarWithTrailerPeakPrice : modSettings.privateCarWithTrailerNonPeakPrice
+                tollPrice: isPeakHours ? modSettings.PrivateCarWithTrailerPeakPrice : modSettings.PrivateCarWithTrailerNonPeakPrice
             },
             'Truck': {
                 name: 'Truck',
                 icon: EU_TruckTractor01Src,
-                tollPrice: isPeakHours ? modSettings.truckPeakPrice : modSettings.truckNonPeakPrice
+                tollPrice: isPeakHours ? modSettings.TruckPeakPrice : modSettings.TruckNonPeakPrice
             },
             'TruckWithTrailer': {
                 name: 'Truck with Trailer',
                 icon: TruckTrailer01Src,
-                tollPrice: isPeakHours ? modSettings.truckWithTrailerPeakPrice : modSettings.truckWithTrailerNonPeakPrice
+                tollPrice: isPeakHours ? modSettings.TruckWithTrailerPeakPrice : modSettings.TruckWithTrailerNonPeakPrice
             },
             'Bus': {
                 name: 'Bus',
                 icon: Bus01Src,
-                tollPrice: modSettings.chargePublicVehicles 
-                    ? (isPeakHours ? modSettings.busPeakPrice : modSettings.busNonPeakPrice)
+                tollPrice: modSettings.ChargePublicVehicles 
+                    ? (isPeakHours ? modSettings.BusPeakPrice : modSettings.BusNonPeakPrice)
                     : 0
             },
             'Taxi': {
                 name: 'Taxi',
                 icon: Taxi01Src,
-                tollPrice: modSettings.chargePublicVehicles
-                    ? (isPeakHours ? modSettings.taxiPeakPrice : modSettings.taxiNonPeakPrice)
+                tollPrice: modSettings.ChargePublicVehicles
+                    ? (isPeakHours ? modSettings.TaxiPeakPrice : modSettings.TaxiNonPeakPrice)
                     : 0
             },
             'ParkMaintenance': {
                 name: 'Park Maintenance',
                 icon: ParkMaintenanceVehicle01Src,
-                tollPrice: modSettings.chargeServiceVehicles
-                    ? (isPeakHours ? modSettings.parkMaintenancePeakPrice : modSettings.parkMaintenanceNonPeakPrice)
+                tollPrice: modSettings.ChargePublicVehicles
+                    ? (isPeakHours ? modSettings.ParkMaintenancePeakPrice : modSettings.ParkMaintenanceNonPeakPrice)
                     : 0
             },
             'RoadMaintenance': {
                 name: 'Road Maintenance',
                 icon: RoadMaintenanceVehicle01Src,
-                tollPrice: modSettings.chargeServiceVehicles
-                    ? (isPeakHours ? modSettings.roadMaintenancePeakPrice : modSettings.roadMaintenanceNonPeakPrice)
+                tollPrice: modSettings.ChargePublicVehicles
+                    ? (isPeakHours ? modSettings.RoadMaintenancePeakPrice : modSettings.RoadMaintenanceNonPeakPrice)
                     : 0
             },
             'Ambulance': {
                 name: 'Ambulance',
                 icon: EU_Ambulance01Src,
-                tollPrice: modSettings.chargeServiceVehicles
-                    ? (isPeakHours ? modSettings.ambulancePeakPrice : modSettings.ambulanceNonPeakPrice)
+                tollPrice: modSettings.ChargePublicVehicles
+                    ? (isPeakHours ? modSettings.AmbulancePeakPrice : modSettings.AmbulanceNonPeakPrice)
                     : 0
             },
             'EvacuatingTransport': {
                 name: 'Evacuation Transport',
                 icon: Bus02Src,
-                tollPrice: modSettings.chargeServiceVehicles
-                    ? (isPeakHours ? modSettings.evacuatingTransportPeakPrice : modSettings.evacuatingTransportNonPeakPrice)
+                tollPrice: modSettings.ChargePublicVehicles
+                    ? (isPeakHours ? modSettings.EvacuatingTransportPeakPrice : modSettings.EvacuatingTransportNonPeakPrice)
                     : 0
             },
             'FireEngine': {
                 name: 'Fire Engine',
                 icon: EU_FireTruck01Src,
-                tollPrice: modSettings.chargeServiceVehicles
-                    ? (isPeakHours ? modSettings.fireEnginePeakPrice : modSettings.fireEngineNonPeakPrice)
+                tollPrice: modSettings.ChargePublicVehicles
+                    ? (isPeakHours ? modSettings.FireEnginePeakPrice : modSettings.FireEngineNonPeakPrice)
                     : 0
             },
             'GarbageTruck': {
                 name: 'Garbage Truck',
                 icon: EU_GarbageTruck01Src,
-                tollPrice: modSettings.chargeServiceVehicles
-                    ? (isPeakHours ? modSettings.garbageTruckPeakPrice : modSettings.garbageTruckNonPeakPrice)
+                tollPrice: modSettings.ChargePublicVehicles
+                    ? (isPeakHours ? modSettings.GarbageTruckPeakPrice : modSettings.GarbageTruckNonPeakPrice)
                     : 0
             },
             'Hearse': {
                 name: 'Hearse',
                 icon: Hearse01Src,
-                tollPrice: modSettings.chargeServiceVehicles
-                    ? (isPeakHours ? modSettings.hearsePeakPrice : modSettings.hearseNonPeakPrice)
+                tollPrice: modSettings.ChargePublicVehicles
+                    ? (isPeakHours ? modSettings.HearsePeakPrice : modSettings.HearseNonPeakPrice)
                     : 0
             },
             'PoliceCar': {
                 name: 'Police Car',
                 icon: EU_PoliceVehicle01Src,
-                tollPrice: modSettings.chargeServiceVehicles
-                    ? (isPeakHours ? modSettings.policeCarPeakPrice : modSettings.policeCarNonPeakPrice)
+                tollPrice: modSettings.ChargePublicVehicles
+                    ? (isPeakHours ? modSettings.PoliceCarPeakPrice : modSettings.PoliceCarNonPeakPrice)
                     : 0
             },
             'PostVan': {
                 name: 'Post Van',
                 icon: EU_PostVan01Src,
-                tollPrice: modSettings.chargeServiceVehicles
-                    ? (isPeakHours ? modSettings.postVanPeakPrice : modSettings.postVanNonPeakPrice)
+                tollPrice: modSettings.ChargePublicVehicles
+                    ? (isPeakHours ? modSettings.PostVanPeakPrice : modSettings.PostVanNonPeakPrice)
                     : 0
             },
             'PrisonerTransport': {
                 name: 'Prisoner Transport',
                 icon: PrisonVan01Src,
-                tollPrice: modSettings.chargeServiceVehicles
-                    ? (isPeakHours ? modSettings.prisonerTransportPeakPrice : modSettings.prisonerTransportNonPeakPrice)
+                tollPrice: modSettings.ChargePublicVehicles
+                    ? (isPeakHours ? modSettings.PrisonerTransportPeakPrice : modSettings.PrisonerTransportNonPeakPrice)
                     : 0
             },
             'Motorcycle': {
                 name: 'Motorcycle',
                 icon: Motorbike01Src,
-                tollPrice: isPeakHours ? modSettings.motorcyclePeakPrice : modSettings.motorcycleNonPeakPrice
+                tollPrice: isPeakHours ? modSettings.MotorcyclePeakPrice : modSettings.MotorcycleNonPeakPrice
             }
         };
     }, [modSettings, isPeakHours]);

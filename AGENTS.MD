@@ -13,7 +13,10 @@ Having specific type of Vehicles go through only a specific Tollbooth Road using
 ## Tollbooth road exclusive for specific vechile type
 
 - For the logic of having specific vehicle type with a specific tollbooth road type take this in consideration
-  
+ -- If the tollbooth road is of type Private Transist, it will only allow passthrough cars, cars with trailer and motobikes.
+ -- If the tollbooth road is of type Public Transport, it will only allow passthrough taxis and buses.
+ -- If the tollbooth road is of type Heavy Transist, it will only allow passthrough delivery trucks.
+ -- If the tollbooth road is of type Service Transist, it will only allow passthrough services transport like ambulance, police car, etc.
 
 ## Payment and Economy
 
