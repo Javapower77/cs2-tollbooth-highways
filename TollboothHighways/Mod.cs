@@ -14,6 +14,7 @@ using System.Linq;
 using System.Reflection;
 using Systems;
 using TollboothHighways.Domain.Components;
+using TollboothHighways.Patches;
 using TollboothHighways.Systems;
 using TollboothHighways.Utilities;
 using Unity.Entities;
@@ -79,6 +80,7 @@ namespace TollboothHighways
                 //updateSystem.UpdateAt<TollboothPathfindBiasSystem>(SystemUpdatePhase.GameSimulation);
                 //updateSystem.UpdateBefore<TollboothPathfindBiasSystem, Game.Simulation.PathfindSetupSystem>(SystemUpdatePhase.GameSimulation);
                 //updateSystem.UpdateAfter<TollBoothSpawnSystem, TollboothPathfindBiasSystem>(SystemUpdatePhase.GameSimulation);
+                updateSystem.UpdateAt<TollRoadPathfindingCostSystem>(SystemUpdatePhase.GameSimulation);
                 updateSystem.UpdateAt<TollboothPathValidationSystem>(SystemUpdatePhase.GameSimulation);
                 updateSystem.UpdateAfter<TollboothPathValidationSystem, Game.Simulation.PathfindSetupSystem>(SystemUpdatePhase.GameSimulation);
   
@@ -116,6 +118,12 @@ namespace TollboothHighways
                 {
                     LogUtil.Info($"Patched: {patchedMethod.DeclaringType?.FullName}.{patchedMethod.Name}");
                 }
+
+                // Apply Harmony patches for pathfinding integration
+                TollboothHarmonyPatches.ApplyPatches(World.DefaultGameObjectInjectionWorld.EntityManager);
+
+                // Register the new system
+                updateSystem.UpdateAt<TollRoadLaneRestrictionSystem>(SystemUpdatePhase.GameSimulation);
             }
             catch (System.Exception ex)
             {
@@ -131,6 +139,10 @@ namespace TollboothHighways
             LogUtil.Info($"{nameof(Mod)}.{nameof(OnDispose)}");
             Settings?.UnregisterInOptionsUI();
             Settings = null;
+
+            // Remove Harmony patches
+            TollboothHarmonyPatches.RemovePatches();
+            TollRoadLaneRestrictionData.Dispose();
         }
     }
 }

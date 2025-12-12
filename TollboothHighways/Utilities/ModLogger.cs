@@ -79,7 +79,14 @@ namespace TollboothHighways.Utilities
             }
             else if (logTarget == LogTarget.General)
             {
-                _log.Info(message);
+                try
+                {
+                    _log.Info(message);
+                }
+                catch (Exception ex)
+                {
+                    //  Console.WriteLine($"[Test-Highway-Tollbooth] [ERROR]  Exception logging info message: {ex.Message}");
+                }       
             }
 
             // Info messages are not written to the BepInEx console by the Colossal logger, so write the message explicitly.
