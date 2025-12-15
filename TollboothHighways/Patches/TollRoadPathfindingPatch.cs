@@ -1,3 +1,4 @@
+using Game.Common;
 using Game.Net;
 using Game.Pathfind;
 using Game.Prefabs;
@@ -107,23 +108,23 @@ namespace TollboothHighways.Patches
             try
             {
                 // Public transport
-                if (_entityManager.HasComponent<PublicTransport>(vehicleEntity))
+                if (_entityManager.HasComponent<Game.Vehicles.PublicTransport>(vehicleEntity))
                     return VehicleGroup.PublicTransport;
-                if (_entityManager.HasComponent<Taxi>(vehicleEntity))
+                if (_entityManager.HasComponent<Game.Vehicles.Taxi>(vehicleEntity))
                     return VehicleGroup.PublicTransport;
                 
                 // Trucks
-                if (_entityManager.HasComponent<DeliveryTruck>(vehicleEntity))
+                if (_entityManager.HasComponent<Game.Vehicles.DeliveryTruck>(vehicleEntity))
                     return VehicleGroup.Trucks;
                 
                 // Service vehicles
-                if (_entityManager.HasComponent<PoliceCar>(vehicleEntity) ||
-                    _entityManager.HasComponent<Ambulance>(vehicleEntity) ||
-                    _entityManager.HasComponent<FireEngine>(vehicleEntity) ||
-                    _entityManager.HasComponent<GarbageTruck>(vehicleEntity) ||
-                    _entityManager.HasComponent<Hearse>(vehicleEntity) ||
-                    _entityManager.HasComponent<MaintenanceVehicle>(vehicleEntity) ||
-                    _entityManager.HasComponent<PostVan>(vehicleEntity) ||
+                if (_entityManager.HasComponent<Game.Vehicles.PoliceCar>(vehicleEntity) ||
+                    _entityManager.HasComponent<Game.Vehicles.Ambulance>(vehicleEntity) ||
+                    _entityManager.HasComponent<Game.Vehicles.FireEngine>(vehicleEntity) ||
+                    _entityManager.HasComponent<Game.Vehicles.GarbageTruck>(vehicleEntity) ||
+                    _entityManager.HasComponent<Game.Vehicles.Hearse>(vehicleEntity) ||
+                    _entityManager.HasComponent<Game.Vehicles.MaintenanceVehicle>(vehicleEntity) ||
+                    _entityManager.HasComponent<Game.Vehicles.PostVan>(vehicleEntity) ||
                     _entityManager.HasComponent<PrisonerTransport>(vehicleEntity))
                 {
                     return VehicleGroup.ServiceVehicles;

@@ -74,16 +74,10 @@ namespace TollboothHighways
                 // 2. Spawn tollbooth / toll road entities (early in simulation)
                 updateSystem.UpdateBefore<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                // TollboothPathfindBiasSystem should run BEFORE pathfinding setup
-                // This ensures penalties are in place before any vehicle calculates its path
-                // NOTE: I leave this here for reference, but not solution was found to make it work as intended.
-                //updateSystem.UpdateAt<TollboothPathfindBiasSystem>(SystemUpdatePhase.GameSimulation);
-                //updateSystem.UpdateBefore<TollboothPathfindBiasSystem, Game.Simulation.PathfindSetupSystem>(SystemUpdatePhase.GameSimulation);
-                //updateSystem.UpdateAfter<TollBoothSpawnSystem, TollboothPathfindBiasSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAt<TollRoadPathfindingCostSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAt<TollboothPathValidationSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAfter<TollboothPathValidationSystem, Game.Simulation.PathfindSetupSystem>(SystemUpdatePhase.GameSimulation);
-  
+                // 3. Lane restriction system (last to ensure all entities are loaded)
+                updateSystem.UpdateAt<TollRoadLaneRestrictionSystem>(SystemUpdatePhase.GameSimulation);
+
+
                 // 3. Toll collection system (NEW - runs on main thread for debugging)
                 updateSystem.UpdateAt<TollCollectionSystem>(SystemUpdatePhase.GameSimulation);
 
@@ -118,12 +112,6 @@ namespace TollboothHighways
                 {
                     LogUtil.Info($"Patched: {patchedMethod.DeclaringType?.FullName}.{patchedMethod.Name}");
                 }
-
-                // Apply Harmony patches for pathfinding integration
-                TollboothHarmonyPatches.ApplyPatches(World.DefaultGameObjectInjectionWorld.EntityManager);
-
-                // Register the new system
-                updateSystem.UpdateAt<TollRoadLaneRestrictionSystem>(SystemUpdatePhase.GameSimulation);
             }
             catch (System.Exception ex)
             {
@@ -140,8 +128,7 @@ namespace TollboothHighways
             Settings?.UnregisterInOptionsUI();
             Settings = null;
 
-            // Remove Harmony patches
-            TollboothHarmonyPatches.RemovePatches();
+            // Dispose of static data
             TollRoadLaneRestrictionData.Dispose();
         }
     }

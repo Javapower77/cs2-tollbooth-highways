@@ -45,7 +45,7 @@ namespace TollboothHighways.Systems
                 {
                     ComponentType.ReadOnly<Lane>(),
                     ComponentType.ReadOnly<Owner>(),
-                    ComponentType.ReadOnly<CarLane>()
+                    ComponentType.ReadOnly<Game.Net.CarLane>()
                 },
                 None = new[]
                 {
@@ -145,7 +145,7 @@ namespace TollboothHighways.Systems
             // Get type handles
             var entityTypeHandle = SystemAPI.GetEntityTypeHandle();
             var ownerTypeHandle = SystemAPI.GetComponentTypeHandle<Owner>(true);
-            var carLaneTypeHandle = SystemAPI.GetComponentTypeHandle<CarLane>(true);
+            var carLaneTypeHandle = SystemAPI.GetComponentTypeHandle<Game.Net.CarLane>(true);
             
             // Build lane restriction data
             var laneRestrictions = new NativeParallelHashMap<Entity, TollRoadRestrictionFlags>(
@@ -202,7 +202,7 @@ namespace TollboothHighways.Systems
         {
             [ReadOnly] public EntityTypeHandle EntityTypeHandle;
             [ReadOnly] public ComponentTypeHandle<Owner> OwnerTypeHandle;
-            [ReadOnly] public ComponentTypeHandle<CarLane> CarLaneTypeHandle;
+            [ReadOnly] public ComponentTypeHandle<Game.Net.CarLane> CarLaneTypeHandle;
             
             [ReadOnly] public NativeParallelHashSet<Entity> TollRoadSet;
             [ReadOnly] public NativeParallelHashMap<Entity, TollRoadRestrictionFlags> RestrictionMap;
