@@ -12,6 +12,7 @@ This mod of course will evolute meanwhile I keep learning new stuf in this type 
 * [How manual tolbooth works](/TollboothHighways/Docs/StopVehiclesOnRoadSystem.md)
 * [Diagram for the manual tollbooth road](/TollboothHighways/Docs/Tollbooth-Barrier-Flow.md)
 * [Images previews from the mod](/TollboothHighways/Docs/ModsPreviews.md)
+* [How logging in IJob with Burst Compiled code](/TollboothHighways/Docs/JobLogger.md)
 
 ## Objetive
 

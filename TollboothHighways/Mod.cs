@@ -1,23 +1,16 @@
 ﻿using Colossal.IO.AssetDatabase;
-using Colossal.Logging;
 using Colossal.UI;
 using Game;
-using Game.Input;
 using Game.Modding;
-using Game.Prefabs;
 using Game.SceneFlow;
-using Game.UI.InGame;
 using HarmonyLib;
 using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using Systems;
-using TollboothHighways.Domain.Components;
-using TollboothHighways.Patches;
 using TollboothHighways.Systems;
 using TollboothHighways.Utilities;
-using Unity.Entities;
 using static TollboothHighways.ModSettings;
 
 namespace TollboothHighways
@@ -74,9 +67,8 @@ namespace TollboothHighways
                 // 2. Spawn tollbooth / toll road entities (early in simulation)
                 updateSystem.UpdateBefore<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
-                // 3. Lane restriction system (last to ensure all entities are loaded)
-                //updateSystem.UpdateAt<TollRoadLaneRestrictionSystem>(SystemUpdatePhase.GameSimulation);
-
+                // 3a. Path validation system - validates paths and forces repath for restricted vehicles
+                updateSystem.UpdateAt<TollboothPathValidationSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 3. Toll collection system (NEW - runs on main thread for debugging)
                 updateSystem.UpdateAt<TollCollectionSystem>(SystemUpdatePhase.GameSimulation);
@@ -112,13 +104,8 @@ namespace TollboothHighways
                 {
                     LogUtil.Info($"Patched: {patchedMethod.DeclaringType?.FullName}.{patchedMethod.Name}");
                 }
-
-                // Apply Harmony patches for pathfinding integration
-                TollboothHarmonyPatches.ApplyPatches(World.DefaultGameObjectInjectionWorld.EntityManager);
-
-                // Register the new system
-                updateSystem.UpdateAt<TollRoadLaneRestrictionSystem>(SystemUpdatePhase.GameSimulation);
             }
+               
             catch (System.Exception ex)
             {
                 LogUtil.Error($"Error loading the system phases - Stack trace: {ex.StackTrace}");
@@ -133,10 +120,6 @@ namespace TollboothHighways
             LogUtil.Info($"{nameof(Mod)}.{nameof(OnDispose)}");
             Settings?.UnregisterInOptionsUI();
             Settings = null;
-
-            // Remove Harmony patches
-            TollboothHarmonyPatches.RemovePatches();
-            TollRoadLaneRestrictionData.Dispose();
         }
     }
 }

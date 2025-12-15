@@ -65,8 +65,8 @@ namespace TollboothHighways
                     //Labels
                     { _setting.GetOptionLabelLocaleID(nameof(ModSettings.OpenRepositoryAtVersion)), "Open GitHub mod repository" },
                     { _setting.GetOptionDescLocaleID(nameof(ModSettings.OpenRepositoryAtVersion)), "Open the github repository of this mod." },
-                    { _setting.GetOptionLabelLocaleID(nameof(ModSettings.OpenRepositoryRoadmap)), "Open Roadmap" },
-                    { _setting.GetOptionDescLocaleID(nameof(ModSettings.OpenRepositoryRoadmap)), "Open the status board of the tasks involved in the developing of this mod." },
+                    { _setting.GetOptionLabelLocaleID(nameof(ModSettings.OpenDocumentation)), "Review Documentation" },
+                    { _setting.GetOptionDescLocaleID(nameof(ModSettings.OpenDocumentation)), "Open documentation generated for this mod located in github." },
                     { _setting.GetOptionLabelLocaleID(nameof(ModSettings.ModVersion)), "Version" },
                     { _setting.GetOptionDescLocaleID(nameof(ModSettings.ModVersion)), "Mod current version." },
                     { _setting.GetOptionLabelLocaleID(nameof(ModSettings.AuthorMod)), "Mod author" },

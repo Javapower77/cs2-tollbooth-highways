@@ -1,13 +1,18 @@
+# Tollbooths Collection for CS:2
+
 ## Description
-This asset pack add several highway roads and railroad intersections to use in your map.
+
+This asset pack add highways tollbooths to collect money.
+There are 5 automatic and 5 manual tollbooth assets.
+You can build any combination you want, and in the future I will create assets where they are combined in one prefab pack.
+You can configure all cost for each type of tollbooth in the option menu of the mod.
 
 ## Added Assets
 
-
-## NOTE
-
 ## SPECIAL THANKS
+
 I would like to thanks a lot for the patience on answering my question in order to keep learning on modding CS2 to the people on the Cities Skyline Modding Discord Server.
+
 * krzychu124
 * Bruceyboy24804
 * StarQ / Qoushik
@@ -19,5 +24,6 @@ I would like to thanks a lot for the patience on answering my question in order 
 ... to mention some of them!
 
 ## DISCLAIMER
-* Safe to remove. This mod will not break your save if removed. However the assets will no longer work.
-* This mod may require ***Asset Packs Manager*** which is highly experimental. This mod shouldn't break the save game. But subscribing to assets that require this without the dependency will pop up errors. Worst case you'll get error popups on game load and/or grey boxes in save. But either way, YOU ARE RESPONSIBLE for any damage.
+
+* DON'T USE ON ANY SAVEGAME PLEASE!!! THIS AND THE NEXT VERSION WILL BE ALPHA VERSIONS.
+* PLEASE TEST THIS MOD IN ANY SCENARIO BUT DON'T USE AS A SAVEGAME TO BUILD YOUR CITY IN FUTURE.
