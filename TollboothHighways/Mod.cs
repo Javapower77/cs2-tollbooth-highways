@@ -75,7 +75,7 @@ namespace TollboothHighways
                 updateSystem.UpdateBefore<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
 
                 // 3. Lane restriction system (last to ensure all entities are loaded)
-                updateSystem.UpdateAt<TollRoadLaneRestrictionSystem>(SystemUpdatePhase.GameSimulation);
+                //updateSystem.UpdateAt<TollRoadLaneRestrictionSystem>(SystemUpdatePhase.GameSimulation);
 
 
                 // 3. Toll collection system (NEW - runs on main thread for debugging)
@@ -112,6 +112,12 @@ namespace TollboothHighways
                 {
                     LogUtil.Info($"Patched: {patchedMethod.DeclaringType?.FullName}.{patchedMethod.Name}");
                 }
+
+                // Apply Harmony patches for pathfinding integration
+                TollboothHarmonyPatches.ApplyPatches(World.DefaultGameObjectInjectionWorld.EntityManager);
+
+                // Register the new system
+                updateSystem.UpdateAt<TollRoadLaneRestrictionSystem>(SystemUpdatePhase.GameSimulation);
             }
             catch (System.Exception ex)
             {
@@ -128,7 +134,8 @@ namespace TollboothHighways
             Settings?.UnregisterInOptionsUI();
             Settings = null;
 
-            // Dispose of static data
+            // Remove Harmony patches
+            TollboothHarmonyPatches.RemovePatches();
             TollRoadLaneRestrictionData.Dispose();
         }
     }
