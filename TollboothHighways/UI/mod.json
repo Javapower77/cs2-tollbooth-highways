@@ -1,6 +1,9 @@
 {
   "id": "TollboothHighways",
+  "displayName": "Tollbooths Collection",
   "author": "Javapower",
-  "version": "1.0.0",
+  "version": "1.0.0-Alpha",
+  "description": "Manual and automatic tollbooth to collect money",
+  "isCodeMod": true,
   "dependencies": []
 }

@@ -148,7 +148,7 @@ namespace TollboothHighways
                     { _setting.GetOptionLabelLocaleID(nameof(ModSettings.PrisonerTransportPeakPrice)), "Prisioner Transport" },
                     { _setting.GetOptionDescLocaleID(nameof(ModSettings.PrisonerTransportPeakPrice)), "Toll price for prisioner transport in peak hours." },
                     { _setting.GetOptionLabelLocaleID(nameof(ModSettings.SpecialThanks)), "This mod was a long journey in learning modding in CS:2, a game that I loved for years form the first version. Thanks to the patiente and help on so many people on Discord Server this mod could never be possible. I hope you enjoy as much as I enjoyed building it.\r\n\r\nkrzychu124\r\nBruceyboy24804\r\nStarQ / Qoushik\r\nTDW\r\nyenyang\r\nTigon Ologdring\r\njk142\r\nrcav8tr\r\nNullpinter\r\nKonsi / Mimonsi\r\n...and many more! THANKS YOU!!!" },
-                    { _setting.GetOptionDescLocaleID(nameof(ModSettings.SpecialThanks)), "krzychu124\r\nBruceyboy24804\r\nStarQ / Qoushik\r\nTDW\r\nyenyang\r\nTigon Ologdring\r\njk142\r\nrcav8tr\r\nNullpinter\r\nKonsi / Mimonsi\r\n...and many more! THANKS YOU!!!" },
+                    { _setting.GetOptionDescLocaleID(nameof(ModSettings.SpecialThanks)), "krzychu124\r\nBruceyboy24804\r\nStarQ / Qoushik\r\nTDW\r\nyenyang\r\nTigon Ologdring\r\njk142\r\nrcav8tr\r\nNullpinter\r\nKonsi / Mimonsi\r\nHonu\r\n...and many more! THANKS YOU!!!" },
                     // Buttons
                     { _setting.GetOptionLabelLocaleID(nameof(ModSettings.ResetSettings)), "Reset to default values" },
                     { _setting.GetOptionDescLocaleID(nameof(ModSettings.ResetSettings)), "Reset all settings to default values." },

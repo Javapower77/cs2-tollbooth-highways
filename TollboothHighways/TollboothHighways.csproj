@@ -24,9 +24,9 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
 		<!-- Mod information -->
-		<AssemblyVersion>1.00.0</AssemblyVersion>
-		<FileVersion>1.00.0</FileVersion>
-		<Version>1.00.0</Version>
+		<AssemblyVersion>1.00.2</AssemblyVersion>
+		<FileVersion>1.00.2</FileVersion>
+		<Version>1.00.2</Version>
 		<NeutralLanguage>en</NeutralLanguage>
 		<RepositoryUrl>https://github.com/Javapower77/cs2-tollbooth-highways</RepositoryUrl>
 		<PackageProjectUrl>https://github.com/Javapower77/cs2-tollbooth-highways</PackageProjectUrl>
@@ -177,8 +177,8 @@
 
 	<!-- Automatically build the UI with the project. -->
 	<Target Name="BuildUI" AfterTargets="AfterBuild">
-		<!-- <Exec Command="npm run build" WorkingDirectory="$(ProjectDir)/UI" /> -->
-		<Exec Command="npm run dev" WorkingDirectory="$(ProjectDir)/UI" /> 
+		<Exec Command="npm run build" WorkingDirectory="$(ProjectDir)/UI" /> 
+		<!-- <Exec Command="npm run dev" WorkingDirectory="$(ProjectDir)/UI" /> -->
 	</Target>  
 	
 	<Target Name="GetAdditionalFiles" AfterTargets="DeployWIP">

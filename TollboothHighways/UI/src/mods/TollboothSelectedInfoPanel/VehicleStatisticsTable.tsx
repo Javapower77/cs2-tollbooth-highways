@@ -357,9 +357,9 @@ export const VehicleStatisticsFlexGrid: React.FC<VehicleStatisticsTableProps> = 
 
         switch (column.type) {
             case 'currency':
-                <LocalizedNumber unit={Unit.Money} value={value as number}></LocalizedNumber>
+                return (<LocalizedNumber unit={Unit.Money} value={value as number}></LocalizedNumber>);
             case 'number':
-                <LocalizedNumber unit={Unit.Integer} value={value as number}></LocalizedNumber>
+                return (<LocalizedNumber unit={Unit.Integer} value={value as number}></LocalizedNumber>);
             case 'text':
             default:
                 return formatters.text(value as string);

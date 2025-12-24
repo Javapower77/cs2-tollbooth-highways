@@ -10,7 +10,7 @@ namespace TollboothHighways
     public class ModAssemblyInfo
     {
         public const string Name        = "TollboothHighways";
-        public const string Version     = "1.00.0";
+        public const string Version     = "1.00.2";
         public const string Title       = "";
         public const string Description = "";
     }

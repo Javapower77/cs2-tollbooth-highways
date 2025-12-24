@@ -1,22 +1,49 @@
 <Publish>
   <!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
-  <ModId Value="" />
+  <ModId Value="129197" />
   <!--Name of the mod to display to players-->
-  <DisplayName Value="[Alpha] Tollbooths Collection" />
+  <DisplayName Value="Tollbooths Collection [Alpha]" />
   <!--Short description of the mod-->
   <ShortDescription Value="A set of manual and automatic tollbooth assets for your city.  " />
   <!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
   <!--LongDescription Value="This is a long description" /-->
-  <LongDescription>## Description
-This asset pack add several highway roads and railroad intersections to use in your map.
+  <LongDescription># Tollbooths Collection for CS:2
+
+## Description
+
+This asset pack add highways tollbooths to collect money.
+There are 5 automatic and 5 manual tollbooth assets.
+You can build any combination you want, and in the future I will create assets where they are combined in one prefab pack.
+You can configure all cost for each type of tollbooth in the option menu of the mod.
 
 ## Added Assets
+* **Toll-Automatic-HeavyTransit**: Automatic toolbooth for heavy transit vehicles. Vechicles will slow down to pay the toll.
+* **Toll-Manual-HeavyTransit**: Manual toolbooth for heavy transit vehicles. Vechicles will stop to pay the toll.
+* **Toll-Automatic-PrivateTransit**: Automatic toolbooth for private transit vehicles. Vechicles will slow down to pay the toll.
+* **Toll-Manual-PrivateTransit**: Manual toolbooth for private transit vehicles. Vechicles will stop to pay the toll.
+* **Toll-Automatic-PublicTransit**: Automatic toolbooth for public transit vehicles. Vechicles will slow down to pay the toll.
+* **Toll-Manual-PublicTransit**: Manual toolbooth for public transit vehicles. Vechicles will stop to pay the toll.
+* **Toll-Automatic-ServiceTransit**: Automatic toolbooth for service transit vehicles. Vechicles will slow down to pay the toll.
+* **Toll-Manual-ServiceTransit**: Manual toolbooth for service transit vehicles. Vechicles will stop to pay the toll.
+* **Toll-Automatic-AnyTransit**: Automatic toolbooth for any transit vehicles. Vechicles will slow down to pay the toll.
+* **Toll-Manual-AnyTransit**: Manual toolbooth for any transit vehicles. Vechicles will stop to pay the toll.
 
+## NOTICE ON THE USAGE
 
-## NOTE
+When click on the tollbooth in the road there will be a popup with some information about the type, quantity and even how much money had been collected with the transit going through it.
+
+## CAVEATS AND LIMITATIONS
+
+I couldn't make that vehicles go through the specific tollbooth yet. I had tried many ways, using Harmony Patch, Reflection, etc. but I couldn't find a way to do it.
+So, for now, all tollbooths will charge all vehicles, but you can configure the cost for each type of vehicle to 0 if you want that specific vehicle type don't pay anything.
+For Public Transit tollbooths, it works because vanilla game have that feature implemented through the "Public Transport Only" road option or the CarLane.PublicOnly flag.
+There is no way to impact in the Cost to avoid wrong tollbooths either.
+
 
 ## SPECIAL THANKS
-I would like to thanks a lot for the patience on answering my question in order to keep learning on modding CS2 to the people on the Cities Skyline Modding Discord Server.
+
+I would like to thanks a lot for the patience on answering my question in order to keep learning on modding CS2 to the people on the Cities Skyline Modding Discord Server.	
+
 * krzychu124
 * Bruceyboy24804
 * StarQ / Qoushik
@@ -25,34 +52,43 @@ I would like to thanks a lot for the patience on answering my question in order 
 * Tigon Ologdring
 * Pro Best Cities
 * jk142
+* Honu
 ... to mention some of them!
 
 ## DISCLAIMER
-* Safe to remove. This mod will not break your save if removed. However the assets will no longer work.
-* This mod may require ***Asset Packs Manager*** which is highly experimental. This mod shouldn't break the save game. But subscribing to assets that require this without the dependency will pop up errors. Worst case you'll get error popups on game load and/or grey boxes in save. But either way, YOU ARE RESPONSIBLE for any damage.</LongDescription>
+
+* DON'T USE ON ANY SAVEGAME PLEASE!!! THIS AND THE NEXT VERSION WILL BE ALPHA VERSIONS.
+* PLEASE TEST THIS MOD IN ANY SCENARIO BUT DON'T USE AS A SAVEGAME TO BUILD YOUR CITY IN FUTURE.</LongDescription>
   <!--Thumbnail-->
   <Thumbnail Value="Properties/Thumbnail.png" />
   <!--Screenshot, can be set multiple times-->
-  <Screenshot Value="" />
+  <Screenshot Value="Properties/Previews/Assets-01.jpg" />
+  <Screenshot Value="Properties/Previews/Example1.jpg" />
+  <Screenshot Value="Properties/Previews/Toll-Automatic-PrivateTransit.jpg" />
+  <Screenshot Value="Properties/Previews/Toll-Automatic-PublicTransit.jpg" />
+  <Screenshot Value="Properties/Previews/Toll-Manual-PrivateTransit.jpg" />
+  <Screenshot Value="Properties/Previews/Toll-Manual-PublicTransit.jpg" />
   <!--Tag, can be set multiple times-->
   <Tag Value="" />
   <!--Link to the forum post where the mod can be discussed-->
   <ForumLink Value="" />
   <!--Version of the mod-->
-  <ModVersion Value="1.00.0" />
+  <ModVersion Value="1.00.2" />
   <!--Recommended version of the base game to use the mod-->
   <GameVersion Value="1.5.3f1" />
   <!--Dependency for the mod, can be set multiple times-->
   <!--Required DLC, can be set multiple times. Supported values are "Landmark Buildings", "San Fransisco Set", "Beach Properties", "Urban Promenades", "Modern Architecture"-->
   <RequiredDLC Value="" />
   <!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
-  <ChangeLog Value="">## Patch 1.07
-* Fixed an issue of bad array length. Reported by TrevorHall and samlee860407. Thanks!
-* Fixed road direction for several interesctions. Reported by rzzirrah. Thanks.
-* Add a new Divergent Diamond intersection requested by Buster355.
-* I will be looking for more interesections to add in this mod in a near future.</ChangeLog>
-  <!--<ChangeLog>
-	</ChangeLog>-->
+  <ChangeLog>## Version 1.02-Alpha
+
+* Fix an issue in the UI when a tollbooth is selected.
+
+* Very first release of the mod. This version is for testing and not be used in any savegame that you will continue use.
+* Support manual and automatic tollbooths assets.
+* This mod will be improved and fixed during the tests.</ChangeLog>
   <!--External link, can be set multiple times. supported types are "discord", "github", "youtube", "twitch", "x", "paypal", "patreon", "buymeacoffee", "kofi", "crowdin", "gitlab", "gofundme"-->
   <ExternalLink Type="github" Url="https://github.com/Javapower77/cs2-tollbooth-highways/tree/master" />
+  <ExternalLink Type="discord" Url="https://discord.gg/UkKAfRqfCn" />
+  <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/tollbooths-collection-for-cs-2.1891098/" />
 </Publish>

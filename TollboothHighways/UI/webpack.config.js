@@ -4,7 +4,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { CSSPresencePlugin } = require("./tools/css-presence");
 const TerserPlugin = require("terser-webpack-plugin");
 const gray = (text) => `\x1b[90m${text}\x1b[0m`;
-const webpack = require("webpack");
+//const webpack = require("webpack");
 
 const CSII_USERDATAPATH = process.env.CSII_USERDATAPATH;
 
@@ -13,6 +13,7 @@ if (!CSII_USERDATAPATH) {
 }
 
 const OUTPUT_DIR = `${CSII_USERDATAPATH}\\Mods\\${MOD.id}`;
+//const OUTPUT_DIR = "./dist/";
 
 const banner = `
  * Cities: Skylines II UI Module
@@ -93,22 +94,27 @@ module.exports = {
     },
     publicPath: `coui://ui-mods/`,
   },
-  optimization: {
-    minimize: true,
-    minimizer: [
-      new TerserPlugin({
-        extractComments: {
-          banner: () => banner,
-        },
-      }),
-    ],
-  },
+    optimization: {
+        minimize: true,
+        minimizer: [
+            new TerserPlugin({
+                terserOptions: {
+                    format: {
+                        comments: /^\**!|@preserve|@license|@cc_on/i,
+                    },
+                },
+                extractComments: {
+                    banner: () => banner,
+                },
+            }),
+        ],
+    },
   experiments: {
     outputModule: true,
   },
   plugins: [
     new MiniCssExtractPlugin(),
-    new webpack.EvalSourceMapDevToolPlugin({}),
+    //new webpack.EvalSourceMapDevToolPlugin({}),
     new CSSPresencePlugin(),
     {
       apply(compiler) {

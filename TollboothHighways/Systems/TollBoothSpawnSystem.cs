@@ -320,7 +320,7 @@ namespace TollboothHighways.Systems
             }
         }
         
-        /*
+        
         private void AssignCarLaneFlagsToTollboothRoad(Entity roadEntity)
         {
             try
@@ -333,13 +333,13 @@ namespace TollboothHighways.Systems
                 if (EntityManager.HasComponent<TollRoadPrivateTransportData>(roadEntity))
                 {
                     // Private Transport: Block heavy vehicles (trucks)
-                    flagsToApply = CarLaneFlags.ForbidHeavyTraffic;
+                    //flagsToApply = CarLaneFlags.ForbidHeavyTraffic;
                     hasValidTollType = true;
                 }
                 else if (EntityManager.HasComponent<TollRoadTruckData>(roadEntity))
                 {
                     // Trucks Only: Block transit traffic (private cars, buses)
-                    flagsToApply = CarLaneFlags.ForbidTransitTraffic;
+                   // flagsToApply = CarLaneFlags.ForbidTransitTraffic;
                     hasValidTollType = true;
                 }
                 else if (EntityManager.HasComponent<TollRoadPublicTransportData>(roadEntity))
@@ -352,7 +352,7 @@ namespace TollboothHighways.Systems
                 else if (EntityManager.HasComponent<TollRoadServiceVehiclesData>(roadEntity))
                 {
                     // Service Vehicles Only: Block both transit and heavy traffic
-                    flagsToApply = CarLaneFlags.ForbidTransitTraffic | CarLaneFlags.ForbidHeavyTraffic;
+                    //flagsToApply = CarLaneFlags.ForbidTransitTraffic | CarLaneFlags.ForbidHeavyTraffic;
                     hasValidTollType = true;
                 }
                 else
@@ -387,13 +387,13 @@ namespace TollboothHighways.Systems
                             var originalFlags = carLane.m_Flags;
 
                             // Apply restriction flags (preserve existing flags using |=)
-                            carLane.m_Flags |= flagsToApply;
+                            //carLane.m_Flags |= flagsToApply;
 
                             // Only write if flags actually changed
                             if (carLane.m_Flags != originalFlags)
                             {
                                 m_CarLaneData[laneEntity] = carLane;
-                                LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Current CarLane flags: {originalFlags}, CarLane flags to apply: {flagsToApply}");
+                                //LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Current CarLane flags: {originalFlags}, CarLane flags to apply: {flagsToApply}");
                                 LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Applied flags {m_CarLaneData[laneEntity].m_Flags} to EDGE START lane {laneEntity.Index} on tollbooth road {roadEntity.Index}");
                             }
                         }
@@ -426,13 +426,13 @@ namespace TollboothHighways.Systems
                         var originalFlags = carLane.m_Flags;
 
                         // Apply restriction flags (preserve existing flags using |=)
-                        carLane.m_Flags |= flagsToApply;
+                        //carLane.m_Flags |= flagsToApply;
 
                         // Only write if flags actually changed
                         if (carLane.m_Flags != originalFlags)
                         {
                             m_CarLaneData[laneEntity] = carLane;
-                            LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Current CarLane flags: {originalFlags}, CarLane flags to apply: {flagsToApply}");
+                           // LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Current CarLane flags: {originalFlags}, CarLane flags to apply: {flagsToApply}");
                             LogUtil.Info($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Applied flags {m_CarLaneData[laneEntity].m_Flags} to lane {laneEntity.Index} on tollbooth road {roadEntity.Index}");
                             appliedAnyFlags = true;
                         }
@@ -457,7 +457,7 @@ namespace TollboothHighways.Systems
                 LogUtil.Error($"TollBoothSpawnSystem: \t\t\tAssignCarLaneFlagsToTollboothRoad() - Stack trace: {ex.StackTrace}");
             }
         }
-        */
+        
         
         private void AssociateTollboothWithRoad(Entity tollBoothEntity, Entity roadEntity)
         {

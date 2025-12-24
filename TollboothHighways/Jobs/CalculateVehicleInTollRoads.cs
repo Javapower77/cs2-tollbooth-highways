@@ -14,6 +14,7 @@ using Unity.Entities.UniversalDelegates;
 using Unity.Jobs;
 using UnityEngine;
 using SubLane = Game.Net.SubLane;
+using System.Runtime.InteropServices;
 
 namespace TollboothHighways.Jobs
 {
@@ -30,54 +31,46 @@ namespace TollboothHighways.Jobs
         [ReadOnly] public ComponentLookup<PrefabRef> PrefabRefData;
         [ReadOnly] public ComponentLookup<Edge> EdgeObjectData;
         [ReadOnly] public ComponentLookup<CarTrailerLane> VehicleTrailerData;
-        [WriteOnly] public NativeList<(Entity tollRoad, Entity vehicle)>.ParallelWriter Results;
-        public JobLogger.Writer Logger;
+        [WriteOnly] public NativeList<TollRoadVehicle>.ParallelWriter Results;
 
         public void Execute(int index)
         {
-            //Logger.Log($"BEGIN -> TollHighways.Jobs.CalculateVehicleInTollRoads.Execute({index})");
             Entity e = tollRoadEntities[index];
-            
-            // Variable to store the index position of the Sublane object that represents the road
             int subLaneTypeRoad = 0;
 
-            // Check if the entity has the Edge component, which is used to represent the road
-            // and the point of check where the vehicles pass through
-            //Logger.Log($"| Checking if entity {e.Index}:{index} has Edge component");
             if (EdgeObjectData.TryGetComponent(e, out Edge edgeComponent))
             {
-                // get the Sublane objects from the Stard Edge component of the road
                 if (SubLaneObjectData.TryGetBuffer(edgeComponent.m_Start, out DynamicBuffer<SubLane> sublaneObjects))
                 {
                     for (int x = 0; x < sublaneObjects.Length; x++)
                     {
-                        // Check if the Sublane object is a road, if so, store the index position
-                        // to use it later to get the LaneObjects from the Sublane object
                         if (sublaneObjects[x].m_PathMethods == Game.Pathfind.PathMethod.Road)
                         {
                             subLaneTypeRoad = x;
                             break;
                         }
-                    }                   
+                    }
 
-                    // Get the LaneObjects from the second Sublane of the road that represent the location
-                    // where vehicles passthrough. This is only for this custom made road
                     if (LaneObjectData.TryGetBuffer(sublaneObjects[subLaneTypeRoad].m_SubLane, out DynamicBuffer<LaneObject> laneObjects))
-                    {                       
-                        // Loop through the LaneObjects to check if one Object has the VehicleTrailerData component,
-                        // if so, it means that the vehicle is a trailer and we don't want to count it as a vehicle
+                    {
                         for (int i = 0; i < laneObjects.Length; i++)
                         {
                             Entity vehicleEntity = laneObjects[i].m_LaneObject;
                             if (!VehicleTrailerData.TryGetComponent(vehicleEntity, out _))
                             {
-                                Results.AddNoResize((e, vehicleEntity));
+                                Results.AddNoResize(new TollRoadVehicle { TollRoad = e, Vehicle = vehicleEntity });
                             }
-                        }                        
+                        }
                     }
                 }
             }
-            //Logger.Log($"END -> TollHighways.Jobs.CalculateVehicleInTollRoads.Execute({index})");
         }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct TollRoadVehicle
+    {
+        public Entity TollRoad;
+        public Entity Vehicle;
     }
 }
