@@ -30,6 +30,13 @@ So, for now, all tollbooths will charge all vehicles, but you can configure the 
 For Public Transit tollbooths, it works because vanilla game have that feature implemented through the "Public Transport Only" road option or the CarLane.PublicOnly flag.
 There is no way to impact in the Cost to avoid wrong tollbooths either.
 
+## ATTENTION
+
+Remember NOT to use this mod in any current save game because it is probably that will break your game. Nevertheless, you can backup first the your map and then use this mode. If anything goes wrong you could restore with the backed up .cok files of your map.
+
+If you like to help to find issues, please try to create a new issue in my GitHub and share screenshots and/or logs that could help me to address the problem.
+
+https://github.com/Javapower77/cs2-tollbooth-highways/issues
 
 ## SPECIAL THANKS
 
